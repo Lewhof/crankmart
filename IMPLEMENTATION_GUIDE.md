@@ -54,22 +54,28 @@ hotfix/*          -- production fixes
    DATABASE_URL_UNPOOLED=<neon-direct-url>
    NEXTAUTH_SECRET=<generate-new-secret>
    NEXTAUTH_URL=https://crankmart.com
-   GOOGLE_CLIENT_ID=<new-or-existing>
-   GOOGLE_CLIENT_SECRET=<new-or-existing>
-   PAYFAST_MERCHANT_ID=<existing-or-new>
-   PAYFAST_MERCHANT_KEY=<existing-or-new>
-   PAYFAST_PASSPHRASE=<existing-or-new>
+   GOOGLE_CLIENT_ID=<create-new-project>
+   GOOGLE_CLIENT_SECRET=<create-new-project>
+   PAYFAST_MERCHANT_ID=24040660
+   PAYFAST_MERCHANT_KEY=<existing-key>
+   PAYFAST_PASSPHRASE=<existing-passphrase>
    PAYFAST_SANDBOX=true
    ```
-5. Custom domain: crankmart.com
+5. Custom domains:
+   - crankmart.com (primary)
+   - crankmart.co.za (301 redirect to crankmart.com/za)
 6. Enable preview deployments for PRs
+7. Enable Neon integration (auto preview database branches)
 
 ### Step 5: DNS Configuration
 1. Point crankmart.com to Vercel:
    - A record: 76.76.21.21
    - CNAME: cname.vercel-dns.com (for www)
-2. Verify domain in Vercel dashboard
-3. SSL auto-provisioned by Vercel
+2. Point crankmart.co.za to Vercel (for 301 redirect):
+   - A record: 76.76.21.21
+   - Configure redirect rule in Vercel: crankmart.co.za/* -> crankmart.com/za/$1 (301)
+3. Verify both domains in Vercel dashboard
+4. SSL auto-provisioned by Vercel for both domains
 
 ---
 
@@ -250,20 +256,16 @@ Verify counts:
 - Businesses with correct statuses
 - Events with dates
 
-### Step 17: Image Strategy
-**Decision needed:** Where will uploaded images be stored?
+### Step 17: Image Storage (Vercel Blob)
+**Decision: Vercel Blob** -- native Vercel integration, CDN-backed, serverless-compatible, cost-effective at scale.
 
-Options:
-1. **Vercel Blob Storage** -- simplest, integrated with Vercel
-2. **Cloudflare R2** -- cost-effective, S3-compatible
-3. **AWS S3** -- industry standard
+1. Install: `npm install @vercel/blob`
+2. Add `BLOB_READ_WRITE_TOKEN` to Vercel environment variables
+3. Update upload API routes (`/api/sell/upload`, `/api/account/avatar`, `/api/directory/upload`) to use `put()` from `@vercel/blob`
+4. Update `next.config.ts` to allow images from Vercel Blob hostname
+5. Migrate any existing cyclemart.co.za/uploads/* URLs in database to new Blob URLs (or accept broken images for old local-upload references)
 
-Update `next.config.ts` image domains accordingly.
-
-Existing images in the database reference:
-- Unsplash URLs (keep as-is)
-- cyclemart.co.za/uploads/* (need migration or re-hosting)
-- Various scraped URLs from trail sites (keep as-is)
+Existing remote image URLs (Unsplash, Trailforks, etc.) remain as-is -- no migration needed.
 
 ### Step 18: Environment Configuration
 Verify all environment variables are set in Vercel:
@@ -297,27 +299,66 @@ SMTP_USER
 SMTP_PASS
 ```
 
-### Step 19: First Deployment
+### Step 19: Route Restructure (Global + /[country])
+This is the most significant architectural change. Move country-specific pages under a dynamic `[country]` segment.
+
+**Pages that move under `app/[country]/`:**
+- `browse/` (listings)
+- `sell/` (sell flow)
+- `directory/` (business directory)
+- `routes/` (cycling routes)
+- `events/` (events calendar)
+- `news/` (news/blog)
+- `seller/` (seller profiles)
+- `boost/` (boost selection)
+- `search/` (search results)
+- `pricing/` (pricing page -- may vary per country)
+
+**Pages that stay global (no country prefix):**
+- `login/`, `register/`, `forgot-password/` (auth)
+- `account/` (user dashboard)
+- `admin/` (admin panel)
+- `faq/`, `privacy/`, `terms/`, `how-to/` (static/legal)
+
+**New pages:**
+- `app/page.tsx` -- Global landing with country selector
+- `app/[country]/page.tsx` -- Country-specific home page
+- `app/[country]/layout.tsx` -- Country layout (injects country context)
+- `app/admin/whiteboard/page.tsx` -- Admin to-do/whiteboard
+
+**Country validation middleware:**
+Add middleware or layout-level validation to ensure `[country]` param matches a registered country code (za, au, nz). Return 404 for invalid country codes.
+
+### Step 20: API Route Restructure
+API routes that return country-specific data need the country context:
+- Option A: Add `?country=za` query parameter to existing endpoints
+- Option B: Move APIs under `/api/[country]/` segments
+- **Recommended: Option A** -- simpler, less file restructuring, country passed from client context
+
+### Step 21: First Deployment
 1. Merge all changes to `main`
 2. Vercel auto-deploys from `main`
 3. Verify deployment at crankmart.com
 4. Smoke test all core pages:
-   - [ ] Home page loads
-   - [ ] Browse page shows listings
-   - [ ] Listing detail renders
-   - [ ] Sell flow navigates all 4 steps
-   - [ ] Login/register forms work
-   - [ ] Directory page loads
-   - [ ] Routes page loads
-   - [ ] Events page loads
-   - [ ] Admin panel accessible
+   - [ ] crankmart.com loads (global landing)
+   - [ ] crankmart.com/za loads (SA home)
+   - [ ] crankmart.com/za/browse shows listings
+   - [ ] Listing detail renders at /za/browse/[slug]
+   - [ ] Sell flow navigates all 4 steps at /za/sell/*
+   - [ ] Login/register forms work (global)
+   - [ ] Directory page loads at /za/directory
+   - [ ] Routes page loads at /za/routes
+   - [ ] Events page loads at /za/events
+   - [ ] Admin panel accessible at /admin
+   - [ ] Admin whiteboard loads at /admin/whiteboard
    - [ ] Mobile responsive layout correct
+   - [ ] crankmart.co.za redirects to crankmart.com/za
 
 ---
 
 ## Phase 1D: Quality & Launch (Week 4-5)
 
-### Step 20: Fix Known Issues
+### Step 22: Fix Known Issues
 From VERSION.md known issues:
 1. Wire up full-text search (tsvector columns exist, need query integration)
 2. Add `submitted_by` user link for My Routes tab
@@ -325,23 +366,24 @@ From VERSION.md known issues:
 4. Configure SMTP for email delivery
 5. Test PayFast sandbox end-to-end
 
-### Step 21: Performance Optimisation
+### Step 23: Performance Optimisation
 1. Run Lighthouse audit on key pages
 2. Optimise images (ensure Next.js Image component used everywhere)
 3. Add loading.tsx skeletons for slow pages (some already exist)
 4. Verify static generation for content pages
 5. Check bundle size with `@next/bundle-analyzer`
 
-### Step 22: SEO Migration
+### Step 24: SEO Migration
 1. Set up Google Search Console for crankmart.com
-2. Submit sitemap
-3. If cyclemart.co.za will redirect:
-   - Configure 301 redirects from old domain to new
-   - Submit change of address in Search Console
+2. Submit sitemap (per-country sitemaps: /za/sitemap.xml)
+3. Configure 301 redirects:
+   - cyclemart.co.za/* -> crankmart.com/za/* (all paths)
+   - crankmart.co.za/* -> crankmart.com/za/* (all paths)
+   - Submit change of address in Search Console for cyclemart.co.za
 4. Verify structured data with Google Rich Results Test
-5. Check all pages have proper meta tags
+5. Check all pages have proper meta tags (country-aware)
 
-### Step 23: Security Review
+### Step 25: Security Review
 1. Verify all API routes have proper auth checks
 2. Ensure no secrets in client-side code
 3. Add rate limiting to auth endpoints
@@ -349,35 +391,41 @@ From VERSION.md known issues:
 5. Review CORS configuration
 6. Ensure PayFast IPN endpoint validates signatures
 
-### Step 24: Monitoring Setup
+### Step 26: Monitoring Setup
 1. Enable Vercel Analytics (built-in)
 2. Add Vercel Speed Insights
 3. Set up error tracking (Sentry or similar)
 4. Configure uptime monitoring
 5. Set up alerts for error spikes
 
-### Step 25: Launch Checklist
+### Step 27: Launch Checklist
 - [ ] All "cyclemart" references removed
 - [ ] New logo/favicon deployed
-- [ ] Database seeded with production data
-- [ ] PayFast configured (sandbox tested, ready for live)
+- [ ] Database seeded with CycleMart data (tagged country_code='ZA')
+- [ ] /za routes working (browse, sell, directory, routes, events)
+- [ ] Global landing page working (crankmart.com)
+- [ ] crankmart.co.za 301-redirects to crankmart.com/za
+- [ ] PayFast configured (sandbox tested, merchant 24040660)
+- [ ] New Google OAuth project configured
 - [ ] Email delivery working
-- [ ] SSL certificate active on crankmart.com
-- [ ] 301 redirects from cyclemart.co.za (if applicable)
+- [ ] Vercel Blob storage for uploads
+- [ ] SSL certificates active on crankmart.com and crankmart.co.za
 - [ ] Google Search Console configured
 - [ ] Sitemap submitted
 - [ ] robots.txt verified
 - [ ] Lighthouse scores 90+ on all metrics
 - [ ] Mobile responsive verified on real devices
 - [ ] Admin panel accessible and functional
-- [ ] Error tracking enabled
+- [ ] Admin whiteboard page functional
+- [ ] Error tracking enabled (Sentry)
 - [ ] Backup strategy confirmed (Neon auto-backups)
+- [ ] Social media handles secured (see whiteboard to-do)
 
 ---
 
 ## Phase 2: Australia Expansion (Future)
 
-### Step 26: Australia Configuration
+### Step 28: Australia Configuration
 1. Create `src/config/countries/au.ts` with:
    - AUD currency
    - Australian states/territories
@@ -390,19 +438,13 @@ From VERSION.md known issues:
 3. Configure webhooks
 4. Test checkout flow end-to-end
 
-### Step 28: Australian Content
+### Step 30: Australian Content
 1. Seed Australian cycling routes (source: Trailforks AU, Komoot AU)
 2. Seed Australian bike shops and businesses
 3. Seed Australian cycling events
 4. Source hero images for Australian routes
 
-### Step 29: Domain & Routing
-**URL strategy (decided):** Path-based routing under crankmart.com
-- crankmart.com/au for Australia
-- Single .com domain consolidates global SEO authority
-- One Vercel project, one codebase, one domain
-
-### Step 30: Launch Australia
+### Step 31: Launch Australia
 - Deploy with AU country context
 - Australian SEO (Google AU)
 - Local social media accounts

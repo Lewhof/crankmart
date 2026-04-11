@@ -12,7 +12,7 @@
 
 CrankMart is a full rebrand and international evolution of CycleMart.co.za, a South African cycling marketplace platform. The existing platform (v0.2.1) is a production-ready Next.js application with classifieds, business directory, cycling routes, events calendar, messaging, admin panel, and PayFast payment integration.
 
-This PRD defines the transformation from a single-country cycling marketplace into an internationally scalable platform, beginning with South Africa (crankmart.com), then expanding to Australia, New Zealand, and beyond.
+This PRD defines the transformation from a single-country cycling marketplace into an internationally scalable platform. The root domain (crankmart.com) serves as the global framework, with country-specific content under path prefixes: /za (South Africa), /au (Australia), /nz (New Zealand), and so on. CycleMart data migrates into the /za vertical. The global framework launches simultaneously as a country-agnostic shell.
 
 **Core principle:** We make no assumptions. Every decision is validated against customer needs, market data, and the existing codebase.
 
@@ -192,13 +192,14 @@ CrankMart will be the world's most comprehensive cycling community platform -- a
 | Colour palette | Review needed | Confirm or update |
 | Tagline | None identified | TBD |
 
-### 4.2 SEO Migration
-- 301 redirects from all cyclemart.co.za URLs to crankmart.com equivalents
-- Updated sitemap.ts and robots.ts
+### 4.2 SEO Migration & Domain Routing
+- **cyclemart.co.za** 301 redirects to **crankmart.com/za** (all paths)
+- **crankmart.co.za** 301 redirects to **crankmart.com/za** (all paths)
+- Updated sitemap.ts and robots.ts for crankmart.com
 - Google Search Console property transfer
 - Structured data (Organization schema) updated
 - Meta descriptions and OG tags updated
-- Canonical URLs updated
+- Canonical URLs on crankmart.com
 
 ### 4.3 Files Requiring Rebrand (Identified)
 - `package.json` -- name field
@@ -222,39 +223,76 @@ CrankMart will be the world's most comprehensive cycling community platform -- a
 
 ## 5. Functional Requirements
 
-### 5.1 Phase 1: South Africa Launch (crankmart.com)
+### 5.1 Phase 1: Global Framework + South Africa (/za)
 
 #### FR-1: Complete Rebrand
 - All user-facing "CycleMart" references replaced with "CrankMart"
-- New logo and favicon assets
+- New logo and favicon assets (updated)
 - Updated email templates
 - Updated SEO metadata and structured data
-- New social media handles configured
+- Social media handles to be secured (see to-do backlog)
 
-#### FR-2: Internationalisation Foundation (i18n-Ready Architecture)
+#### FR-2: Two-Layer Architecture (Global + Country)
+
+**Global layer (crankmart.com):**
+- Country-agnostic framework/shell
+- Global home page with country selector or auto-detect
+- Shared auth system (users are global, content is per-country)
+- Global admin panel
+- Shared UI components, design system, layout
+
+**Country layer (crankmart.com/za):**
+- All marketplace features scoped under /za
+- South African data: listings, businesses, routes, events, news
+- ZAR currency, SA provinces, PayFast payments
+- CycleMart data migrated here
+
+**URL structure:**
+```
+crankmart.com/           --> Global landing / country selector
+crankmart.com/za/        --> South Africa home
+crankmart.com/za/browse  --> SA listings
+crankmart.com/za/routes  --> SA routes
+crankmart.com/za/events  --> SA events
+crankmart.com/za/directory --> SA directory
+crankmart.com/au/        --> Australia home (Phase 2)
+crankmart.com/admin      --> Global admin panel
+crankmart.com/account    --> User account (global)
+crankmart.com/login      --> Auth (global)
+```
+
+#### FR-3: Internationalisation Foundation (i18n-Ready Architecture)
 - **Country context system**: Region/country abstraction layer
   - Country config: currency, provinces/states, payment gateways, phone format, tax rules
   - Default country: South Africa
-  - URL strategy: path-based routing (crankmart.com/za, crankmart.com/au) -- single .com domain consolidates SEO authority globally
+  - URL strategy: path-based routing under crankmart.com -- single domain consolidates SEO authority globally
 - **Currency abstraction**: Replace hardcoded "R" / ZAR with configurable currency per country
 - **Region abstraction**: Replace hardcoded SA provinces with configurable regions per country
-- **Payment gateway abstraction**: PayFast for SA, prepare interface for Stripe (international)
+- **Payment gateway abstraction**: PayFast for SA (existing merchant 24040660), prepare interface for Stripe (international)
 
-#### FR-3: Database Migration to Fresh Neon Instance
+#### FR-4: Database Migration
 - New Neon project for CrankMart
 - Schema migration from existing Drizzle schema
-- Seed data migration (routes, businesses, events, categories)
-- No user data migration (fresh start)
+- CycleMart data migrated as /za content (routes, businesses, events, categories, listings)
+- All location-dependent records tagged with country_code='ZA'
+- New Google OAuth project (replacing CycleMart credentials)
 
-#### FR-4: Vercel Deployment
-- GitHub repo connected to Vercel
+#### FR-5: Vercel Deployment
+- GitHub repo (Lewhof/crankmart) connected to Vercel
 - Production branch deployment (main)
 - Preview deployments for PRs
 - Environment variables configured
-- Custom domain: crankmart.com
+- Custom domains: crankmart.com + crankmart.co.za (301 redirect to crankmart.com/za)
+- Neon integration for automatic preview database branches
 
-#### FR-5: Existing Features (Carry Forward)
-All features from CycleMart v0.2.1 carried forward:
+#### FR-6: Image Storage
+- **Vercel Blob** for user-uploaded images (avatars, listing photos, business logos)
+- Integrated with Vercel, CDN-backed, serverless-compatible
+- Replaces the previous nginx-served /uploads/ approach
+- Existing scraped image URLs (Unsplash, Trailforks, etc.) remain as remote references
+
+#### FR-7: Existing Features (Carry Forward under /za)
+All features from CycleMart v0.2.1 carried forward under the /za country scope:
 - Classifieds marketplace (browse, sell, search)
 - Business directory (list, claim, verify)
 - Cycling routes (browse, review, save)
@@ -265,30 +303,36 @@ All features from CycleMart v0.2.1 carried forward:
 - Admin panel
 - Authentication
 
-#### FR-6: Known Issues to Resolve (from VERSION.md)
+#### FR-8: Admin Whiteboard / To-Do Board
+- New admin page: `/admin/whiteboard`
+- Project-level to-do tracking and task management
+- Used for tracking pending items (social handles, launch tasks, etc.)
+- Persisted in database (new table: `admin_todos`)
+
+#### FR-9: Known Issues to Resolve (from VERSION.md)
 - PayFast sandbox end-to-end testing
 - Full-text search (currently basic ILIKE only -- tsvector exists but may not be fully wired)
 - Email SMTP configuration
 - Routes table: submitted_by user link for "My Routes" tab
 - News: author link in schema for "My Articles" tab
 
-### 5.2 Phase 2: Australia Expansion
+### 5.2 Phase 2: Australia Expansion (/au)
 - Country config for Australia (AUD, states/territories, Stripe)
 - Australian cycling routes seed data
 - Australian business directory seed data
 - Australian events calendar
-- Domain strategy: crankmart.com.au or au.crankmart.com
+- Path: crankmart.com/au
 - Stripe payment integration
 - Time zone handling
 
-### 5.3 Phase 3: New Zealand Expansion
+### 5.3 Phase 3: New Zealand Expansion (/nz)
 - Country config for New Zealand (NZD, regions, Stripe)
 - NZ cycling routes, directory, events seed data
-- Domain: crankmart.co.nz or nz.crankmart.com
+- Path: crankmart.com/nz
 
 ### 5.4 Future Phases
-- United Kingdom, Europe, North America
-- Multi-language support (Phase 2+ consideration)
+- United Kingdom (/uk), Europe, North America
+- Multi-language support (later consideration)
 - Mobile app (React Native / Expo)
 
 ---
@@ -358,31 +402,56 @@ All features from CycleMart v0.2.1 carried forward:
 | **Source Control** | GitHub (Lewhof/crankmart) | Version control, PR workflow |
 | **Framework** | Next.js 16 (App Router) | Full-stack React framework |
 | **ORM** | Drizzle ORM | Type-safe database access |
-| **Auth** | NextAuth v5 | Authentication & sessions |
-| **Payments (SA)** | PayFast | South African payments |
+| **Auth** | NextAuth v5 (new Google OAuth project) | Authentication & sessions |
+| **Payments (SA)** | PayFast (merchant 24040660) | South African payments |
 | **Payments (Int'l)** | Stripe (Phase 2+) | International payments |
 | **Email** | Nodemailer / Resend (evaluate) | Transactional email |
-| **Images** | Vercel Image Optimisation + Sharp | CDN-backed image delivery |
+| **Image Storage** | Vercel Blob | User uploads (avatars, listings, directory) |
+| **Image Optimisation** | Next.js Image + Sharp | CDN-backed delivery & transforms |
 | **Maps** | Leaflet.js | Interactive maps |
 | **Monitoring** | Vercel Analytics + Sentry (add) | Performance & error tracking |
 
 ### 7.2 International Architecture
 
+**App Router structure (Next.js dynamic segments):**
 ```
-crankmart/
+app/
+├── page.tsx                    # Global landing (country selector)
+├── login/page.tsx              # Auth (global)
+├── register/page.tsx           # Auth (global)
+├── account/page.tsx            # User account (global)
+├── admin/                      # Admin panel (global)
+│   ├── whiteboard/page.tsx     # To-do / task board (new)
+│   └── ...existing admin pages
+├── [country]/                  # Dynamic country segment
+│   ├── page.tsx                # Country home (/za, /au, /nz)
+│   ├── browse/page.tsx         # Listings
+│   ├── browse/[slug]/page.tsx  # Listing detail
+│   ├── sell/                   # Sell flow
+│   ├── directory/              # Business directory
+│   ├── routes/                 # Cycling routes
+│   ├── events/                 # Events calendar
+│   ├── news/                   # News/blog
+│   └── ...
+```
+
+**Config layer:**
+```
+src/
 ├── config/
 │   └── countries/
-│       ├── za.ts      # South Africa config
-│       ├── au.ts      # Australia config (Phase 2)
-│       └── nz.ts      # New Zealand config (Phase 3)
+│       ├── index.ts       # Country registry, validation, helpers
+│       ├── za.ts          # South Africa
+│       ├── au.ts          # Australia (Phase 2)
+│       └── nz.ts          # New Zealand (Phase 3)
 ├── lib/
-│   ├── country.ts     # Country context provider
-│   ├── currency.ts    # Currency formatting
-│   ├── regions.ts     # Province/state helpers
+│   ├── country.ts         # Country context provider & hooks
+│   ├── currency.ts        # Currency formatting utilities
+│   ├── regions.ts         # Region/province helpers
 │   └── payments/
-│       ├── interface.ts  # Payment gateway interface
-│       ├── payfast.ts    # SA implementation
-│       └── stripe.ts     # International (Phase 2)
+│       ├── interface.ts   # Payment gateway interface
+│       ├── payfast.ts     # SA implementation (existing)
+│       └── stripe.ts      # International (Phase 2)
 ```
 
 Each country config exports:
@@ -395,7 +464,6 @@ interface CountryConfig {
   paymentGateway: "payfast" | "stripe"
   phoneFormat: string
   timezone: string
-  domain: string
   measurementSystem: "metric"  // cycling is metric worldwide
 }
 ```
