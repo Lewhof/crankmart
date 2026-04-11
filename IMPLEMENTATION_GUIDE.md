@@ -23,7 +23,7 @@ This guide takes the cloned CycleMart codebase and transforms it into CrankMart,
 
 ### Step 2: Branch Strategy
 ```
-main              -- production (deploys to crankmart.co.za)
+main              -- production (deploys to crankmart.com)
 develop           -- integration branch
 feature/*         -- feature branches
 hotfix/*          -- production fixes
@@ -53,7 +53,7 @@ hotfix/*          -- production fixes
    DATABASE_URL=<neon-pooled-url>
    DATABASE_URL_UNPOOLED=<neon-direct-url>
    NEXTAUTH_SECRET=<generate-new-secret>
-   NEXTAUTH_URL=https://crankmart.co.za
+   NEXTAUTH_URL=https://crankmart.com
    GOOGLE_CLIENT_ID=<new-or-existing>
    GOOGLE_CLIENT_SECRET=<new-or-existing>
    PAYFAST_MERCHANT_ID=<existing-or-new>
@@ -61,11 +61,11 @@ hotfix/*          -- production fixes
    PAYFAST_PASSPHRASE=<existing-or-new>
    PAYFAST_SANDBOX=true
    ```
-5. Custom domain: crankmart.co.za
+5. Custom domain: crankmart.com
 6. Enable preview deployments for PRs
 
 ### Step 5: DNS Configuration
-1. Point crankmart.co.za to Vercel:
+1. Point crankmart.com to Vercel:
    - A record: 76.76.21.21
    - CNAME: cname.vercel-dns.com (for www)
 2. Verify domain in Vercel dashboard
@@ -80,7 +80,7 @@ hotfix/*          -- production fixes
 1. `package.json` -- Change name from "cyclemart" to "crankmart"
 2. `vercel.json` -- Verify/update any domain references
 3. `drizzle.config.ts` -- Update if any cyclemart references
-4. `next.config.ts` -- Replace cyclemart.co.za with crankmart.co.za in image domains
+4. `next.config.ts` -- Replace cyclemart.co.za with crankmart.com in image domains
 
 ### Step 7: Brand Assets
 1. Design new CrankMart logo (or update from existing)
@@ -108,11 +108,11 @@ Execute in this order to avoid breaking references:
 
 2. **Email templates** (`src/lib/email-templates.ts`):
    - All 11 templates: replace "CycleMart" with "CrankMart"
-   - Update logo URL to crankmart.co.za/apple-icon.png
+   - Update logo URL to crankmart.com/apple-icon.png
    - Update footer links
 
 3. **Email sender** (`src/lib/email.ts`):
-   - From address: info@crankmart.co.za
+   - From address: info@crankmart.com
 
 4. **Navigation** (`src/components/nav/`):
    - TopNav.tsx -- logo, brand text
@@ -176,7 +176,7 @@ export const zaConfig = {
   paymentGateway: "payfast" as const,
   phoneFormat: "+27",
   timezone: "Africa/Johannesburg",
-  domain: "crankmart.co.za",
+  domain: "crankmart.com",
 }
 ```
 
@@ -272,7 +272,7 @@ Verify all environment variables are set in Vercel:
 ```
 DATABASE_URL
 NEXTAUTH_SECRET
-NEXTAUTH_URL=https://crankmart.co.za
+NEXTAUTH_URL=https://crankmart.com
 ```
 
 **Authentication (at least one):**
@@ -300,7 +300,7 @@ SMTP_PASS
 ### Step 19: First Deployment
 1. Merge all changes to `main`
 2. Vercel auto-deploys from `main`
-3. Verify deployment at crankmart.co.za
+3. Verify deployment at crankmart.com
 4. Smoke test all core pages:
    - [ ] Home page loads
    - [ ] Browse page shows listings
@@ -333,7 +333,7 @@ From VERSION.md known issues:
 5. Check bundle size with `@next/bundle-analyzer`
 
 ### Step 22: SEO Migration
-1. Set up Google Search Console for crankmart.co.za
+1. Set up Google Search Console for crankmart.com
 2. Submit sitemap
 3. If cyclemart.co.za will redirect:
    - Configure 301 redirects from old domain to new
@@ -362,7 +362,7 @@ From VERSION.md known issues:
 - [ ] Database seeded with production data
 - [ ] PayFast configured (sandbox tested, ready for live)
 - [ ] Email delivery working
-- [ ] SSL certificate active on crankmart.co.za
+- [ ] SSL certificate active on crankmart.com
 - [ ] 301 redirects from cyclemart.co.za (if applicable)
 - [ ] Google Search Console configured
 - [ ] Sitemap submitted
@@ -397,12 +397,10 @@ From VERSION.md known issues:
 4. Source hero images for Australian routes
 
 ### Step 29: Domain & Routing
-**Decision needed:** URL strategy
-- Option A: crankmart.com.au (separate ccTLD)
-- Option B: au.crankmart.com (subdomain)
-- Option C: crankmart.com/au (path-based)
-
-Each has SEO and infrastructure trade-offs.
+**URL strategy (decided):** Path-based routing under crankmart.com
+- crankmart.com/au for Australia
+- Single .com domain consolidates global SEO authority
+- One Vercel project, one codebase, one domain
 
 ### Step 30: Launch Australia
 - Deploy with AU country context
@@ -418,7 +416,7 @@ Repeat Phase 2 pattern for NZ:
 - `src/config/countries/nz.ts`
 - NZD currency, NZ regions
 - NZ cycling content seeding
-- Domain strategy aligned with AU decision
+- Path-based: crankmart.com/nz
 - NZ cycling community outreach
 
 ---

@@ -12,7 +12,7 @@
 
 CrankMart is a full rebrand and international evolution of CycleMart.co.za, a South African cycling marketplace platform. The existing platform (v0.2.1) is a production-ready Next.js application with classifieds, business directory, cycling routes, events calendar, messaging, admin panel, and PayFast payment integration.
 
-This PRD defines the transformation from a single-country cycling marketplace into an internationally scalable platform, beginning with South Africa (crankmart.co.za), then expanding to Australia, New Zealand, and beyond.
+This PRD defines the transformation from a single-country cycling marketplace into an internationally scalable platform, beginning with South Africa (crankmart.com), then expanding to Australia, New Zealand, and beyond.
 
 **Core principle:** We make no assumptions. Every decision is validated against customer needs, market data, and the existing codebase.
 
@@ -182,18 +182,18 @@ CrankMart will be the world's most comprehensive cycling community platform -- a
 ### 4.1 Branding Changes
 | Element | CycleMart (Current) | CrankMart (New) |
 |---|---|---|
-| Domain | cyclemart.co.za | crankmart.co.za |
+| Domain | cyclemart.co.za | crankmart.com |
 | Name | CycleMart | CrankMart |
 | Package name | "cyclemart" | "crankmart" |
 | localStorage keys | cyclemart-sell-* | crankmart-sell-* |
-| Email sender | info@cyclemart.co.za | info@crankmart.co.za |
+| Email sender | info@cyclemart.co.za | info@crankmart.com |
 | Social handles | @cyclemartsa | @crankmart (TBD) |
 | Logo | Current apple-icon.png | New CrankMart logo (TBD) |
 | Colour palette | Review needed | Confirm or update |
 | Tagline | None identified | TBD |
 
 ### 4.2 SEO Migration
-- 301 redirects from all cyclemart.co.za URLs to crankmart.co.za equivalents
+- 301 redirects from all cyclemart.co.za URLs to crankmart.com equivalents
 - Updated sitemap.ts and robots.ts
 - Google Search Console property transfer
 - Structured data (Organization schema) updated
@@ -222,7 +222,7 @@ CrankMart will be the world's most comprehensive cycling community platform -- a
 
 ## 5. Functional Requirements
 
-### 5.1 Phase 1: South Africa Launch (crankmart.co.za)
+### 5.1 Phase 1: South Africa Launch (crankmart.com)
 
 #### FR-1: Complete Rebrand
 - All user-facing "CycleMart" references replaced with "CrankMart"
@@ -235,7 +235,7 @@ CrankMart will be the world's most comprehensive cycling community platform -- a
 - **Country context system**: Region/country abstraction layer
   - Country config: currency, provinces/states, payment gateways, phone format, tax rules
   - Default country: South Africa
-  - URL strategy decision needed: subdomain (za.crankmart.com) vs path (/za/) vs ccTLD (crankmart.co.za)
+  - URL strategy: path-based routing (crankmart.com/za, crankmart.com/au) -- single .com domain consolidates SEO authority globally
 - **Currency abstraction**: Replace hardcoded "R" / ZAR with configurable currency per country
 - **Region abstraction**: Replace hardcoded SA provinces with configurable regions per country
 - **Payment gateway abstraction**: PayFast for SA, prepare interface for Stripe (international)
@@ -251,7 +251,7 @@ CrankMart will be the world's most comprehensive cycling community platform -- a
 - Production branch deployment (main)
 - Preview deployments for PRs
 - Environment variables configured
-- Custom domain: crankmart.co.za
+- Custom domain: crankmart.com
 
 #### FR-5: Existing Features (Carry Forward)
 All features from CycleMart v0.2.1 carried forward:
@@ -481,7 +481,7 @@ interface CountryConfig {
 ### 10.1 Launch Metrics (Phase 1 - First 90 Days)
 | Metric | Target |
 |---|---|
-| Site live on crankmart.co.za | Day 1 |
+| Site live on crankmart.com | Day 1 |
 | Lighthouse score (all metrics) | 90+ |
 | Registered users | 500 |
 | Active listings | 300 |
