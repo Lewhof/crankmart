@@ -1,0 +1,501 @@
+import {
+  pgTable,
+  pgEnum,
+  uuid,
+  varchar,
+  text,
+  integer,
+  boolean,
+  timestamp,
+  numeric,
+  serial,
+  jsonb,
+  customType,
+} from 'drizzle-orm/pg-core'
+
+// Custom type for PostgreSQL tsvector
+const tsvector = customType<{ data: string; driverData: string }>({
+  dataType() {
+    return 'tsvector'
+  },
+  toDriver(value: string): string {
+    return value
+  },
+  fromDriver(value: string): string {
+    return value
+  },
+})
+import { relations } from 'drizzle-orm'
+
+// Enums (match live DB)
+export const conditionEnum = pgEnum('listing_condition', [
+  'new',
+  'like_new',
+  'used',
+  'poor',
+])
+
+export const listingStatusEnum = pgEnum('listing_status', [
+  'draft',
+  'active',
+  'sold',
+  'expired',
+  'removed',
+  'paused',
+])
+
+export const userRoleEnum = pgEnum('user_role', [
+  'buyer',
+  'seller',
+  'shop_owner',
+  'organiser',
+  'vendor',
+  'admin',
+  'superadmin',
+])
+
+export const sellerTypeEnum = pgEnum('seller_type', [
+  'individual',
+  'shop',
+  'brand',
+])
+
+export const moderationStatusEnum = pgEnum('moderation_status', [
+  'pending',
+  'approved',
+  'rejected',
+  'flagged',
+])
+
+export const kycStatusEnum = pgEnum('kyc_status', [
+  'not_submitted',
+  'pending',
+  'approved',
+  'rejected',
+])
+
+export const eventTypeEnum = pgEnum('event_type', [
+  'race',
+  'sportive',
+  'fun_ride',
+  'social_ride',
+  'training_camp',
+  'expo',
+  'club_event',
+  'charity_ride',
+])
+
+export const eventStatusEnum = pgEnum('event_status', [
+  'draft',
+  'pending_review',
+  'verified',
+  'cancelled',
+  'completed',
+])
+
+// Users table
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).unique().notNull(),
+  emailVerified: boolean('email_verified').default(false),
+  passwordHash: varchar('password_hash', { length: 255 }),
+  phone: varchar('phone', { length: 20 }),
+  name: varchar('name', { length: 255 }).notNull(),
+  avatarUrl: varchar('avatar_url', { length: 500 }),
+  role: userRoleEnum('role').default('buyer'),
+  kycStatus: kycStatusEnum('kyc_status').default('not_submitted'),
+  kycDocumentUrl: varchar('kyc_document_url', { length: 500 }),
+  province: varchar('province', { length: 100 }),
+  city: varchar('city', { length: 100 }),
+  bio: text('bio'),
+  isActive: boolean('is_active').default(true),
+  bannedAt: timestamp('banned_at'),
+  banReason: text('ban_reason'),
+  lastActiveAt: timestamp('last_active_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+// Listing categories
+export const listingCategories = pgTable('listing_categories', {
+  id: serial('id').primaryKey(),
+  parentId: integer('parent_id'),
+  name: varchar('name', { length: 100 }).notNull(),
+  slug: varchar('slug', { length: 100 }).unique().notNull(),
+  iconUrl: varchar('icon_url', { length: 200 }),
+  displayOrder: integer('display_order').default(0),
+  listingCount: integer('listing_count').default(0),
+})
+
+// Listings
+export const listings = pgTable('listings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sellerId: uuid('seller_id').references(() => users.id).notNull(),
+  categoryId: integer('category_id').references(() => listingCategories.id),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).unique().notNull(),
+  description: text('description'),
+  bikeMake: varchar('bike_make', { length: 100 }),
+  bikeModel: varchar('bike_model', { length: 100 }),
+  bikeYear: integer('bike_year'),
+  frameSize: varchar('frame_size', { length: 10 }),
+  wheelSizeInches: integer('wheel_size_inches'),
+  suspensionTravelMm: integer('suspension_travel_mm'),
+  frameMaterial: varchar('frame_material', { length: 50 }),
+  drivetrainSpeeds: integer('drivetrain_speeds'),
+  brakeType: varchar('brake_type', { length: 50 }),
+  componentBrands: varchar('component_brands', { length: 255 }),
+  damageNotes: text('damage_notes'),
+  tradeConsidered: boolean('trade_considered').default(false),
+  originalReceipt: boolean('original_receipt').default(false),
+  warrantyRemaining: text('warranty_remaining'),
+  recentUpgrades: text('recent_upgrades'),
+  postalCode: varchar('postal_code', { length: 10 }),
+  colour: varchar('colour', { length: 50 }),
+  youtubeUrl: varchar('youtube_url', { length: 500 }),
+  condition: conditionEnum('condition').notNull(),
+  price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+  negotiable: boolean('negotiable').default(true),
+  sellerType: sellerTypeEnum('seller_type').default('individual'),
+  locationLat: numeric('location_lat', { precision: 10, scale: 7 }),
+  locationLng: numeric('location_lng', { precision: 10, scale: 7 }),
+  locationAddress: varchar('location_address', { length: 255 }),
+  province: varchar('province', { length: 100 }),
+  city: varchar('city', { length: 100 }),
+  shippingAvailable: boolean('shipping_available').default(false),
+  status: listingStatusEnum('status').default('active'),
+  moderationStatus: moderationStatusEnum('moderation_status').default('approved'),
+  boostEnabled: boolean('boost_enabled').default(false),
+  attributes: jsonb('attributes').$type<Record<string, string | boolean>>().default({}),
+  boostExpiresAt: timestamp('boost_expires_at'),
+  isFeatured: boolean('is_featured').default(false),
+  featuredExpiresAt: timestamp('featured_expires_at'),
+  viewsCount: integer('views_count').default(0),
+  savesCount: integer('saves_count').default(0),
+  enquiryCount: integer('enquiry_count').default(0),
+  expiresAt: timestamp('expires_at'),
+  renewalEmailSent: boolean('renewal_email_sent').default(false),
+  soldAt: timestamp('sold_at'),
+  searchVector: tsvector('search_vector'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+// Listing images
+export const listingImages = pgTable('listing_images', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  listingId: uuid('listing_id').references(() => listings.id).notNull(),
+  imageUrl: varchar('image_url', { length: 500 }).notNull(),
+  thumbUrl: varchar('thumb_url', { length: 500 }),
+  displayOrder: integer('display_order').default(0),
+  isPrimary: boolean('is_primary').default(false),
+  uploadedAt: timestamp('uploaded_at').defaultNow(),
+})
+
+// Listing saves (favourites)
+export const listingSaves = pgTable('listing_saves', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  listingId: uuid('listing_id').references(() => listings.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  listings: many(listings),
+  saves: many(listingSaves),
+}))
+
+export const listingsRelations = relations(listings, ({ one, many }) => ({
+  seller: one(users, {
+    fields: [listings.sellerId],
+    references: [users.id],
+  }),
+  category: one(listingCategories, {
+    fields: [listings.categoryId],
+    references: [listingCategories.id],
+  }),
+  images: many(listingImages),
+  saves: many(listingSaves),
+}))
+
+export const listingImagesRelations = relations(listingImages, ({ one }) => ({
+  listing: one(listings, {
+    fields: [listingImages.listingId],
+    references: [listings.id],
+  }),
+}))
+
+export const listingCategoriesRelations = relations(listingCategories, ({ many }) => ({
+  listings: many(listings),
+}))
+
+// ─── Boost / Payment tables ──────────────────────────────────────────────
+
+export const boostTypeEnum = pgEnum('boost_type', [
+  'bump', 'category_top', 'homepage', 'directory',
+])
+
+export const boostStatusEnum = pgEnum('boost_status', [
+  'pending', 'active', 'expired', 'failed', 'refunded',
+])
+
+export const boostPackages = pgTable('boost_packages', {
+  id:           serial('id').primaryKey(),
+  type:         boostTypeEnum('type').notNull(),
+  name:         varchar('name', { length: 100 }).notNull(),
+  description:  text('description'),
+  durationDays: integer('duration_days'),
+  priceCents:   integer('price_cents').notNull(),
+  isActive:     boolean('is_active').default(true),
+  displayOrder: integer('display_order').default(0),
+  createdAt:    timestamp('created_at').defaultNow(),
+})
+
+export const boosts = pgTable('boosts', {
+  id:                uuid('id').primaryKey().defaultRandom(),
+  userId:            uuid('user_id').references(() => users.id).notNull(),
+  packageId:         integer('package_id').references(() => boostPackages.id).notNull(),
+  listingId:         uuid('listing_id'),
+  directoryId:       uuid('directory_id'),
+  status:            boostStatusEnum('status').default('pending'),
+  payfastPaymentId:  varchar('payfast_payment_id', { length: 255 }),
+  payfastMPaymentId: varchar('payfast_m_payment_id', { length: 255 }),
+  amountCents:       integer('amount_cents').notNull(),
+  startsAt:          timestamp('starts_at'),
+  expiresAt:         timestamp('expires_at'),
+  createdAt:         timestamp('created_at').defaultNow(),
+  updatedAt:         timestamp('updated_at').defaultNow(),
+})
+
+export const boostPackagesRelations = relations(boostPackages, ({ many }) => ({
+  boosts: many(boosts),
+}))
+
+export const boostsRelations = relations(boosts, ({ one }) => ({
+  user:    one(users,         { fields: [boosts.userId],    references: [users.id] }),
+  package: one(boostPackages, { fields: [boosts.packageId], references: [boostPackages.id] }),
+}))
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
+export const routeDisciplineEnum = pgEnum('route_discipline', ['road', 'mtb', 'gravel', 'urban', 'bikepacking'])
+export const routeDifficultyEnum = pgEnum('route_difficulty', ['beginner', 'intermediate', 'advanced', 'expert'])
+export const routeSurfaceEnum    = pgEnum('route_surface',    ['tarmac', 'gravel', 'singletrack', 'mixed'])
+export const routeStatusEnum     = pgEnum('route_status',     ['pending', 'approved', 'rejected'])
+
+export const routes = pgTable('routes', {
+  id:              uuid('id').primaryKey().defaultRandom(),
+  slug:            varchar('slug', { length: 255 }).unique().notNull(),
+  name:            varchar('name', { length: 255 }).notNull(),
+  description:     text('description'),
+  discipline:      routeDisciplineEnum('discipline').notNull().default('mtb'),
+  difficulty:      routeDifficultyEnum('difficulty').notNull().default('intermediate'),
+  surface:         routeSurfaceEnum('surface').default('mixed'),
+  distanceKm:      numeric('distance_km', { precision: 6, scale: 1 }),
+  elevationM:      integer('elevation_m'),
+  estTimeMin:      integer('est_time_min'),
+  province:        varchar('province', { length: 100 }),
+  region:          varchar('region', { length: 100 }),
+  town:            varchar('town', { length: 100 }),
+  lat:             numeric('lat', { precision: 10, scale: 7 }),
+  lng:             numeric('lng', { precision: 10, scale: 7 }),
+  gpxUrl:          varchar('gpx_url', { length: 500 }),
+  heroImageUrl:    varchar('hero_image_url', { length: 500 }),
+  facilities:      jsonb('facilities').$type<Record<string, boolean>>().default({}),
+  tags:            text('tags').array().default([]),
+  websiteUrl:      varchar('website_url', { length: 500 }),
+  contactEmail:    varchar('contact_email', { length: 255 }),
+  contactPhone:    varchar('contact_phone', { length: 50 }),
+  isVerified:      boolean('is_verified').default(false),
+  isFeatured:      boolean('is_featured').default(false),
+  status:          routeStatusEnum('status').default('approved'),
+  avgRating:       numeric('avg_rating', { precision: 3, scale: 2 }).default('0'),
+  reviewCount:     integer('review_count').default(0),
+  imageCount:      integer('image_count').default(0),
+  primaryImageUrl: varchar('primary_image_url', { length: 500 }),
+  sourceName:      varchar('source_name', { length: 100 }),
+  sourceUrl:       varchar('source_url', { length: 500 }),
+  lastScrapedAt:   timestamp('last_scraped_at'),
+  submittedBy:     uuid('submitted_by').references(() => users.id),
+  viewsCount:      integer('views_count').default(0),
+  savesCount:      integer('saves_count').default(0),
+  createdAt:       timestamp('created_at').defaultNow(),
+  updatedAt:       timestamp('updated_at').defaultNow(),
+})
+
+export const routeImages = pgTable('route_images', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  routeId:      uuid('route_id').references(() => routes.id, { onDelete: 'cascade' }).notNull(),
+  url:          varchar('url', { length: 500 }).notNull(),
+  thumbUrl:     varchar('thumb_url', { length: 500 }),
+  mediumUrl:    varchar('medium_url', { length: 500 }),
+  altText:      varchar('alt_text', { length: 255 }),
+  source:       varchar('source', { length: 100 }).default('scrape'),
+  displayOrder: integer('display_order').default(0),
+  isPrimary:    boolean('is_primary').default(false),
+  width:        integer('width'),
+  height:       integer('height'),
+  uploadedAt:   timestamp('uploaded_at').defaultNow(),
+})
+
+export const routeLoops = pgTable('route_loops', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  routeId:      uuid('route_id').references(() => routes.id, { onDelete: 'cascade' }).notNull(),
+  name:         varchar('name', { length: 255 }).notNull(),
+  distanceKm:   numeric('distance_km', { precision: 6, scale: 1 }),
+  difficulty:   routeDifficultyEnum('difficulty').default('intermediate'),
+  category:     varchar('category', { length: 20 }).default('green'),
+  subtitle:     varchar('subtitle', { length: 100 }),
+  description:  text('description'),
+  displayOrder: integer('display_order').default(0),
+})
+
+export const routeReviews = pgTable('route_reviews', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  routeId:        uuid('route_id').references(() => routes.id, { onDelete: 'cascade' }).notNull(),
+  userId:         uuid('user_id').references(() => users.id).notNull(),
+  rating:         integer('rating').notNull(),
+  body:           text('body'),
+  conditionsNote: text('conditions_note'),
+  riddenAt:       timestamp('ridden_at'),
+  createdAt:      timestamp('created_at').defaultNow(),
+})
+
+export const routeSaves = pgTable('route_saves', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  userId:    uuid('user_id').references(() => users.id).notNull(),
+  routeId:   uuid('route_id').references(() => routes.id, { onDelete: 'cascade' }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
+export const scrapeRuns = pgTable('scrape_runs', {
+  id:            uuid('id').primaryKey().defaultRandom(),
+  sourceName:    varchar('source_name', { length: 100 }).notNull(),
+  startedAt:     timestamp('started_at').defaultNow(),
+  finishedAt:    timestamp('finished_at'),
+  routesFound:   integer('routes_found').default(0),
+  routesAdded:   integer('routes_added').default(0),
+  routesUpdated: integer('routes_updated').default(0),
+  errors:        jsonb('errors').$type<string[]>().default([]),
+  status:        varchar('status', { length: 50 }).default('running'),
+})
+
+export const routesRelations = relations(routes, ({ one, many }) => ({
+  submitter: one(users, { fields: [routes.submittedBy], references: [users.id] }),
+  images:    many(routeImages),
+  loops:     many(routeLoops),
+  reviews:   many(routeReviews),
+  saves:     many(routeSaves),
+}))
+export const routeImagesRelations  = relations(routeImages,  ({ one }) => ({ route: one(routes, { fields: [routeImages.routeId],  references: [routes.id] }) }))
+export const routeLoopsRelations   = relations(routeLoops,   ({ one }) => ({ route: one(routes, { fields: [routeLoops.routeId],   references: [routes.id] }) }))
+export const routeReviewsRelations = relations(routeReviews, ({ one }) => ({ route: one(routes, { fields: [routeReviews.routeId], references: [routes.id] }), user: one(users, { fields: [routeReviews.userId], references: [users.id] }) }))
+export const routeSavesRelations   = relations(routeSaves,   ({ one }) => ({ route: one(routes, { fields: [routeSaves.routeId],   references: [routes.id] }), user: one(users,  { fields: [routeSaves.userId],  references: [users.id] }) }))
+
+// Events table
+export const events = pgTable('events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).unique().notNull(),
+  description: text('description'),
+  eventType: eventTypeEnum('event_type').default('race'),
+  status: eventStatusEnum('status').default('draft'),
+  startDate: timestamp('start_date').notNull(),
+  endDate: timestamp('end_date'),
+  province: varchar('province', { length: 100 }),
+  city: varchar('city', { length: 100 }),
+  venue: varchar('venue', { length: 255 }),
+  distance: varchar('distance', { length: 100 }),
+  entryFee: varchar('entry_fee', { length: 100 }),
+  entryUrl: varchar('entry_url', { length: 500 }),
+  websiteUrl: varchar('website_url', { length: 500 }),
+  bannerUrl: varchar('banner_url', { length: 500 }),
+  organiserName: varchar('organiser_name', { length: 255 }),
+  organiserEmail: varchar('organiser_email', { length: 255 }),
+  organiserPhone: varchar('organiser_phone', { length: 50 }),
+  isScraped: boolean('is_scraped').default(false),
+  scrapeSource: varchar('scrape_source', { length: 100 }),
+  isFeatured: boolean('is_featured').default(false),
+  submittedBy: uuid('submitted_by'),
+  moderationStatus: varchar('moderation_status', { length: 50 }).default('approved'),
+  boostTier: varchar('boost_tier', { length: 50 }),
+  boostExpiresAt: timestamp('boost_expires_at'),
+  organiserUserId: uuid('organiser_user_id').references(() => users.id),
+  editToken: varchar('edit_token', { length: 500 }),
+  outreachSentAt: timestamp('outreach_sent_at'),
+  viewsCount: integer('views_count').default(0),
+  savesCount: integer('saves_count').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+// ─── Business Directory ──────────────────────────────────────────────────────
+
+export const businessTypeEnum = pgEnum('business_type', [
+  'shop',
+  'brand',
+  'service_center',
+  'tour_operator',
+  'event_organiser',
+])
+
+export const businessStatusEnum = pgEnum('business_status', [
+  'pending',
+  'verified',
+  'suspended',
+  'claimed',
+  'removed',
+])
+
+export const businesses = pgTable('businesses', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).unique().notNull(),
+  businessType: businessTypeEnum('business_type').default('shop').notNull(),
+  description: text('description'),
+  province: varchar('province', { length: 100 }),
+  city: varchar('city', { length: 100 }),
+  suburb: varchar('suburb', { length: 100 }),
+  address: varchar('address', { length: 500 }),
+  phone: varchar('phone', { length: 50 }),
+  whatsapp: varchar('whatsapp', { length: 50 }),
+  email: varchar('email', { length: 255 }),
+  website: varchar('website', { length: 500 }),
+  brandsStocked: text('brands_stocked').array().default([]),
+  services: text('services').array().default([]),
+  specialisation: text('specialisation').array().default([]),
+  seoTags: text('seo_tags').array().default([]),
+  logoUrl: varchar('logo_url', { length: 500 }),
+  bannerUrl: varchar('banner_url', { length: 500 }),
+  locationLat: numeric('location_lat', { precision: 10, scale: 7 }),
+  locationLng: numeric('location_lng', { precision: 10, scale: 7 }),
+  status: businessStatusEnum('status').default('pending').notNull(),
+  verified: boolean('verified').default(false).notNull(),
+  isPremium: boolean('is_premium').default(false).notNull(),
+  tier: varchar('tier', { length: 50 }).default('free'),
+  boostTier: varchar('boost_tier', { length: 50 }).default('free'),
+  boostPosition: integer('boost_position'),
+  boostExpiresAt: timestamp('boost_expires_at'),
+  autoVerified: boolean('auto_verified').default(false),
+  outreachSentAt: timestamp('outreach_sent_at'),
+  outreachTouch2At: timestamp('outreach_touch2_at'),
+  outreachTouch3At: timestamp('outreach_touch3_at'),
+  claimToken: varchar('claim_token', { length: 500 }),
+  claimTokenExpiresAt: timestamp('claim_token_expires_at'),
+  hours: jsonb('hours').$type<Record<string, unknown>>().default({}),
+  contactSource: varchar('contact_source', { length: 100 }),
+  consentAt: timestamp('consent_at'),
+  viewsCount: integer('views_count').default(0),
+  savesCount: integer('saves_count').default(0),
+  claimedBy: uuid('claimed_by').references(() => users.id),
+  claimedAt: timestamp('claimed_at'),
+  verifiedAt: timestamp('verified_at'),
+  searchVector: tsvector('search_vector'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+export const businessesRelations = relations(businesses, ({ one }) => ({
+  owner: one(users, { fields: [businesses.claimedBy], references: [users.id] }),
+}))

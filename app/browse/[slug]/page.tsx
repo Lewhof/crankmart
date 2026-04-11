@@ -1,0 +1,59 @@
+import type { Metadata } from 'next'
+import ListingDetailClient from './ListingDetail'
+
+interface Props {
+  params: { slug: string }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cyclemart.co.za'
+    const res = await fetch(`${baseUrl}/api/listings/${params.slug}`, { next: { revalidate: 300 } })
+    if (!res.ok) throw new Error('Not found')
+    const listing = await res.json()
+
+    const make  = listing.bikeMake  ? `${listing.bikeMake} ` : ''
+    const model = listing.bikeModel ? `${listing.bikeModel} ` : ''
+    const year  = listing.bikeYear  ? `${listing.bikeYear} ` : ''
+    const title = `${make}${model}${year}— CycleMart`.trim()
+
+    const condMap: Record<string, string> = {
+      new: 'New', like_new: 'Like New', used: 'Used', poor: 'Poor'
+    }
+    const cond   = condMap[listing.condition] ?? listing.condition
+    const price  = parseFloat(listing.price).toLocaleString('en-ZA', { maximumFractionDigits: 0 })
+    const where  = [listing.city, listing.province].filter(Boolean).join(', ')
+    const desc   = `${cond} ${listing.title} for R${price}${where ? ` in ${where}` : ''}. Listed on CycleMart SA.`
+
+    const image  = listing.images?.[0]?.imageUrl ?? listing.images?.[0]?.image_url ?? null
+    const url    = `${baseUrl}/browse/${params.slug}`
+
+    return {
+      title,
+      description: desc,
+      openGraph: {
+        title,
+        description: desc,
+        url,
+        siteName: 'CycleMart',
+        type: 'website',
+        ...(image ? { images: [{ url: image.startsWith('http') ? image : `${baseUrl}${image}`, width: 1200, height: 630, alt: title }] } : {}),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description: desc,
+        ...(image ? { images: [image.startsWith('http') ? image : `${baseUrl}${image}`] } : {}),
+      },
+    }
+  } catch {
+    return {
+      title: 'Listing — CycleMart',
+      description: 'Buy and sell bikes, gear, and cycling equipment in South Africa.',
+    }
+  }
+}
+
+export default function ListingDetailPage({ params }: Props) {
+  return <ListingDetailClient />
+}

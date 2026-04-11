@@ -1,0 +1,94 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/db'
+import { events } from '@/db/schema'
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, '')
+    .replace(/-+/g, '-')
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+
+    const {
+      title,
+      description,
+      eventType,
+      startDate,
+      endDate,
+      province,
+      city,
+      venue,
+      distance,
+      entryFee,
+      entryUrl,
+      websiteUrl,
+      organiserName,
+      organiserEmail,
+      organiserPhone,
+      bannerUrl,
+    } = body
+
+    // Validation
+    if (!title || !startDate || !organiserEmail) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    const slug = generateSlug(title)
+
+    // Check if slug already exists
+    const existing = await db
+      .select()
+      .from(events)
+      .where({ slug: events.slug })
+      .limit(1)
+
+    if (existing && existing.length > 0) {
+      return NextResponse.json(
+        { error: 'Event with this title already exists' },
+        { status: 409 }
+      )
+    }
+
+    const event = await db.insert(events).values({
+      title,
+      slug,
+      description,
+      eventType: (eventType || 'race') as any,
+      status: 'upcoming' as any,
+      startDate: new Date(startDate),
+      endDate: endDate ? new Date(endDate) : null,
+      province,
+      city,
+      venue,
+      distance,
+      entryFee,
+      entryUrl,
+      websiteUrl,
+      organiserName,
+      organiserEmail,
+      organiserPhone,
+      bannerUrl,
+      moderationStatus: 'pending',
+      isScraped: false,
+    }).returning()
+
+    return NextResponse.json(
+      { event: event[0], message: 'Event submitted for review' },
+      { status: 201 }
+    )
+  } catch (error) {
+    console.error('Event submission error:', error)
+    return NextResponse.json(
+      { error: 'Failed to submit event' },
+      { status: 500 }
+    )
+  }
+}

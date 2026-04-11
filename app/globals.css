@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* Explicitly include src/ directory for Tailwind v4 */
+@source "../src/**/*.{js,ts,jsx,tsx}";
+@source "../components/**/*.{js,ts,jsx,tsx}";
+@source "../app/**/*.{js,ts,jsx,tsx}";
+
+@theme {
+  --color-primary: #EA580C;
+  --color-primary-dark: #C44A0A;
+  --color-primary-light: #3D50A0;
+  --color-primary-ghost: #E9ECF5;
+  --color-night-ride: #0D1B2A;
+  --color-night-ride-dark: #09121D;
+  --color-ink: #1a1a1a;
+  --color-background: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-border: #ebebeb;
+  --color-muted: #9a9a9a;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-destructive: #EF4444;
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --primary: #0D1B2A;
+  --primary-foreground: #ffffff;
+  --primary-hover: #A8172A;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --destructive: #EF4444;
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+}
+
+* {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+html {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: #f5f5f5;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* Scrollbar hide */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* shadcn component variables */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 21 90% 48%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --radius: 0.5rem;
+  }
+}
+
+/* ===== CycleMart Component Styles ===== */
+
+/* Listing card */
+.cm-card {
+  background: #ffffff;
+  border: 1px solid #ebebeb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  display: block;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s;
+}
+.cm-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+/* Boosted strip */
+.cm-boosted-strip {
+  background: #0D1B2A;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 12px 12px 0 0;
+}
+.cm-card-boosted { border-radius: 0 0 12px 12px !important; }
+
+/* Attribute chips */
+.cm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  border: 1.5px solid #e8e8e8;
+  background: #ffffff;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.cm-chip-label { font-weight: 700; color: #1a1a1a; }
+.cm-chip-value { color: #6b6b6b; }
+
+/* Condition dot colours */
+.dot-new { width: 8px; height: 8px; border-radius: 50%; background: #10B981; display: inline-block; }
+.dot-like_new { width: 8px; height: 8px; border-radius: 50%; background: #3B82F6; display: inline-block; }
+.dot-used { width: 8px; height: 8px; border-radius: 50%; background: #F59E0B; display: inline-block; }
+.dot-poor { width: 8px; height: 8px; border-radius: 50%; background: #EF4444; display: inline-block; }
+
+/* Sticky bottom CTA bar */
+.cm-bottom-bar {
+  position: fixed;
+  bottom: 60px; /* above bottom nav */
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #ebebeb;
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  z-index: 40;
+  max-width: 896px;
+  margin: 0 auto;
+}
+@media (min-width: 768px) { .cm-bottom-bar { bottom: 0; } }
+
+.cm-btn-outline {
+  flex: 1;
+  height: 48px;
+  border: 2px solid #1a1a1a;
+  border-radius: 10px;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.12s;
+}
+.cm-btn-outline:hover { background: #f5f5f5; }
+
+.cm-btn-primary {
+  flex: 1;
+  height: 48px;
+  border: none;
+  border-radius: 10px;
+  background: #EA580C;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.12s;
+}
+.cm-btn-primary:hover { background: #C44A0A; }
+
+/* ===== CycleMart responsive nav ===== */
+.cm-desktop-only { display: none; }
+.cm-mobile-only { display: flex; }
+
+@media screen and (min-width: 768px) {
+  .cm-desktop-only { display: flex; }
+  .cm-mobile-only { display: none !important; }
+  /* Hide bottom nav on desktop */
+  nav.cm-bottom-nav { display: none !important; }
+}
