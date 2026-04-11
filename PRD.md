@@ -236,16 +236,24 @@ CrankMart will be the world's most comprehensive cycling community platform -- a
 
 **Global layer (crankmart.com):**
 - Country-agnostic framework/shell
-- Global home page with country selector or auto-detect
+- Root (crankmart.com/) auto-detects country via IP geolocation and redirects to /za (or appropriate country path)
+- Until Phase 2, crankmart.com redirects to crankmart.com/za (only country live)
 - Shared auth system (users are global, content is per-country)
 - Global admin panel
 - Shared UI components, design system, layout
+- The global framework mirrors the /za structure but contains no listing/content data -- it's the blank template each new country inherits
 
 **Country layer (crankmart.com/za):**
 - All marketplace features scoped under /za
-- South African data: listings, businesses, routes, events, news
+- South African data: ALL CycleMart data migrated here (listings, users, businesses, routes, events, news)
 - ZAR currency, SA provinces, PayFast payments
-- CycleMart data migrated here
+- Full CycleMart data migration (not a fresh start)
+
+**Domain routing:**
+- crankmart.com/ --> auto-redirect to /za (until Phase 2)
+- crankmart.co.za --> 301 redirect to crankmart.com/za
+- cyclemart.co.za --> 301 redirect to crankmart.com/za
+- CycleMart velo-server to be decommissioned after redirects are live
 
 **URL structure:**
 ```
@@ -270,12 +278,23 @@ crankmart.com/login      --> Auth (global)
 - **Region abstraction**: Replace hardcoded SA provinces with configurable regions per country
 - **Payment gateway abstraction**: PayFast for SA (existing merchant 24040660), prepare interface for Stripe (international)
 
-#### FR-4: Database Migration
+#### FR-4: Full Data Migration
 - New Neon project for CrankMart
 - Schema migration from existing Drizzle schema
-- CycleMart data migrated as /za content (routes, businesses, events, categories, listings)
+- **Full CycleMart data migration** into /za scope:
+  - All users and accounts
+  - All listings and listing images
+  - All businesses and directory entries
+  - All routes, route images, loops, reviews
+  - All events
+  - All news articles
+  - All boost packages and transactions
+  - All messages and conversations
+  - All categories
 - All location-dependent records tagged with country_code='ZA'
+- Past events retained (historical record)
 - New Google OAuth project (replacing CycleMart credentials)
+- CycleMart velo-server decommissioned after migration verified
 
 #### FR-5: Vercel Deployment
 - GitHub repo (Lewhof/crankmart) connected to Vercel
@@ -305,9 +324,20 @@ All features from CycleMart v0.2.1 carried forward under the /za country scope:
 
 #### FR-8: Admin Whiteboard / To-Do Board
 - New admin page: `/admin/whiteboard`
-- Project-level to-do tracking and task management
-- Used for tracking pending items (social handles, launch tasks, etc.)
+- Project-level task tracking with the following fields:
+  - **Title** -- task name
+  - **Description** -- detail / notes
+  - **Status** -- To Do / In Progress / Done / Blocked
+  - **Priority** -- Critical / High / Medium / Low
+  - **Category** -- Development / Design / Content / Marketing / Infrastructure / Other
+  - **Assigned to** -- team member (optional)
+  - **Due date** -- optional target date
+  - **Created date** -- auto
+- List view with filtering by status, priority, category
+- Sortable columns
+- Inline status/priority updates
 - Persisted in database (new table: `admin_todos`)
+- Reference UI: lewhofmeyr.co.za task list (to be confirmed with screenshot)
 
 #### FR-9: Known Issues to Resolve (from VERSION.md)
 - PayFast sandbox end-to-end testing

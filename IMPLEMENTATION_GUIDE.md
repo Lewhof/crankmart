@@ -243,18 +243,33 @@ Wrap existing PayFast code behind this interface. When Australia launches, add S
 3. Verify all 17 tables created with correct columns and enums
 4. Verify indexes and constraints
 
-### Step 16: Seed Data Migration
-Run seed scripts in order:
-1. `npm run db:seed` -- categories, test users, sample listings
-2. `tsx seed-directory.ts` -- business directory (SA businesses)
-3. `tsx seed-routes-v2.ts` -- cycling routes
-4. Run event seed scripts as needed
+### Step 16: Full Data Migration from CycleMart
+**All CycleMart data migrates to CrankMart** (tagged country_code='ZA'):
 
-Verify counts:
-- Categories populated
-- Routes with images and loops
-- Businesses with correct statuses
-- Events with dates
+1. Export from CycleMart Neon database (pg_dump or Drizzle export)
+2. Import into CrankMart Neon database
+3. Run migration script to add country_code='ZA' to all existing records
+4. Alternatively, run seed scripts if starting from seed data:
+   - `npm run db:seed` -- categories, users, sample listings
+   - `tsx seed-directory.ts` -- business directory (SA businesses)
+   - `tsx seed-routes-v2.ts` -- cycling routes
+   - Run event seed scripts as needed
+
+**Migration checklist:**
+- [ ] Users and accounts
+- [ ] All listings + listing images
+- [ ] All businesses / directory entries
+- [ ] All routes + images + loops + reviews
+- [ ] All events (including past -- historical record)
+- [ ] All news articles
+- [ ] Boost packages and transactions
+- [ ] Messages and conversations
+- [ ] Categories
+- [ ] All records tagged country_code='ZA'
+
+**Verify counts match CycleMart source database.**
+
+After verification, decommission CycleMart velo-server (systemd service, nginx, port 3099).
 
 ### Step 17: Image Storage (Vercel Blob)
 **Decision: Vercel Blob** -- native Vercel integration, CDN-backed, serverless-compatible, cost-effective at scale.
