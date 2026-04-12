@@ -11,12 +11,12 @@ function SuccessContent() {
   const title      = params.get('title') || 'Your listing'
   const listingId  = params.get('listingId') || ''
 
-  const listingUrl = `https://cyclemart.co.za/browse/${slug}`
-  const waText = encodeURIComponent(`Check out my listing on CycleMart: ${title}\n${listingUrl}`)
+  const listingUrl = `https://crankmart.com/browse/${slug}`
+  const waText = encodeURIComponent(`Check out my listing on CrankMart: ${title}\n${listingUrl}`)
 
   // Confetti-lite: brief flash on mount
   useEffect(() => {
-    document.title = 'Listing Live! 🎉 — CycleMart'
+    document.title = 'Listing Live! 🎉 — CrankMart'
   }, [])
 
   return (
@@ -31,7 +31,7 @@ function SuccessContent() {
           Your listing is live! 🎉
         </h1>
         <p style={{ fontSize: 15, color: '#6b7280', margin: '0 0 32px', lineHeight: 1.5 }}>
-          <strong style={{ color: '#1a1a1a' }}>{decodeURIComponent(title)}</strong> is now visible to buyers on CycleMart. Share it to get more views faster.
+          <strong style={{ color: '#1a1a1a' }}>{decodeURIComponent(title)}</strong> is now visible to buyers on CrankMart. Share it to get more views faster.
         </p>
 
         {/* Primary actions */}

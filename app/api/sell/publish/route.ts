@@ -193,10 +193,10 @@ export async function POST(request: NextRequest) {
 
     // Email seller confirmation — fire and forget
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cyclemart.co.za'
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
       await sendEmail({
         to: session.user.email as string,
-        subject: `Your listing "${title}" is live on CycleMart 🎉`,
+        subject: `Your listing "${title}" is live on CrankMart 🎉`,
         html: listingPublishedEmail({
           sellerName: session.user.name || 'there',
           listingTitle: title,

@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     try {
       const adminResult = await db.execute(sql.raw(`SELECT email FROM users WHERE role = 'admin' LIMIT 3`))
       const admins = (adminResult.rows ?? adminResult) as any[]
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cyclemart.co.za'
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
 
       for (const admin of admins) {
         await sendEmail({
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 <body style="font-family:sans-serif;background:#f5f5f5;padding:32px">
   <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #ebebeb">
     <div style="background:#0D1B2A;padding:24px 32px">
-      <div style="color:#fff;font-size:20px;font-weight:800">🚲 CycleMart — New Article Submission</div>
+      <div style="color:#fff;font-size:20px;font-weight:800">🚲 CrankMart — New Article Submission</div>
     </div>
     <div style="padding:32px">
       <h2 style="margin:0 0 8px;font-size:18px">${title}</h2>

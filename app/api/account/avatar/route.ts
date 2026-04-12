@@ -7,7 +7,7 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 
-const UPLOAD_DIR    = '/home/velo/storage/cyclemart/uploads/avatars'
+const UPLOAD_DIR    = '/home/velo/storage/crankmart/uploads/avatars'
 const PUBLIC_URL    = '/uploads/avatars'
 const MAX_SIZE      = 5 * 1024 * 1024   // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']

@@ -37,7 +37,7 @@ SELECT 'event_feature', 'Event Featured – 7 days', 'Pin your event at the top 
 WHERE NOT EXISTS (SELECT 1 FROM boost_packages WHERE type = 'event_feature' AND name = 'Event Featured – 7 days');
 
 INSERT INTO boost_packages (type, name, description, duration_days, price_cents, is_active, display_order)
-SELECT 'event_feature', 'Event Homepage Spotlight', 'Feature your event on the CycleMart homepage for 7 days', 7, 7900, true, 6
+SELECT 'event_feature', 'Event Homepage Spotlight', 'Feature your event on the CrankMart homepage for 7 days', 7, 7900, true, 6
 WHERE NOT EXISTS (SELECT 1 FROM boost_packages WHERE type = 'event_feature' AND name = 'Event Homepage Spotlight');
 
 INSERT INTO boost_packages (type, name, description, duration_days, price_cents, is_active, display_order)

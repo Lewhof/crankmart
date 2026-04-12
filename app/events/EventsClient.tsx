@@ -291,7 +291,7 @@ export default function EventsPage() {
           {/* Organisers grid */}
           <div className="events-wrap">
             <p style={{ fontSize: 13, color: '#9a9a9a', marginBottom: 16 }}>
-              Event organisers, cycling clubs and race series listed on CycleMart
+              Event organisers, cycling clubs and race series listed on CrankMart
             </p>
             {orgLoading ? (
               <div className="org-grid">

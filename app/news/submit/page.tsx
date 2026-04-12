@@ -91,7 +91,7 @@ export default function SubmitArticlePage() {
           <div style={{ marginBottom: 28 }}>
             <h1 style={{ fontSize: 24, fontWeight: 900, color: '#1a1a1a', margin: '0 0 6px' }}>Submit an Article</h1>
             <p style={{ margin: 0, fontSize: 14, color: '#6b7280', lineHeight: 1.5 }}>
-              Share your cycling news, race reports, or industry updates with the CycleMart community. All submissions are reviewed by our editorial team before publishing.
+              Share your cycling news, race reports, or industry updates with the CrankMart community. All submissions are reviewed by our editorial team before publishing.
             </p>
           </div>
 

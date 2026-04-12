@@ -58,7 +58,7 @@ async function checkApiAvailable(): Promise<boolean> {
   try {
     const url = `${TF_BASE}?filter=region_id:${REGION_ID}&rows=20&page=1&fields=rid,title,difficulty,distance,elevation_gain,lat,lon,alias,photos`
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'CycleMartBot/1.0 (+https://cyclemart.co.za)' },
+      headers: { 'User-Agent': 'CrankMartBot/1.0 (+https://crankmart.com)' },
     })
     if (!res.ok) return false
     const contentType = res.headers.get('content-type') ?? ''
@@ -73,7 +73,7 @@ async function checkApiAvailable(): Promise<boolean> {
 async function fetchTfPage(page: number): Promise<TfRoute[]> {
   const url = `${TF_BASE}?filter=region_id:${REGION_ID}&rows=100&page=${page}&fields=rid,title,lat,lon,alias,photos`
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'CycleMartBot/1.0 (+https://cyclemart.co.za)' },
+    headers: { 'User-Agent': 'CrankMartBot/1.0 (+https://crankmart.com)' },
   })
   if (!res.ok) throw new Error(`HTTP ${res.status} on page ${page}`)
   const data: TfResponse = await res.json()

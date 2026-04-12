@@ -36,7 +36,7 @@ export default function ArticleDetailPage() {
   }, [slug])
 
   const handleShare = () => {
-    const url = `https://cyclemart.co.za/news/${slug}`
+    const url = `https://crankmart.com/news/${slug}`
     navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
   }
 

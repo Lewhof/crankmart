@@ -22,7 +22,7 @@ export async function GET(
     const html = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; CycleMartBot/1.0; +https://cyclemart.co.za)',
+        'User-Agent': 'Mozilla/5.0 (compatible; CrankMartBot/1.0; +https://crankmart.com)',
         'Accept': 'text/html',
       }
     }).then(r => r.text()).finally(() => clearTimeout(timer))

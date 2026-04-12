@@ -1,4 +1,4 @@
-# CycleMart Sprint 1 - Completion Report
+# CrankMart Sprint 1 - Completion Report
 
 **Date:** 2026-03-24  
 **Status:** ✅ Complete  
@@ -9,7 +9,7 @@
 
 ### 1. Project Scaffold ✅
 - Next.js 15 (App Router) with TypeScript (strict mode)
-- Tailwind CSS with CycleMart design tokens
+- Tailwind CSS with CrankMart design tokens
 - All dependencies installed: drizzle-orm, tRPC, NextAuth v5, Lucide React, Sharp
 
 ### 2. Database Layer ✅
@@ -125,7 +125,7 @@
 
 ### 1. Install & Setup
 ```bash
-cd /home/hein/Workspace/cyclemart
+cd /home/hein/Workspace/crankmart
 npm install  # Already done
 ```
 
@@ -136,7 +136,7 @@ npm run db:seed
 Populates with:
 - 10 categories
 - 50 realistic listings
-- 5 test users (john@cyclemart.test, sarah@cyclemart.test, etc.)
+- 5 test users (john@crankmart.test, sarah@crankmart.test, etc.)
 - 250+ product images
 
 ### 3. Start Dev Server
@@ -176,7 +176,7 @@ npm run start
 ## File Structure
 
 ```
-cyclemart/
+crankmart/
 ├── app/
 │   ├── layout.tsx              # Root layout + providers
 │   ├── page.tsx                # Home
@@ -243,7 +243,7 @@ cyclemart/
 
 ## Git & Deployment
 
-- **Repository:** `github.com/VelocityFibre/cyclemart`
+- **Repository:** `github.com/VelocityFibre/crankmart`
 - **Branch:** `master` (initial commit with Sprint 1 complete)
 - **Build:** Passing (Next.js 16 + Turbopack)
 - **Ready to:** Deploy to Vercel or any Next.js host

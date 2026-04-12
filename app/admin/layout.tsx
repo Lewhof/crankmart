@@ -62,7 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Access Denied</h1>
         <p style={{ color: '#666', margin: 0 }}>You need an admin account to access this area.</p>
         <p style={{ color: '#999', fontSize: 13, margin: 0 }}>Signed in as: {session?.user?.email}</p>
-        <a href="/" style={{ marginTop: 8, color: '#0D1B2A', fontWeight: 600, textDecoration: 'none' }}>← Back to CycleMart</a>
+        <a href="/" style={{ marginTop: 8, color: '#0D1B2A', fontWeight: 600, textDecoration: 'none' }}>← Back to CrankMart</a>
       </div>
     )
   }
@@ -70,7 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const Sidebar = () => (
     <div style={{ width: 200, background: '#fff', borderRight: '1px solid #ebebeb', height: '100vh', position: 'fixed', top: 0, left: 0, display: 'flex', flexDirection: 'column', zIndex: 50 }}>
       <div style={{ padding: '16px 20px', borderBottom: '1px solid #ebebeb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link href="/" style={{ fontSize: 16, fontWeight: 800, color: '#0D1B2A', textDecoration: 'none' }}>🚲 CycleMart</Link>
+        <Link href="/" style={{ fontSize: 16, fontWeight: 800, color: '#0D1B2A', textDecoration: 'none' }}>🚲 CrankMart</Link>
         <button onClick={() => setOpen(false)} style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer' }} className="sidebar-close">
           <X size={18} />
         </button>

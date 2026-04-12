@@ -123,7 +123,7 @@ export default function Dashboard() {
       {/* Page header */}
       <div>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>Dashboard</h1>
-        <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>Welcome to the CycleMart admin panel</p>
+        <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>Welcome to the CrankMart admin panel</p>
       </div>
       {/* Stats Grid */}
       <div

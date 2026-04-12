@@ -89,7 +89,7 @@ function Step2Content() {
     if (status === 'loading') return
     // Only guard step-1 completion — auth check moved to step-4 (publish)
     // No auth required just to fill in the form
-    const step1 = localStorage.getItem('cyclemart-sell-category')
+    const step1 = localStorage.getItem('crankmart-sell-category')
     if (!step1) router.replace('/sell/step-1')
   }, [status, router, category])
 
@@ -150,7 +150,7 @@ function Step2Content() {
           if (draft?.data) { setForm(draft.data); return }
         }
       } catch {}
-      const saved = localStorage.getItem('cyclemart-sell-draft')
+      const saved = localStorage.getItem('crankmart-sell-draft')
       if (saved) { try { setForm(JSON.parse(saved)) } catch {} }
     }
     loadDraft()
@@ -189,8 +189,8 @@ function Step2Content() {
   }
 
   const handleContinue = () => {
-    localStorage.setItem('cyclemart-sell-draft', JSON.stringify(form))
-    localStorage.setItem('cyclemart-sell-category', category)
+    localStorage.setItem('crankmart-sell-draft', JSON.stringify(form))
+    localStorage.setItem('crankmart-sell-category', category)
     router.push('/sell/step-3')
   }
 

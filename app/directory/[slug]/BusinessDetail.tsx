@@ -84,10 +84,10 @@ export default function BusinessDetailPage() {
     const localBusinessSchema = {
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
-      '@id': `https://cyclemart.co.za/directory/${business.slug}#business`,
+      '@id': `https://crankmart.com/directory/${business.slug}#business`,
       name: business.name,
       description: business.description || `${business.name} is a ${TYPE_LABELS[business.type] || business.type} in ${business.city}, ${business.province}.`,
-      url: `https://cyclemart.co.za/directory/${business.slug}`,
+      url: `https://crankmart.com/directory/${business.slug}`,
       ...(business.phone && { telephone: business.phone }),
       ...(business.address && {
         address: {

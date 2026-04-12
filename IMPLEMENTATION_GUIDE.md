@@ -8,7 +8,7 @@
 
 ## Overview
 
-This guide takes the cloned CycleMart codebase and transforms it into CrankMart, deployed on the Neon + Vercel + GitHub stack, with internationalisation foundations for future country expansion.
+This guide takes the cloned CrankMart codebase and transforms it into CrankMart, deployed on the Neon + Vercel + GitHub stack, with internationalisation foundations for future country expansion.
 
 **Estimated Phase 1 timeline:** 4-6 weeks
 
@@ -18,8 +18,8 @@ This guide takes the cloned CycleMart codebase and transforms it into CrankMart,
 
 ### Step 1: Repository Setup (Complete)
 - [x] GitHub repository created at Lewhof/crankmart
-- [x] CycleMart source code cloned into repository
-- [x] Working branch: claude/clone-cyclemart-repo-IJQm2
+- [x] CrankMart source code cloned into repository
+- [x] Working branch: claude/clone-crankmart-repo-IJQm2
 
 ### Step 2: Branch Strategy
 ```
@@ -63,7 +63,7 @@ hotfix/*          -- production fixes
    ```
 5. Custom domains:
    - crankmart.com (primary)
-   - crankmart.co.za (301 redirect to crankmart.com/za)
+   - crankmart.com (301 redirect to crankmart.com/za)
 6. Enable preview deployments for PRs
 7. Enable Neon integration (auto preview database branches)
 
@@ -71,9 +71,9 @@ hotfix/*          -- production fixes
 1. Point crankmart.com to Vercel:
    - A record: 76.76.21.21
    - CNAME: cname.vercel-dns.com (for www)
-2. Point crankmart.co.za to Vercel (for 301 redirect):
+2. Point crankmart.com to Vercel (for 301 redirect):
    - A record: 76.76.21.21
-   - Configure redirect rule in Vercel: crankmart.co.za/* -> crankmart.com/za/$1 (301)
+   - Configure redirect rule in Vercel: crankmart.com/* -> crankmart.com/za/$1 (301)
 3. Verify both domains in Vercel dashboard
 4. SSL auto-provisioned by Vercel for both domains
 
@@ -83,10 +83,10 @@ hotfix/*          -- production fixes
 
 ### Step 6: Package & Config Rebrand
 **Files to update:**
-1. `package.json` -- Change name from "cyclemart" to "crankmart"
+1. `package.json` -- Change name from "crankmart" to "crankmart"
 2. `vercel.json` -- Verify/update any domain references
-3. `drizzle.config.ts` -- Update if any cyclemart references
-4. `next.config.ts` -- Replace cyclemart.co.za with crankmart.com in image domains
+3. `drizzle.config.ts` -- Update if any crankmart references
+4. `next.config.ts` -- Replace crankmart.com with crankmart.com in image domains
 
 ### Step 7: Brand Assets
 1. Design new CrankMart logo (or update from existing)
@@ -100,8 +100,8 @@ hotfix/*          -- production fixes
    - `/public/apple-icon.png`
    - `/public/icon-192.png`
    - `/public/icon-512.png`
-3. Update hero/banner images if they contain CycleMart branding:
-   - `/public/images/cyclemart-brand-banner.jpg`
+3. Update hero/banner images if they contain CrankMart branding:
+   - `/public/images/crankmart-brand-banner.jpg`
    - `/public/images/hero-brand-banner.jpg`
 
 ### Step 8: Code Rebrand (Systematic Find & Replace)
@@ -113,7 +113,7 @@ Execute in this order to avoid breaking references:
    - Social media handles
 
 2. **Email templates** (`src/lib/email-templates.ts`):
-   - All 11 templates: replace "CycleMart" with "CrankMart"
+   - All 11 templates: replace "CrankMart" with "CrankMart"
    - Update logo URL to crankmart.com/apple-icon.png
    - Update footer links
 
@@ -126,9 +126,9 @@ Execute in this order to avoid breaking references:
    - BottomNav.tsx -- any brand references
 
 5. **localStorage keys** (sell flow pages):
-   - `cyclemart-sell-category` -> `crankmart-sell-category`
-   - `cyclemart-sell-draft` -> `crankmart-sell-draft`
-   - `cyclemart-sell-photos` -> `crankmart-sell-photos`
+   - `crankmart-sell-category` -> `crankmart-sell-category`
+   - `crankmart-sell-draft` -> `crankmart-sell-draft`
+   - `crankmart-sell-photos` -> `crankmart-sell-photos`
 
 6. **SEO files**:
    - `app/sitemap.ts` -- base URL
@@ -137,12 +137,12 @@ Execute in this order to avoid breaking references:
    - `public/llms.txt` -- any brand references
 
 7. **All remaining references**:
-   - Run: `grep -r "cyclemart" --include="*.ts" --include="*.tsx" --include="*.css" --include="*.json" -l`
+   - Run: `grep -r "crankmart" --include="*.ts" --include="*.tsx" --include="*.css" --include="*.json" -l`
    - Update each file identified
 
 ### Step 9: Validate Rebrand
 1. `npm run build` -- must pass with zero errors
-2. Search codebase for any remaining "cyclemart" (case-insensitive)
+2. Search codebase for any remaining "crankmart" (case-insensitive)
 3. Visual check: run dev server and verify brand appears correctly on:
    - Home page
    - Browse page
@@ -243,10 +243,10 @@ Wrap existing PayFast code behind this interface. When Australia launches, add S
 3. Verify all 17 tables created with correct columns and enums
 4. Verify indexes and constraints
 
-### Step 16: Full Data Migration from CycleMart
-**All CycleMart data migrates to CrankMart** (tagged country_code='ZA'):
+### Step 16: Full Data Migration from CrankMart
+**All CrankMart data migrates to CrankMart** (tagged country_code='ZA'):
 
-1. Export from CycleMart Neon database (pg_dump or Drizzle export)
+1. Export from CrankMart Neon database (pg_dump or Drizzle export)
 2. Import into CrankMart Neon database
 3. Run migration script to add country_code='ZA' to all existing records
 4. Alternatively, run seed scripts if starting from seed data:
@@ -267,9 +267,9 @@ Wrap existing PayFast code behind this interface. When Australia launches, add S
 - [ ] Categories
 - [ ] All records tagged country_code='ZA'
 
-**Verify counts match CycleMart source database.**
+**Verify counts match CrankMart source database.**
 
-After verification, decommission CycleMart velo-server (systemd service, nginx, port 3099).
+After verification, decommission CrankMart velo-server (systemd service, nginx, port 3099).
 
 ### Step 17: Image Storage (Vercel Blob)
 **Decision: Vercel Blob** -- native Vercel integration, CDN-backed, serverless-compatible, cost-effective at scale.
@@ -278,7 +278,7 @@ After verification, decommission CycleMart velo-server (systemd service, nginx, 
 2. Add `BLOB_READ_WRITE_TOKEN` to Vercel environment variables
 3. Update upload API routes (`/api/sell/upload`, `/api/account/avatar`, `/api/directory/upload`) to use `put()` from `@vercel/blob`
 4. Update `next.config.ts` to allow images from Vercel Blob hostname
-5. Migrate any existing cyclemart.co.za/uploads/* URLs in database to new Blob URLs (or accept broken images for old local-upload references)
+5. Migrate any existing crankmart.com/uploads/* URLs in database to new Blob URLs (or accept broken images for old local-upload references)
 
 Existing remote image URLs (Unsplash, Trailforks, etc.) remain as-is -- no migration needed.
 
@@ -367,7 +367,7 @@ API routes that return country-specific data need the country context:
    - [ ] Admin panel accessible at /admin
    - [ ] Admin whiteboard loads at /admin/whiteboard
    - [ ] Mobile responsive layout correct
-   - [ ] crankmart.co.za redirects to crankmart.com/za
+   - [ ] crankmart.com redirects to crankmart.com/za
 
 ---
 
@@ -392,9 +392,9 @@ From VERSION.md known issues:
 1. Set up Google Search Console for crankmart.com
 2. Submit sitemap (per-country sitemaps: /za/sitemap.xml)
 3. Configure 301 redirects:
-   - cyclemart.co.za/* -> crankmart.com/za/* (all paths)
-   - crankmart.co.za/* -> crankmart.com/za/* (all paths)
-   - Submit change of address in Search Console for cyclemart.co.za
+   - crankmart.com/* -> crankmart.com/za/* (all paths)
+   - crankmart.com/* -> crankmart.com/za/* (all paths)
+   - Submit change of address in Search Console for crankmart.com
 4. Verify structured data with Google Rich Results Test
 5. Check all pages have proper meta tags (country-aware)
 
@@ -414,17 +414,17 @@ From VERSION.md known issues:
 5. Set up alerts for error spikes
 
 ### Step 27: Launch Checklist
-- [ ] All "cyclemart" references removed
+- [ ] All "crankmart" references removed
 - [ ] New logo/favicon deployed
-- [ ] Database seeded with CycleMart data (tagged country_code='ZA')
+- [ ] Database seeded with CrankMart data (tagged country_code='ZA')
 - [ ] /za routes working (browse, sell, directory, routes, events)
 - [ ] Global landing page working (crankmart.com)
-- [ ] crankmart.co.za 301-redirects to crankmart.com/za
+- [ ] crankmart.com 301-redirects to crankmart.com/za
 - [ ] PayFast configured (sandbox tested, merchant 24040660)
 - [ ] New Google OAuth project configured
 - [ ] Email delivery working
 - [ ] Vercel Blob storage for uploads
-- [ ] SSL certificates active on crankmart.com and crankmart.co.za
+- [ ] SSL certificates active on crankmart.com and crankmart.com
 - [ ] Google Search Console configured
 - [ ] Sitemap submitted
 - [ ] robots.txt verified
@@ -500,7 +500,7 @@ git push -u origin feature/rebrand
 
 ## Appendix B: File Inventory Requiring Rebrand
 
-Total files to update (identified by grep for "cyclemart"):
+Total files to update (identified by grep for "crankmart"):
 - app/layout.tsx
 - app/page.tsx
 - app/sitemap.ts

@@ -40,7 +40,7 @@ async function fetchPage(page: number): Promise<TFRoute[]> {
   })
   const url = `${API_BASE}/routes?${params}`
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'CycleMartBot/1.0 (+https://cyclemart.co.za)' },
+    headers: { 'User-Agent': 'CrankMartBot/1.0 (+https://crankmart.com)' },
   })
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching Trailforks page ${page}`)
   const data = await res.json()

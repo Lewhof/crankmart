@@ -51,7 +51,7 @@ function abs(src: string, base: string): string | null {
 
 async function fetchHtml(url: string): Promise<string> {
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CycleMartBot/1.0 +https://cyclemart.co.za)' },
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CrankMartBot/1.0 +https://crankmart.com)' },
     signal: AbortSignal.timeout(TIMEOUT_MS),
     redirect: 'follow',
   })

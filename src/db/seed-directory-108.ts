@@ -1,5 +1,5 @@
 /**
- * CycleMart Business Directory — 108-Listing Seed
+ * CrankMart Business Directory — 108-Listing Seed
  * Generated: 2026-03-30
  *
  * Imports 108 new businesses from business-directory-db.json
@@ -86,7 +86,7 @@ function mapBusinessType(categories: string[]): Business["business_type"] {
 }
 
 function loadAndParseData(): SourceBusiness[] {
-  const filePath = "/home/hein/.openclaw/workspace/cyclemart/data/business-directory-db.json";
+  const filePath = "/home/hein/.openclaw/workspace/crankmart/data/business-directory-db.json";
   let content = fs.readFileSync(filePath, "utf-8");
 
   // Remove JS-style comments (// lines)
@@ -101,7 +101,7 @@ function loadAndParseData(): SourceBusiness[] {
 }
 
 async function seed() {
-  console.log(`\n🚀 CycleMart Directory Seed — 108 businesses\n`);
+  console.log(`\n🚀 CrankMart Directory Seed — 108 businesses\n`);
 
   let inserted = 0;
   let skipped = 0;

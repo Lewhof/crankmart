@@ -20,7 +20,7 @@ function mapDifficulty(raw: string): Difficulty {
 
 async function fetchHtml(url: string): Promise<string> {
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'CycleMartBot/1.0 (+https://cyclemart.co.za)' },
+    headers: { 'User-Agent': 'CrankMartBot/1.0 (+https://crankmart.com)' },
   })
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`)
   return res.text()

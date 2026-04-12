@@ -24,7 +24,7 @@ export async function sendEmail({
   to: string
   subject: string
   html: string
-  /** Override the sender address (e.g. for no-reply flows). Defaults to info@cyclemart.co.za */
+  /** Override the sender address (e.g. for no-reply flows). Defaults to info@crankmart.com */
   fromEmail?: string
   fromName?: string
 }) {
@@ -43,8 +43,8 @@ export async function sendEmail({
     auth: { user: config.smtp_user, pass: config.smtp_pass },
   })
 
-  const senderName  = fromName  ?? config.smtp_from_name  ?? 'CycleMart'
-  const senderEmail = fromEmail ?? config.smtp_from_email ?? 'info@cyclemart.co.za'
+  const senderName  = fromName  ?? config.smtp_from_name  ?? 'CrankMart'
+  const senderEmail = fromEmail ?? config.smtp_from_email ?? 'info@crankmart.com'
 
   await transporter.sendMail({
     from: `"${senderName}" <${senderEmail}>`,

@@ -32,16 +32,16 @@ const SA_LISTINGS = [
 ]
 
 async function seed() {
-  console.log('🌱 Seeding CycleMart database...')
+  console.log('🌱 Seeding CrankMart database...')
 
   // Create 5 test users
   console.log('Creating test users...')
   const testUsers = [
-    { email: 'admin@cyclemart.co.za', name: 'CycleMart Admin', role: 'admin', province: 'Western Cape', city: 'Cape Town' },
-    { email: 'marcus@cyclemart.co.za', name: 'Marcus van der Berg', role: 'seller', province: 'Gauteng', city: 'Johannesburg' },
-    { email: 'emma@cyclemart.co.za', name: 'Emma Pretorius', role: 'buyer', province: 'Western Cape', city: 'Cape Town' },
-    { email: 'thabo@cyclemart.co.za', name: 'Thabo Nkosi', role: 'seller', province: 'KwaZulu-Natal', city: 'Durban' },
-    { email: 'sarah@cyclemart.co.za', name: 'Sarah Mitchell', role: 'seller', province: 'Western Cape', city: 'Stellenbosch' },
+    { email: 'admin@crankmart.com', name: 'CrankMart Admin', role: 'admin', province: 'Western Cape', city: 'Cape Town' },
+    { email: 'marcus@crankmart.com', name: 'Marcus van der Berg', role: 'seller', province: 'Gauteng', city: 'Johannesburg' },
+    { email: 'emma@crankmart.com', name: 'Emma Pretorius', role: 'buyer', province: 'Western Cape', city: 'Cape Town' },
+    { email: 'thabo@crankmart.com', name: 'Thabo Nkosi', role: 'seller', province: 'KwaZulu-Natal', city: 'Durban' },
+    { email: 'sarah@crankmart.com', name: 'Sarah Mitchell', role: 'seller', province: 'Western Cape', city: 'Stellenbosch' },
   ]
 
   // Insert users one at a time to avoid conflicts

@@ -132,7 +132,7 @@ function ComingSoonPage() {
           <div style={{ width: 44, height: 44, background: 'linear-gradient(135deg, #273970, #4f6bc4)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Bike size={24} style={{ color: '#fff' }} />
           </div>
-          <span style={{ fontSize: 24, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>CycleMart</span>
+          <span style={{ fontSize: 24, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>CrankMart</span>
         </div>
 
         {/* Heading */}
@@ -243,7 +243,7 @@ function ComingSoonPage() {
 
         {/* Footer */}
         <p style={{ position: 'absolute', bottom: 24, fontSize: 12, color: 'rgba(255,255,255,.2)' }}>
-          © 2026 CycleMart · South Africa's cycling marketplace
+          © 2026 CrankMart · South Africa's cycling marketplace
         </p>
       </div>
     </div>

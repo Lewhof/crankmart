@@ -32,17 +32,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const displayName = CITY_DISPLAY_NAMES[city] || city;
 
   return {
-    title: `Cycling Businesses in ${displayName} | CycleMart Directory`,
+    title: `Cycling Businesses in ${displayName} | CrankMart Directory`,
     description: `Find bike shops, cycling coaches, event organisers, and bike hire services in ${displayName}. Browse our complete directory of cycling businesses.`,
     openGraph: {
       title: `Cycling Businesses in ${displayName}`,
       description: `Discover cycling businesses in ${displayName} - shops, mechanics, coaches, and more.`,
-      url: `https://cyclemart.co.za/directory/${city}`,
-      siteName: "CycleMart",
+      url: `https://crankmart.com/directory/${city}`,
+      siteName: "CrankMart",
       type: "website",
     },
     alternates: {
-      canonical: `https://cyclemart.co.za/directory/${city}`,
+      canonical: `https://crankmart.com/directory/${city}`,
     },
   };
 }
@@ -97,19 +97,19 @@ export default async function CityPage({ params, searchParams }: Props) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://cyclemart.co.za",
+        item: "https://crankmart.com",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Directory",
-        item: "https://cyclemart.co.za/directory",
+        item: "https://crankmart.com/directory",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: displayName,
-        item: `https://cyclemart.co.za/directory/${city}`,
+        item: `https://crankmart.com/directory/${city}`,
       },
     ],
   };

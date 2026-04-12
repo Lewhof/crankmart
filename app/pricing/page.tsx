@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'CycleMart Pricing | SA Cycling Directory',
+  title: 'CrankMart Pricing | SA Cycling Directory',
   description: 'Affordable plans to list your bike shop, brand or event on South Africa\'s dedicated cycling directory.',
 }
 
@@ -278,7 +278,7 @@ export default function PricingPage() {
             Reach SA cyclists.<br />Grow your business.
           </h1>
           <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.7, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto' }}>
-            CycleMart is South Africa&apos;s dedicated cycling directory. Every rand spent here reaches people who are actively looking for bike shops, events, and services.
+            CrankMart is South Africa&apos;s dedicated cycling directory. Every rand spent here reaches people who are actively looking for bike shops, events, and services.
           </p>
         </div>
       </div>
@@ -293,7 +293,7 @@ export default function PricingPage() {
         }}>
           <div style={{ fontSize: 20 }}>💡</div>
           <p style={{ margin: 0, fontSize: 14, color: '#374151', lineHeight: 1.6 }}>
-            <strong>A single Google Ads click costs R12–R45.</strong> Featured on CycleMart reaches SA cyclists for <strong>R149/mo</strong> — unlimited impressions, targeted audience, zero cost-per-click.
+            <strong>A single Google Ads click costs R12–R45.</strong> Featured on CrankMart reaches SA cyclists for <strong>R149/mo</strong> — unlimited impressions, targeted audience, zero cost-per-click.
           </p>
         </div>
 

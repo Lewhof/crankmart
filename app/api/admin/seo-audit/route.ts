@@ -20,7 +20,7 @@ export interface CheckResult {
 }
 
 const MANUAL_FILE = path.join(process.cwd(), '.seo-audit-manual.json')
-const BASE = 'https://cyclemart.co.za'
+const BASE = 'https://crankmart.com'
 const now = () => new Date().toISOString()
 
 function readManual(): Record<string, { status: string; note?: string; marked_at: string; marked_by?: string }> {
@@ -405,9 +405,9 @@ async function runHttpChecks(): Promise<CheckResult[]> {
     { id: 'sitemap_xml', label: 'sitemap.xml resolves (200 + valid)', category: 'technical_seo', url: `${BASE}/sitemap.xml`, validate: b => b.includes('<urlset') || b.includes('<sitemapindex') },
     { id: 'sitemap_listings', label: 'sitemap-listings.xml resolves', category: 'technical_seo', url: `${BASE}/sitemap-listings.xml`, validate: b => b.includes('<urlset') },
     { id: 'sitemap_blog', label: 'sitemap-blog.xml resolves', category: 'technical_seo', url: `${BASE}/sitemap-blog.xml`, validate: b => b.includes('<urlset') },
-    { id: 'social_instagram', label: 'Instagram profile (@cyclemartsa)', category: 'marketing', url: 'https://www.instagram.com/cyclemartsa' },
-    { id: 'social_facebook', label: 'Facebook page (@cyclemartsa)', category: 'marketing', url: 'https://www.facebook.com/cyclemartsa' },
-    { id: 'social_tiktok', label: 'TikTok profile (@cyclemartsa)', category: 'marketing', url: 'https://www.tiktok.com/@cyclemartsa' },
+    { id: 'social_instagram', label: 'Instagram profile (@crankmartsa)', category: 'marketing', url: 'https://www.instagram.com/crankmartsa' },
+    { id: 'social_facebook', label: 'Facebook page (@crankmartsa)', category: 'marketing', url: 'https://www.facebook.com/crankmartsa' },
+    { id: 'social_tiktok', label: 'TikTok profile (@crankmartsa)', category: 'marketing', url: 'https://www.tiktok.com/@crankmartsa' },
   ]
 
   await Promise.all(checks.map(async (c) => {

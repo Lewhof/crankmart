@@ -1,7 +1,7 @@
 /**
- * CycleMart Business Directory Seed Script
+ * CrankMart Business Directory Seed Script
  * Seeds 108 SA cycling businesses (all disabled at launch)
- * Source: /home/hein/.openclaw/workspace/cyclemart/data/business-directory-db.json
+ * Source: /home/hein/.openclaw/workspace/crankmart/data/business-directory-db.json
  */
 
 import { db } from './src/db'
@@ -64,7 +64,7 @@ const mapStatus = (status: string): 'pending' | 'verified' | 'suspended' | 'clai
 async function main() {
   console.log('🔍 Loading seed data from JSON...')
   
-  const seedPath = '/home/hein/.openclaw/workspace/cyclemart/data/business-directory-db.json'
+  const seedPath = '/home/hein/.openclaw/workspace/crankmart/data/business-directory-db.json'
   let fileContent = await fs.readFile(seedPath, 'utf-8')
   
   // Strip comments from JSON (lines starting with //)

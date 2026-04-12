@@ -158,7 +158,7 @@ export default function RegisterPage() {
         </Link>
 
         <h1 style={{ fontSize: "32px", fontWeight: "bold", marginBottom: "32px", textAlign: "center" }}>
-          Add Your Business to CycleMart
+          Add Your Business to CrankMart
         </h1>
 
         {mode === "choose" && (

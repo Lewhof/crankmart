@@ -65,11 +65,11 @@ export async function PATCH(request: NextRequest) {
       const rows = Array.isArray(result.rows) ? result.rows : (Array.isArray(result) ? result : [])
       const event = rows[0] as any
       if (event?.organiser_email) {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cyclemart.co.za'
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
         sendEmail({
           to: String(event.organiser_email),
-          subject: `Your event is live on CycleMart: "${event.title}"`,
-          html: `<div style="font-family:sans-serif;max-width:560px;margin:40px auto;background:#fff;border-radius:12px;border:1px solid #ebebeb;overflow:hidden"><div style="background:#0D1B2A;padding:24px 32px"><div style="color:#fff;font-size:20px;font-weight:800">🚲 CycleMart</div></div><div style="padding:32px"><h2 style="margin:0 0 12px">Your event is live!</h2><p style="color:#6b7280">Hi ${event.organiser_name || 'there'}, your event <strong>${event.title}</strong> has been approved and is now listed on CycleMart.</p><a href="${baseUrl}/events/${event.slug}" style="display:inline-block;margin-top:16px;background:#0D1B2A;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">View Event →</a></div></div>`
+          subject: `Your event is live on CrankMart: "${event.title}"`,
+          html: `<div style="font-family:sans-serif;max-width:560px;margin:40px auto;background:#fff;border-radius:12px;border:1px solid #ebebeb;overflow:hidden"><div style="background:#0D1B2A;padding:24px 32px"><div style="color:#fff;font-size:20px;font-weight:800">🚲 CrankMart</div></div><div style="padding:32px"><h2 style="margin:0 0 12px">Your event is live!</h2><p style="color:#6b7280">Hi ${event.organiser_name || 'there'}, your event <strong>${event.title}</strong> has been approved and is now listed on CrankMart.</p><a href="${baseUrl}/events/${event.slug}" style="display:inline-block;margin-top:16px;background:#0D1B2A;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">View Event →</a></div></div>`
         })
       }
     } else if (action === 'reject') {

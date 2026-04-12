@@ -8,7 +8,7 @@
 
 | Category | Locations | Action |
 |----------|-----------|--------|
-| Rebrand (cyclemart -> crankmart) | 304+ | Find & replace |
+| Rebrand (crankmart -> crankmart) | 304+ | Find & replace |
 | Internationalise (SA -> configurable) | 650+ | Abstract to country config |
 | Both | 50+ | Rebrand + abstract |
 
@@ -25,8 +25,8 @@
 | public/robots.txt | 49-51 | Sitemap URLs |
 | public/llms.txt | 9, 26-35 | Domain + social handles (8 refs) |
 | app/faq/page.tsx | 10-158 | FAQ content with URLs (21 refs) |
-| app/terms/page.tsx | 22 | legal@cyclemart.co.za |
-| app/privacy/page.tsx | 20 | privacy@cyclemart.co.za |
+| app/terms/page.tsx | 22 | legal@crankmart.com |
+| app/privacy/page.tsx | 20 | privacy@crankmart.com |
 | app/news/[slug]/page.tsx | 9, 20, 33 | NEXT_PUBLIC_APP_URL fallback |
 | app/directory/[slug]/page.tsx | 14, 26, 37 | Schema.org URLs |
 | app/directory/category/[type]/page.tsx | 51-125 | Breadcrumb URLs |
@@ -37,45 +37,45 @@
 
 | File | Line(s) | Context |
 |------|---------|---------|
-| package.json | 2 | name: "cyclemart" |
-| package-lock.json | 2, 8 | name: "cyclemart" |
+| package.json | 2 | name: "crankmart" |
+| package-lock.json | 2, 8 | name: "crankmart" |
 
 ## 3. REBRAND: localStorage Keys (19 locations)
 
 | File | Line(s) | Keys |
 |------|---------|------|
-| app/sell/step-1/page.tsx | 49 | cyclemart-sell-category |
-| app/sell/step-2/page.tsx | 92, 153, 192, 193 | cyclemart-sell-draft, cyclemart-sell-category |
-| app/sell/step-3/page.tsx | 21, 22, 27, 38 | cyclemart-sell-category, cyclemart-sell-photos |
+| app/sell/step-1/page.tsx | 49 | crankmart-sell-category |
+| app/sell/step-2/page.tsx | 92, 153, 192, 193 | crankmart-sell-draft, crankmart-sell-category |
+| app/sell/step-3/page.tsx | 21, 22, 27, 38 | crankmart-sell-category, crankmart-sell-photos |
 | app/sell/step-4/page.tsx | 66-164 | All 3 keys (10 refs) |
 
 ## 4. REBRAND: Email References (20+ locations)
 
 | File | Line(s) | Context |
 |------|---------|---------|
-| src/lib/email.ts | 27, 47 | info@cyclemart.co.za sender |
+| src/lib/email.ts | 27, 47 | info@crankmart.com sender |
 | src/lib/email-templates.ts | 4, 53-429 | 12 templates with brand + logo URL |
-| src/db/migrate-settings.ts | 24 | noreply@cyclemart.co.za |
-| src/db/seed.ts | 40-44 | 5 test user emails @cyclemart.co.za |
+| src/db/migrate-settings.ts | 24 | noreply@crankmart.com |
+| src/db/seed.ts | 40-44 | 5 test user emails @crankmart.com |
 | app/api/auth/forgot-password/route.ts | 45-100 | Reset email sender (5 refs) |
-| app/api/admin/verifications/[id]/route.ts | 76 | directory@cyclemart.co.za |
-| seed-blog-posts.ts | 30 | editorial@cyclemart.co.za |
-| seed-blog-final.ts | 27 | editorial@cyclemart.co.za |
-| seed-blog-safe.ts | 24 | editorial@cyclemart.co.za |
+| app/api/admin/verifications/[id]/route.ts | 76 | directory@crankmart.com |
+| seed-blog-posts.ts | 30 | editorial@crankmart.com |
+| seed-blog-final.ts | 27 | editorial@crankmart.com |
+| seed-blog-safe.ts | 24 | editorial@crankmart.com |
 
 ## 5. REBRAND: Social Media (8 locations)
 
 | File | Line(s) | Context |
 |------|---------|---------|
 | app/layout.tsx | 78-83 | Instagram, Facebook, TikTok, LinkedIn, YouTube, Twitter |
-| public/llms.txt | 35 | @cyclemartsa handles |
+| public/llms.txt | 35 | @crankmartsa handles |
 | app/api/admin/seo-audit/route.ts | 408-410 | Social profile checks |
 
 ## 6. REBRAND: User-Facing Brand Text (40+ locations)
 
 | File | Line(s) | Context |
 |------|---------|---------|
-| app/browse/[slug]/ListingDetail.tsx | 120, 705, 876 | Share text "on CycleMart" |
+| app/browse/[slug]/ListingDetail.tsx | 120, 705, 876 | Share text "on CrankMart" |
 | app/api/blog/seed/route.ts | 31-352 | Blog content with brand (20+ refs) |
 | Various page components | throughout | Brand name in headings, meta tags |
 
@@ -83,7 +83,7 @@
 
 | File | Path |
 |------|------|
-| public/images/cyclemart-brand-banner.jpg | Brand banner |
+| public/images/crankmart-brand-banner.jpg | Brand banner |
 | public/images/hero-brand-banner.jpg | Hero banner |
 | app/favicon.ico | Favicon |
 | app/apple-icon.png | Apple touch icon |
@@ -93,20 +93,20 @@
 
 | File | Line(s) | Current |
 |------|---------|---------|
-| src/db/scrapers/sources/mtbtrailssa.ts | 23 | CycleMartBot/1.0 |
-| src/db/scrapers/sources/trailforks.ts | 43 | CycleMartBot/1.0 |
-| src/db/scrapers/sources/komoot.ts | 53 | CycleMartBot/1.0 |
-| src/db/scrapers/scrape-images-v2.ts | 54 | CycleMartBot/1.0 |
-| src/db/scrapers/scrape-venue-images.ts | 53 | CycleMartBot/1.0 |
-| src/db/scrapers/scrape-business-logos.ts | 27 | CycleMartBot/1.0 |
+| src/db/scrapers/sources/mtbtrailssa.ts | 23 | CrankMartBot/1.0 |
+| src/db/scrapers/sources/trailforks.ts | 43 | CrankMartBot/1.0 |
+| src/db/scrapers/sources/komoot.ts | 53 | CrankMartBot/1.0 |
+| src/db/scrapers/scrape-images-v2.ts | 54 | CrankMartBot/1.0 |
+| src/db/scrapers/scrape-venue-images.ts | 53 | CrankMartBot/1.0 |
+| src/db/scrapers/scrape-business-logos.ts | 27 | CrankMartBot/1.0 |
 
 ## 9. REBRAND: Storage Paths (3 locations)
 
 | File | Line(s) | Path |
 |------|---------|------|
-| app/api/directory/upload/route.ts | 7 | /home/velo/storage/cyclemart/uploads/directory |
-| app/api/account/avatar/route.ts | 10 | /home/velo/storage/cyclemart/uploads/avatars |
-| app/api/sell/upload/route.ts | 7 | /home/velo/storage/cyclemart/uploads/listings |
+| app/api/directory/upload/route.ts | 7 | /home/velo/storage/crankmart/uploads/directory |
+| app/api/account/avatar/route.ts | 10 | /home/velo/storage/crankmart/uploads/avatars |
+| app/api/sell/upload/route.ts | 7 | /home/velo/storage/crankmart/uploads/listings |
 
 ---
 

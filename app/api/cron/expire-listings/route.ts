@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
             })
           : 'soon'
 
-        const listingUrl = `https://cyclemart.co.za/browse/${listing.slug}`
-        const renewUrl = `https://cyclemart.co.za/account?tab=listings&action=renew&id=${listing.id}`
+        const listingUrl = `https://crankmart.com/browse/${listing.slug}`
+        const renewUrl = `https://crankmart.com/account?tab=listings&action=renew&id=${listing.id}`
 
         const html = listingExpiryReminderEmail({
           sellerName: sellerUser.name,
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 
         await sendEmail({
           to: sellerUser.email,
-          subject: `Your CycleMart listing expires soon: ${listing.title}`,
+          subject: `Your CrankMart listing expires soon: ${listing.title}`,
           html,
         })
 

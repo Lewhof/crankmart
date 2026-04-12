@@ -23,12 +23,12 @@ export function Breadcrumb({ items, variant = 'light' }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://cyclemart.co.za' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://crankmart.com' },
       ...items.map((item, i) => ({
         '@type': 'ListItem',
         position: i + 2,
         name: item.label,
-        ...(item.href ? { item: `https://cyclemart.co.za${item.href}` } : {}),
+        ...(item.href ? { item: `https://crankmart.com${item.href}` } : {}),
       })),
     ],
   }

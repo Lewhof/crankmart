@@ -1,11 +1,11 @@
-# CycleMart Changelog
+# CrankMart Changelog
 
 ## v0.2.1 — 2026-04-03
 
 ### Fix
-- **Email templates** — replaced emoji text header (`🚲 CycleMart`) with real site logo (`apple-icon.png`) across all 11 templates
+- **Email templates** — replaced emoji text header (`🚲 CrankMart`) with real site logo (`apple-icon.png`) across all 11 templates
 - Extracted shared `HEADER()` helper — single source of truth for logo block, no duplication
-- Logo URL: `https://cyclemart.co.za/apple-icon.png` (48×48px, rounded)
+- Logo URL: `https://crankmart.com/apple-icon.png` (48×48px, rounded)
 - No API/DB contract changes — template functions unchanged, only HTML output updated
 
 ---

@@ -53,7 +53,7 @@ export default function StyleGuidePage() {
       {/* Page header */}
       <div style={{ background: 'linear-gradient(135deg, #1a2744, #0D1B2A)', padding: '40px 24px', marginBottom: 0 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <span style={{ color: '#93C5FD', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>CycleMart</span>
+          <span style={{ color: '#93C5FD', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>CrankMart</span>
           <h1 style={{ color: '#fff', fontSize: 28, fontWeight: 900, margin: '8px 0 6px' }}>UI Element Guide</h1>
           <p style={{ color: 'rgba(255,255,255,.6)', fontSize: 14, margin: 0 }}>Naming reference for all layouts, components, and style tokens used across the site.</p>
         </div>
@@ -142,7 +142,7 @@ export default function StyleGuidePage() {
           <div className="sg-body">
             <div className="sg-grid3">
               {[
-                { name: '--color-primary',       hex: '#EA580C', label: 'Primary (CycleMart orange)' },
+                { name: '--color-primary',       hex: '#EA580C', label: 'Primary (CrankMart orange)' },
                 { name: '--color-night-ride',     hex: '#0D1B2A', label: 'Night Ride (dark navy)' },
                 { name: '--color-ink',            hex: '#1a1a1a', label: 'Ink (body text)' },
                 { name: '--color-muted',          hex: '#9a9a9a', label: 'Muted (secondary text)' },
@@ -514,7 +514,7 @@ export default function StyleGuidePage() {
         </div>
 
         <p style={{ fontSize: 12, color: '#9a9a9a', textAlign: 'center' }}>
-          CycleMart UI Guide · <Link href="/" style={{ color: 'var(--color-primary,#EA580C)' }}>← Back to site</Link>
+          CrankMart UI Guide · <Link href="/" style={{ color: 'var(--color-primary,#EA580C)' }}>← Back to site</Link>
         </p>
       </div>
     </div>

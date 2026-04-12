@@ -26,7 +26,7 @@ const TYPE_META: Record<string, { icon: React.ReactNode; color: string; badge: s
 const PERKS: Record<string, string[]> = {
   bump:         ['Instantly pushed to top of category', 'Once-off — takes effect immediately', 'Cheapest way to get more eyes'],
   category_top: ['Pinned at top of search & category', 'Visible for 7 days', 'Blue "Top" badge on listing'],
-  homepage:     ['Featured on CycleMart homepage', 'Highest visibility placement', '"Featured" badge for 7 days'],
+  homepage:     ['Featured on CrankMart homepage', 'Highest visibility placement', '"Featured" badge for 7 days'],
   directory:    ['Premium spot in Business Directory', 'Featured badge on profile', 'Highlighted for 30 days'],
 }
 

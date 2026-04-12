@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     <text x="600" y="290" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="600"
           fill="rgba(255,255,255,0.5)" text-anchor="middle">${label}</text>
     <text x="600" y="330" font-family="Arial,Helvetica,sans-serif" font-size="16"
-          fill="rgba(255,255,255,0.3)" text-anchor="middle">cyclemart.co.za</text>
+          fill="rgba(255,255,255,0.3)" text-anchor="middle">crankmart.com</text>
   </svg>`;
 
   return new NextResponse(svg, {

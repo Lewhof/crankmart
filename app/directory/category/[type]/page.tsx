@@ -43,17 +43,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const displayName = CATEGORY_DISPLAY_NAMES[type] || type;
 
   return {
-    title: `${displayName} | CycleMart Directory`,
-    description: `Browse ${displayName.toLowerCase()} in South Africa. Find verified cycling businesses on CycleMart's directory.`,
+    title: `${displayName} | CrankMart Directory`,
+    description: `Browse ${displayName.toLowerCase()} in South Africa. Find verified cycling businesses on CrankMart's directory.`,
     openGraph: {
       title: `${displayName}`,
       description: `Discover ${displayName.toLowerCase()} across South Africa.`,
-      url: `https://cyclemart.co.za/directory/category/${type}`,
-      siteName: "CycleMart",
+      url: `https://crankmart.com/directory/category/${type}`,
+      siteName: "CrankMart",
       type: "website",
     },
     alternates: {
-      canonical: `https://cyclemart.co.za/directory/category/${type}`,
+      canonical: `https://crankmart.com/directory/category/${type}`,
     },
   };
 }
@@ -110,19 +110,19 @@ export default async function CategoryPage({ params }: Props) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://cyclemart.co.za",
+        item: "https://crankmart.com",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Directory",
-        item: "https://cyclemart.co.za/directory",
+        item: "https://crankmart.com/directory",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: displayName,
-        item: `https://cyclemart.co.za/directory/category/${type}`,
+        item: `https://crankmart.com/directory/category/${type}`,
       },
     ],
   };
@@ -151,7 +151,7 @@ export default async function CategoryPage({ params }: Props) {
 
         <h1 className="text-4xl font-bold mb-4">{displayName}</h1>
         <p className="text-xl text-gray-600">
-          Find verified {displayName.toLowerCase()} across South Africa on CycleMart.
+          Find verified {displayName.toLowerCase()} across South Africa on CrankMart.
         </p>
       </div>
 

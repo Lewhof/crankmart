@@ -82,10 +82,10 @@ export async function POST(req: NextRequest) {
       const html = shopVerifiedEmail({
         ownerName: name || 'there',
         businessName: business.name,
-        dashboardUrl: `${process.env.NEXTAUTH_URL ?? 'https://cyclemart.co.za'}/account/my-listing`,
-        listingUrl: `${process.env.NEXTAUTH_URL ?? 'https://cyclemart.co.za'}/directory/${business.slug}`,
+        dashboardUrl: `${process.env.NEXTAUTH_URL ?? 'https://crankmart.com'}/account/my-listing`,
+        listingUrl: `${process.env.NEXTAUTH_URL ?? 'https://crankmart.com'}/directory/${business.slug}`,
       })
-      await sendEmail({ to: email, subject: `Your CycleMart listing is verified — ${business.name}`, html })
+      await sendEmail({ to: email, subject: `Your CrankMart listing is verified — ${business.name}`, html })
     }
 
     return NextResponse.json({ success: true, slug: business.slug })
