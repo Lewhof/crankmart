@@ -1077,3 +1077,418 @@ No third-party advertising cookies. Analytics to be privacy-first (Plausible or 
 
 ---
 
+## Part 4: Testing, Migration & Operations
+
+## Section 12: Testing Strategy
+
+### 12.1 Testing Pyramid
+
+```
+         /\
+        /  \   E2E Tests (Playwright)
+       /    \  Critical user flows: register, sell, buy contact, boost
+      /------\
+     /        \ Integration Tests (Jest + Supertest)
+    /          \ API route handlers, DB queries, PayFast ITN
+   /------------\
+  /              \ Unit Tests (Vitest)
+ /                \ Pure functions: formatPrice, slugify, country config, validators
+/------------------\
+```
+
+### 12.2 Unit Tests
+
+**Scope:** Pure functions, utilities, country config logic.
+
+| Module | Tests |
+|--------|-------|
+| src/lib/country-config.ts | getCountryConfig returns correct currency/region/gateway per country_code |
+| src/lib/format.ts | formatPrice formats ZAR, AUD, NZD correctly; handles 0 and negative |
+| src/lib/slugify.ts | Produces URL-safe slugs; handles special chars, duplicates |
+| src/lib/validators.ts | Email, phone, price validators return correct errors |
+| src/lib/payfast.ts | generateSignature produces correct MD5; verifyIp matches CIDR |
+
+**Tool:** Vitest (co-located `*.test.ts` files)
+**Target:** 80% coverage on src/lib/*
+
+### 12.3 Integration Tests
+
+**Scope:** API route handlers tested against a real Neon test branch.
+
+**Setup:**
+```typescript
+// tests/setup.ts
+beforeAll(async () => {
+  await db.execute(sql`SET search_path TO test`);
+  await runMigrations();
+  await seedTestData(); // 3 users, 5 listings, 2 businesses
+});
+afterAll(async () => {
+  await db.execute(sql`DROP SCHEMA test CASCADE`);
+});
+```
+
+**Key test suites:**
+
+| Suite | Scenarios |
+|-------|-----------|
+| Auth routes | Register → verify → login → session; forgot-password token lifecycle |
+| Listings CRUD | Create draft → publish → edit → mark-sold → expire |
+| Save/Unsave | Toggle save; saved list returns correct items |
+| Messages | Start conversation; send/receive; unread count increments |
+| Admin moderation | Approve listing; reject listing; role escalation blocked |
+| PayFast ITN | Valid signature + IP accepted; replay rejected; bad sig 400 |
+| Country scope | /za listing not returned for /au query; country_code set correctly |
+
+### 12.4 End-to-End Tests (Playwright)
+
+**Critical paths (must pass before every deployment):**
+
+| Flow | Steps |
+|------|-------|
+| F-01 Register & Login | Navigate /register → fill form → submit → verify email → login |
+| F-02 Sell a Bike | Login → /sell/step-1 → step-2 → step-3 (upload photo) → step-4 → publish → listing live |
+| F-03 Contact Seller | Login as buyer → /browse/[slug] → Send Message → conversation created |
+| F-04 Save Listing | Click heart → saved count increments → /account/saved shows listing |
+| F-05 Business Directory | Browse /directory → filter by type → view business → claim flow |
+| F-06 Boost Purchase | Login → /boost/select → select package → PayFast sandbox → ITN → boost active |
+| F-07 Admin Moderate | Login as admin → /admin/listings → approve pending listing → listing goes live |
+| F-08 Country Switch | Visit /au → filters show Australian states not SA provinces; currency AUD |
+
+**Tool:** Playwright with `@playwright/test`
+**Environment:** Staging (Vercel Preview) with PayFast sandbox
+
+### 12.5 Performance Baselines
+
+| Metric | Target | Tool |
+|--------|--------|------|
+| LCP (browse page, cold) | < 2.5s | Vercel Speed Insights |
+| LCP (listing detail, cold) | < 2.0s | Vercel Speed Insights |
+| API /api/listings p95 | < 300ms | Vercel Function logs |
+| API /api/directory p95 | < 400ms | Vercel Function logs |
+| DB query p99 (tsvector search) | < 100ms | Neon query insights |
+| Time To Interactive | < 3.5s | Lighthouse CI |
+| Lighthouse score (all pages) | >= 85 | Lighthouse CI |
+
+### 12.6 Accessibility
+
+- WCAG 2.1 AA compliance target.
+- axe-core automated scan in CI (zero critical violations gate).
+- Manual keyboard navigation audit before each major release.
+- Colour contrast ratio >= 4.5:1 for body text, >= 3:1 for large text.
+
+### 12.7 CI/CD Pipeline
+
+```
+git push → GitHub Actions
+  ├─ lint (ESLint + Prettier)
+  ├─ type-check (tsc --noEmit)
+  ├─ unit tests (Vitest)
+  ├─ integration tests (Jest + Neon test branch)
+  ├─ npm audit --audit-level=high
+  └─ PASS → Vercel Preview Deploy
+              └─ E2E tests (Playwright on Preview URL)
+                  └─ PASS → Promote to Production
+```
+
+---
+
+## Section 13: Migration Runbook
+
+### 13.1 Overview
+
+Migration from CycleMart (VelocityFibre/cyclemart) to CrankMart (Lewhof/crankmart). No live traffic yet — this is a greenfield rebrand, not a live system cutover.
+
+### 13.2 Pre-Migration Checklist
+
+- [ ] crankmart.com DNS configured; Vercel project linked
+- [ ] crankmart.co.za 301 redirect to crankmart.com/za configured
+- [ ] Neon project created; connection string in Vercel env
+- [ ] AUTH_SECRET generated (openssl rand -base64 32)
+- [ ] RESEND_API_KEY set; from-address verified on crankmart.com
+- [ ] PAYFAST_MERCHANT_ID and PAYFAST_MERCHANT_KEY confirmed (24040660)
+- [ ] Vercel Blob token set; old nginx /uploads/ paths documented
+- [ ] All rebrand find-replace completed (see docs/REBRAND_INVENTORY.md)
+- [ ] package.json name updated to "crankmart"
+- [ ] New brand assets: logo, favicon, OG image uploaded to /public
+
+### 13.3 Database Migration Steps
+
+```bash
+# Step 1: Run schema migrations in order
+npm run db:migrate
+# Applies: 0001 through 0008_country_code.sql
+
+# Step 2: Verify schema
+npm run db:studio  # Inspect tables in Drizzle Studio
+
+# Step 3: Seed reference data (categories, boost packages)
+npx tsx src/db/seed.ts
+
+# Step 4: Import production data from CycleMart (if applicable)
+# Export from cyclemart Neon → import to crankmart Neon
+# pg_dump cyclemart_db | psql crankmart_db
+# Then: UPDATE listings SET country_code = 'ZA' WHERE country_code IS NULL;
+```
+
+### 13.4 Rebrand Execution Order
+
+```
+1. package.json + package-lock.json (name field)
+2. next.config.ts (image hostnames)
+3. app/layout.tsx (schema.org, OG, social handles)
+4. app/sitemap.ts + app/robots.ts + public/robots.txt
+5. localStorage keys (all sell/step-*.tsx files)
+6. Email templates (src/lib/email-templates.ts)
+7. Email sender addresses (src/lib/email.ts + API routes)
+8. Scraper user-agents (src/db/scrapers/*)
+9. Storage paths → replace with Vercel Blob URLs
+10. User-facing brand text (ListingDetail.tsx, FAQ, Terms, Privacy)
+11. Social media handles (layout.tsx, llms.txt)
+12. Seed files (test data emails only — not needed in production)
+```
+
+### 13.5 Image Migration (nginx → Vercel Blob)
+
+```typescript
+// scripts/migrate-images.ts
+// Run once to move all /uploads/* files to Vercel Blob
+import { put } from '@vercel/blob';
+import fs from 'fs';
+import path from 'path';
+
+const UPLOAD_DIR = '/home/velo/storage/cyclemart/uploads';
+const categories = ['directory', 'avatars', 'listings'];
+
+for (const cat of categories) {
+  const dir = path.join(UPLOAD_DIR, cat);
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    const buffer = fs.readFileSync(path.join(dir, file));
+    const blob = await put(`${cat}/${file}`, buffer, { access: 'public' });
+    // Update DB: replace old path with blob.url
+    await db.execute(sql`
+      UPDATE listing_images
+      SET image_url = ${blob.url}
+      WHERE image_url LIKE ${`%${file}`}
+    `);
+  }
+}
+```
+
+### 13.6 Rollback Plan
+
+| Scenario | Rollback Action |
+|----------|-----------------|
+| DB migration failure | `npm run db:rollback` (Drizzle down migrations); restore from Neon branch snapshot |
+| Image migration failure | Old nginx server still accessible; revert DB image_url updates; re-run after fix |
+| Vercel deployment failure | Instant rollback in Vercel dashboard → previous deployment |
+| DNS misconfiguration | Revert DNS records in registrar; propagation < 5 min on Vercel |
+| PayFast ITN not received | Check Vercel function logs; test with PayFast sandbox; verify IP whitelist includes Vercel IPs |
+
+**Neon Branch Strategy for safe migration:**
+```
+main (production) ──► create branch: migration-test
+                        └─ run all migrations
+                        └─ run seed scripts
+                        └─ verify with Drizzle Studio
+                        └─ PASS → merge to main branch
+```
+
+### 13.7 Go-Live Verification
+
+After deployment to production:
+
+- [ ] Home page loads on crankmart.com/za
+- [ ] crankmart.co.za redirects to crankmart.com/za (301)
+- [ ] Register flow: create account, receive email (check From address)
+- [ ] Sell flow: publish test listing; appears in /browse
+- [ ] PayFast sandbox boost: complete payment, boost activates
+- [ ] Admin panel accessible at /admin (admin user seeded)
+- [ ] robots.txt and sitemap.xml return correct crankmart.com URLs
+- [ ] Vercel Speed Insights: LCP < 2.5s on browse page
+- [ ] No console errors in browser DevTools
+
+---
+
+## Section 14: Monitoring & Alerting
+
+### 14.1 Observability Stack
+
+| Layer | Tool | What It Monitors |
+|-------|------|-----------------|
+| Infrastructure | Vercel Dashboard | Function invocations, errors, duration, bandwidth |
+| Database | Neon Dashboard | Query duration, connection pool, storage, branches |
+| Errors | Vercel Log Drain + Sentry (Phase 2) | Uncaught exceptions, 5xx responses |
+| Performance | Vercel Speed Insights | LCP, FID, CLS per page, per country |
+| Uptime | Better Uptime (Phase 2) | /api/health endpoint every 60s; SMS alert on down |
+| Payments | PayFast Merchant Dashboard | Transaction history, failures, refunds |
+
+### 14.2 Health Check Endpoint
+
+```typescript
+// app/api/health/route.ts
+export async function GET() {
+  const checks = {
+    db: false,
+    timestamp: new Date().toISOString(),
+    version: process.env.npm_package_version,
+  };
+  try {
+    await db.execute(sql`SELECT 1`);
+    checks.db = true;
+  } catch {}
+  const status = checks.db ? 200 : 503;
+  return Response.json(checks, { status });
+}
+```
+
+### 14.3 Alert Thresholds
+
+| Signal | Threshold | Action |
+|--------|-----------|--------|
+| 5xx error rate | > 1% over 5 min | Vercel Slack alert |
+| Function duration p99 | > 10s | Investigate + scale |
+| DB connection saturation | > 80% pool | Neon auto-scale kicks in |
+| Neon storage | > 80% of plan | Upgrade plan |
+| Failed PayFast ITN | Any | Slack alert + manual review |
+| Cron job failure | Any | Vercel cron dashboard + email |
+
+### 14.4 Cron Job Schedule
+
+| Cron | Schedule | Purpose |
+|------|----------|---------|
+| /api/cron/expire-listings | Daily 00:00 UTC | Mark listings past expiresAt as expired |
+| /api/cron/expire-boosts | Daily 00:05 UTC | Deactivate boosts past expiresAt |
+| /api/cron/saved-listing-alerts | Daily 08:00 UTC | Email users about saved listing updates |
+
+Configured in `vercel.json`:
+```json
+{
+  "crons": [
+    { "path": "/api/cron/expire-listings", "schedule": "0 0 * * *" },
+    { "path": "/api/cron/expire-boosts", "schedule": "5 0 * * *" },
+    { "path": "/api/cron/saved-listing-alerts", "schedule": "0 8 * * *" }
+  ]
+}
+```
+
+---
+
+## Section 15: Feature Flags & Phase Rollout
+
+### 15.1 Phase Gate Model
+
+Features are gated by environment variable flags, not code branches. This allows gradual rollout without code deploys.
+
+| Flag | Default | Controls |
+|------|---------|---------|
+| FEATURE_AU_LOCALE | false | /au route group enabled |
+| FEATURE_NZ_LOCALE | false | /nz route group enabled |
+| FEATURE_STRIPE | false | Stripe payment option shown |
+| FEATURE_GOOGLE_OAUTH | true | Google sign-in button visible |
+| FEATURE_ROUTES_MODULE | true | Routes section enabled |
+| FEATURE_BOOSTS | true | Boost purchase flow enabled |
+| FEATURE_DIRECTORY_CLAIM | true | Business claim flow enabled |
+| FEATURE_USER_EXPORT | false | Account data export (GDPR) |
+| NEXT_PUBLIC_MAINTENANCE | false | Maintenance mode page shown |
+
+### 15.2 Phase Delivery Summary
+
+| Phase | Scope | Trigger |
+|-------|-------|---------|
+| Phase 1 (MVP) | CrankMart /za fully operational; all CycleMart features rebranded | Launch |
+| Phase 2 (Growth) | /au live; Stripe; Google OAuth; user export; Sentry; email marketing | 3 months post-launch |
+| Phase 3 (Scale) | /nz; mobile app (React Native); affiliate programme; API partner access | 6-12 months |
+
+---
+
+## Section 16: Risk Register
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|----|------|-----------|--------|------------|
+| R-01 | PayFast ITN IP range changes silently | Low | High | Monitor PayFast developer changelog; add IP update to quarterly ops checklist |
+| R-02 | Neon cold-start latency spikes during low traffic | Medium | Medium | Enable Neon connection pooling (PgBouncer); set min pool size = 1 |
+| R-03 | Image upload Blob quota exceeded | Low | Medium | Monitor Vercel Blob usage dashboard; set 80% alert; upgrade plan ahead |
+| R-04 | NextAuth v5 breaking change in patch | Low | High | Pin exact NextAuth version; test upgrades in staging branch first |
+| R-05 | Listing spam from fake accounts | Medium | High | Email verification gate; admin moderation queue; rate limits on publish |
+| R-06 | Vercel function timeout on large DB seeds | Low | Low | Seeds run locally or in separate Neon branch; not in prod cron |
+| R-07 | crankmart.co.za 301 redirect not set correctly | Medium | High | Test redirect on go-live checklist; confirm 301 (not 302) in curl -I |
+| R-08 | tsvector index not updated after bulk insert | Low | Medium | Verify triggers on listings, routes tables; run REINDEX if search degrades |
+| R-09 | Country config returns wrong currency for new locale | Low | High | Unit test getCountryConfig for every supported country_code |
+| R-10 | SMTP deliverability issues on new crankmart.com domain | Medium | High | Warm up sending domain; SPF/DKIM/DMARC configured before go-live; monitor bounce rate |
+
+---
+
+## Section 17: Dependency Map
+
+### 17.1 External Services
+
+| Service | Purpose | Failure Mode | Fallback |
+|---------|---------|-------------|---------|
+| Neon PostgreSQL | Primary database | All reads/writes fail | Read-only cached responses (Phase 2) |
+| Vercel Blob | Image storage | Image uploads fail | Show placeholder; retry upload |
+| Resend | Transactional email | Emails not sent | Silent fail; log; retry via queue (Phase 2) |
+| PayFast | Payment gateway | Boost purchases fail | Show error; no charge; retry |
+| Google OAuth | Social login | Google login unavailable | Credentials login still works |
+| Vercel CDN | Page delivery | Site unavailable | Vercel SLA 99.99% |
+| GitHub Actions | CI/CD | Deployments blocked | Manual deploy via Vercel CLI |
+
+### 17.2 Internal Module Dependencies
+
+```
+app/ pages
+  └─ src/lib/country-config.ts     ← All locale-aware components
+  └─ src/lib/auth.ts               ← All protected routes
+  └─ src/lib/email.ts              ← Auth routes (reset, verify)
+       └─ src/lib/email-templates.ts
+  └─ src/db/schema.ts              ← All API routes
+       └─ src/db/index.ts (Neon connection)
+  └─ src/lib/payfast.ts            ← Boost payment routes
+  └─ src/lib/utils.ts              ← Universal (format, slugify)
+```
+
+### 17.3 Key Package Versions (Pinned)
+
+| Package | Version | Risk if Updated |
+|---------|---------|----------------|
+| next | 15.x | App Router API changes |
+| next-auth | 5.x | Session/JWT schema changes |
+| drizzle-orm | 0.3x | Query API changes |
+| @vercel/blob | latest | Upload API changes |
+| react | 19.x | Concurrent features |
+| tailwindcss | 4.x | Config/utility changes |
+
+---
+
+## Section 18: Glossary
+
+| Term | Definition |
+|------|------------|
+| CrankMart | The rebranded, international version of CycleMart. Domain: crankmart.com |
+| CycleMart | The original SA cycling marketplace (VelocityFibre/cyclemart). Source codebase. |
+| CDDP | CTO Deliberative Development Protocol — 8-step mandatory workflow before any build |
+| country_code | ISO 3166-1 alpha-2 code (ZA, AU, NZ) used to scope all content and config |
+| Country Config | The countryConfig map in src/lib/country-config.ts; returns currency, regions, payment gateway, timezone per country |
+| Locale | A country-specific URL path segment: /za, /au, /nz |
+| Boost | A paid promotion that increases listing or business visibility in search results |
+| ITN | Instant Transaction Notification — PayFast's webhook that confirms payment completion |
+| priceCents | All monetary values stored as integers in the smallest currency unit (cents for ZAR/AUD/NZD) |
+| Drizzle ORM | TypeScript ORM used for all DB queries; provides type-safe parameterised queries |
+| Neon | Serverless PostgreSQL provider; supports branching for safe migrations |
+| Vercel Blob | Vercel's object storage for images; replaces nginx /uploads/ filesystem |
+| tsvector | PostgreSQL full-text search type; used for listing and route search |
+| PRD | Product Requirements Document — this document |
+| POPIA | Protection of Personal Information Act — SA data privacy law |
+| GDPR | General Data Protection Regulation — EU data privacy law (applies for /au, /nz scope) |
+| Sell Wizard | 4-step listing creation flow: category → details → photos → pricing/location |
+| Admin Todo | Internal admin task/whiteboard item stored in admin_todos table |
+| Concierge Mode | Directory registration mode where CrankMart team builds the listing on behalf of the business |
+| Phase 1 | MVP: CrankMart /za fully live with all CycleMart features rebranded |
+| Phase 2 | /au live, Stripe, Google OAuth, GDPR export, marketing email |
+| Phase 3 | /nz, mobile app, affiliate programme, API partner access |
+
+---
+
+*Document version: 2.0 | Generated: 2026-04-12 | Authors: Lew Hofmeyr (COO) + Claude Code (CTO)*
+
