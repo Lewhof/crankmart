@@ -446,3 +446,206 @@ Carried forward from CycleMart v0.2.1 and enhanced. Each feature has a status, o
 
 ---
 
+# Part 2B: User Stories & Acceptance Criteria
+
+Critical P0 user stories with acceptance criteria (Gherkin-lite format). Full backlog lives in the admin whiteboard post-launch.
+
+## 7. User Stories (P0)
+
+### 7.1 Authentication
+
+**US-AUTH-01: Register with email**
+> As a new visitor, I want to register with email+password so that I can list or save items.
+
+**Acceptance criteria:**
+- GIVEN I'm on /register, WHEN I enter name, valid email, password (>=8 chars), province, AND click Register, THEN a user is created and I'm redirected to /account.
+- AND I receive a welcome email within 60 seconds.
+- GIVEN email already exists, WHEN I submit, THEN I see "Email already registered" and stay on page.
+- GIVEN password < 8 chars, WHEN I submit, THEN I see inline validation error.
+
+**US-AUTH-02: Login with Google**
+> As a returning user, I want to login with Google so I don't need to remember a password.
+
+**Acceptance:**
+- GIVEN valid Google account, WHEN I click "Continue with Google", THEN I'm redirected to Google, then back to /account with active session.
+- GIVEN first-time Google user, THEN a user record is created with role='buyer' and emailVerified=true.
+- Session persists across tabs and survives page refresh.
+
+**US-AUTH-03: Reset password**
+> As a user who forgot my password, I want to reset it via email.
+
+**Acceptance:**
+- GIVEN I enter email on /forgot-password, THEN I receive a reset link within 60s.
+- Link expires after 1 hour.
+- GIVEN expired token, WHEN I use it, THEN I see "Link expired, request a new one".
+- New password must be >= 8 chars.
+- After reset, all existing sessions for that user are invalidated.
+
+### 7.2 Selling
+
+**US-SELL-01: Create a listing (happy path)**
+> As a seller, I want to list my bike in under 5 minutes.
+
+**Acceptance:**
+- I can complete steps 1-4 without losing data if I navigate away (draft persists via localStorage + server).
+- Step 1: category selected, saved to localStorage `crankmart-sell-category`.
+- Step 2: title, condition required; all bike-spec fields optional; autosave every 1.5s.
+- Step 3: 1-15 images, each <= 10MB, jpeg/png/webp/heic.
+- Step 4: price (required), province (required), city (required); optional postal code, shipping.
+- On Publish: listing created with status='active', moderationStatus='pending', 30-day expiry.
+- I receive confirmation email with listing URL.
+
+**US-SELL-02: Duplicate detection**
+> As a seller, I don't want to accidentally create duplicate listings.
+
+**Acceptance:**
+- GIVEN I have an existing active listing with title similar (25-char match, case-insensitive), WHEN I publish a new one, THEN the API returns 409 with existing slug/title.
+- I see a modal: "You have a similar listing. View existing, or confirm publish new?"
+- Choosing "Publish anyway" sends `forceDuplicate: true` and publishes.
+
+**US-SELL-03: Mark as sold**
+> As a seller, I want to mark my listing as sold.
+
+**Acceptance:**
+- "Mark Sold" button visible only to seller on listing detail.
+- On click, listing status changes to 'sold', soldAt timestamp set, removed from browse results.
+- Buyer messages in existing conversations still accessible.
+
+### 7.3 Buying
+
+**US-BUY-01: Browse and filter**
+> As a buyer, I want to find a hardtail MTB under R15,000 near me.
+
+**Acceptance:**
+- /browse loads with default filters.
+- Apply filters: category=mtb, maxPrice=15000, province=gauteng.
+- URL updates with query params (shareable).
+- Listings render as single-column mobile, grid on desktop >= 900px.
+- Infinite scroll loads next 24 per request.
+- Empty state: "No listings match. Adjust filters or save this search."
+
+**US-BUY-02: Contact seller**
+> As a buyer, I want to message the seller without revealing my phone number.
+
+**Acceptance:**
+- "Contact Seller" button on listing detail requires login (redirects to /login with callback).
+- Opens message composer, 1-2000 chars, attaches listingId.
+- On send, a new conversation is created (or reuses existing) and seller receives email notification.
+- Messages render in conversation thread with sender name, body, timestamp.
+
+**US-BUY-03: Save a listing**
+> As a buyer, I want to save listings to revisit later.
+
+**Acceptance:**
+- Save icon on listing card / detail page.
+- Requires login (redirect if not).
+- Toggle behaviour: POST /api/listings/save with listingId flips save state.
+- Saved listings appear in /account under Saved tab with saved-at timestamp.
+- Unsave removes from list immediately (optimistic UI).
+
+### 7.4 Directory / Business
+
+**US-SHOP-01: Claim my business**
+> As a shop owner, I want to claim my existing directory listing via the token in my email.
+
+**Acceptance:**
+- Email link: crankmart.com/za/directory/claim?token=...
+- Server validates token: exists, not expired (30-day TTL).
+- If invalid/expired: show error + "Request new link" button.
+- If valid: render prefilled form (business name read-only; phone/email/website/hours/description editable).
+- POPIA consent checkbox required.
+- On submit: phone or email required; business status='claimed', verified=true, consentAt=now, claimToken cleared.
+- User account created (if new email) with role='shop_owner' and random password.
+- Verification email sent.
+- Redirect to /directory/[slug]?claimed=1 with success toast.
+
+**US-SHOP-02: Edit my shop**
+> As a shop owner, I want to update my business details.
+
+**Acceptance:**
+- /account/my-shop accessible only to role=shop_owner with a claimed business.
+- Editable fields: name, description, phone, email, website, address, suburb, city, province, brands stocked (array), services (array), hours (JSON).
+- Saves via PATCH /api/account/my-shop.
+- Logo/cover upload via separate endpoints.
+- Updates reflect on /directory/[slug] within 60s.
+
+### 7.5 Events
+
+**US-EVT-01: Submit an event**
+> As an organiser, I want to list my event on the calendar.
+
+**Acceptance:**
+- /events/submit requires login.
+- Fields: title (req), city (req), organiser email (req), start date (req), + optional description/venue/end date/entry URL/fee/distance/type/discipline/cover image.
+- On submit: event created with status='pending_review'.
+- Organiser receives confirmation + edit token link.
+- Admin notified.
+- Visible in admin moderation queue.
+
+**US-EVT-02: Edit my event via token link**
+> As an organiser without an account, I want to edit my event.
+
+**Acceptance:**
+- Email contains link: crankmart.com/za/events/manage/[token]
+- Token validated against events.editToken; no login required.
+- Editable: all submission fields except slug.
+- Changes trigger re-moderation if major fields changed (title/date/venue).
+
+### 7.6 Payments (Boosts)
+
+**US-PAY-01: Boost my listing**
+> As a seller, I want to pay to feature my listing on the homepage for 7 days.
+
+**Acceptance:**
+- "Boost" button on my listing detail -> /boost/select?listingId=...
+- Boost package catalogue filtered by type (bump/category_top/homepage).
+- Select package, click "Pay with PayFast".
+- Boost record created with status='pending', amount from package.
+- Form auto-submits to PayFast with MD5 signature.
+- On PayFast success: user redirected to /boost/success.
+- IPN webhook validates signature + IP; sets boost.status='active', updates listing.isFeatured, featuredExpiresAt.
+- If cancelled/failed: boost.status='failed', listing unchanged.
+- User sees boost state on listing + /account.
+
+**US-PAY-02: PayFast IPN idempotency**
+> As the platform, I must handle duplicate IPN webhooks without double-activating boosts.
+
+**Acceptance:**
+- GIVEN a boost already has status='active' with matching pf_payment_id, WHEN an IPN arrives, THEN return 200 "OK" and make no changes.
+- Log duplicate for audit.
+
+### 7.7 Admin
+
+**US-ADM-01: Moderate a listing**
+> As admin Zanele, I want to approve or reject pending listings.
+
+**Acceptance:**
+- /admin/listings?moderation=pending lists all pending items.
+- Click row -> sidebar with listing detail + images.
+- Approve: moderationStatus='approved'; listing appears in /browse.
+- Reject: moderationStatus='rejected'; optional reason field; seller emailed.
+- Flag: moderationStatus='flagged' for follow-up.
+- Action logged with admin userId + timestamp.
+
+**US-ADM-02: Verify a business**
+> As admin, I want to verify a claimed business.
+
+**Acceptance:**
+- /admin/verifications shows 4-column pipeline (Pending / Outreach Sent / Claimed / Suspended).
+- Move business between columns via action buttons.
+- On verify: businesses.verified=true, verifiedAt=now; owner emailed.
+- On suspend: businesses.status='suspended'; listing removed from /directory; owner notified.
+
+**US-ADM-03: Manage the whiteboard backlog**
+> As admin, I want a to-do/whiteboard to track operational tasks.
+
+**Acceptance:**
+- /admin/whiteboard renders a list/table of tasks.
+- Fields: title, description, status (To Do/In Progress/Done/Blocked), priority (Critical/High/Medium/Low), category (Dev/Design/Content/Marketing/Infra/Other), assignee, due date, created date.
+- Filter by status, priority, category.
+- Inline edit status and priority.
+- Persisted in `admin_todos` table.
+- Only accessible to admin + superadmin roles.
+
+---
+
