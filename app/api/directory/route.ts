@@ -31,8 +31,8 @@ export async function GET(request: NextRequest) {
     const hasProximity = !isNaN(userLat) && !isNaN(userLng) && nearbyKm > 0;
 
     const conditions: SQL[] = [];
-    // Only active businesses
-    conditions.push(sql`listing_status = 'active'`);
+    // Show verified and claimed businesses (hide pending/suspended/removed)
+    conditions.push(sql`status IN ('verified', 'claimed')`);
     // Exclude event_organiser from the default directory (shops) view
     // unless explicitly requested (e.g. Events page Organisers tab)
     if (type) {
@@ -66,14 +66,14 @@ export async function GET(request: NextRequest) {
       : sql``;
     const orderBySql = hasProximity
       ? sql`ORDER BY distance_from_user ASC`
-      : sql`ORDER BY is_premium DESC, is_verified DESC, name ASC`;
+      : sql`ORDER BY is_premium DESC, verified DESC, name ASC`;
 
     const dataResult = await db.execute(
       sql`
         SELECT
           id, name, slug, business_type, province, city,
-          logo_url, cover_url, description, website, email, phone, whatsapp,
-          brands_stocked, services, is_verified, is_premium, views_count,
+          logo_url, banner_url, description, website, email, phone, whatsapp,
+          brands_stocked, services, verified, is_premium, views_count,
           location_lat, location_lng${distSelectSql}
         FROM businesses
         ${whereSql}
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       province:    row.province,
       city:        row.city,
       logo:        row.logo_url   || null,
-      cover:       row.cover_url  || null,
+      cover:       row.banner_url || null,
       description: row.description,
       website:     row.website,
       email:       row.email,
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       whatsapp:    row.whatsapp,
       brands:      row.brands_stocked || [],
       services:    row.services       || [],
-      verified:    row.is_verified,
+      verified:    row.verified,
       featured:    row.is_premium,
       views:       row.views_count    || 0,
       lat:                row.location_lat       ? parseFloat(row.location_lat)       : null,
