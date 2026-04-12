@@ -1,0 +1,40 @@
+# CycleMart
+> South Africa's first dedicated online cycling marketplace and business directory.
+
+CycleMart connects cyclists with bike shops, cycling brands, coaches, events,
+trail centres, clubs, and services across South Africa.
+
+## About
+- Full name: CycleMart
+- URL: https://cyclemart.co.za
+- Founded: 2026
+- Country: South Africa
+- Category: Online Marketplace, Business Directory, Cycling
+- Operated by: H10 Holdings (Pty) Ltd
+
+## What CycleMart Does
+- Business listings for cycling shops, brands, and services across SA
+- Classified ads for new and second-hand bikes, gear, and parts
+- Cycling events calendar for South Africa
+- Trail and route guides for SA cyclists
+- Cycling club directory
+
+## Target Audience
+South African cyclists — road, MTB, gravel, e-bike, BMX, triathlon
+
+## Key Pages
+- Homepage: https://cyclemart.co.za
+- Browse shops: https://cyclemart.co.za/shops
+- Cycling events: https://cyclemart.co.za/events
+- Buy/sell bikes: https://cyclemart.co.za/classifieds
+- Blog: https://cyclemart.co.za/blog
+- List your business: https://cyclemart.co.za/list
+
+## Contact
+- Email: info@cyclemart.co.za
+- Social: @cyclemartsa (Instagram, Facebook, TikTok)
+
+## Keywords
+cycling, bike shops South Africa, cycling marketplace SA, MTB South Africa,
+road cycling SA, cycling events South Africa, cycling gear, second hand bikes SA,
+cycling coach, Cape Town cycling, cycling clubs South Africa

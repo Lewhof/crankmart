@@ -1,0 +1,29 @@
+/* Admin typography scaling */
+
+/* Desktop: all inline-style font sizes scaled up ~10% via attribute selectors */
+@media (min-width: 768px) {
+  /* stat/metric numbers */
+  main [style*="font-size: 30px"] { font-size: 34px !important; }
+  main [style*="font-size: 24px"] { font-size: 26px !important; }
+  main [style*="font-size: 22px"] { font-size: 24px !important; }
+  main [style*="font-size: 18px"] { font-size: 20px !important; }
+  main [style*="font-size: 16px"] { font-size: 18px !important; }
+  /* body / UI text */
+  main [style*="font-size: 15px"] { font-size: 16px !important; }
+  main [style*="font-size: 14px"] { font-size: 15px !important; }
+  main [style*="font-size: 13px"] { font-size: 14px !important; }
+  main [style*="font-size: 12px"] { font-size: 13px !important; }
+  main [style*="font-size: 11px"] { font-size: 12px !important; }
+}
+
+/* Mobile: slight scale down */
+@media (max-width: 767px) {
+  main [style*="font-size: 24px"] { font-size: 20px !important; }
+  main [style*="font-size: 22px"] { font-size: 18px !important; }
+  main [style*="font-size: 16px"] { font-size: 14px !important; }
+  main [style*="font-size: 15px"] { font-size: 13px !important; }
+  main [style*="font-size: 14px"] { font-size: 12px !important; }
+  main [style*="font-size: 13px"] { font-size: 12px !important; }
+  main [style*="font-size: 12px"] { font-size: 11px !important; }
+  main [style*="font-size: 11px"] { font-size: 10px !important; }
+}

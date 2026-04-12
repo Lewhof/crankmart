@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CycleMart — Events</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #273970;
+      --text: #1a1a1a;
+      --bg: #f5f5f5;
+      --border-radius: 8px;
+      --border-color: #e0e0e0;
+      --spacing: 16px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--spacing);
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      background: white;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .header-cta {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .header-cta:hover {
+      background: #1f2b52;
+    }
+
+    /* ===== SEARCH & FILTERS ===== */
+    .search-section {
+      background: white;
+      padding: 20px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .search-input-wrapper {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 16px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(39, 57, 112, 0.1);
+    }
+
+    .filter-toggle {
+      background: white;
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--primary);
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-chip {
+      background: white;
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-chip:hover {
+      border-color: var(--primary);
+      background: #f9f9f9;
+    }
+
+    .filter-chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* ===== CALENDAR STRIP ===== */
+    .calendar-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 16px 0;
+      margin-bottom: 20px;
+      background: white;
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .calendar-day {
+      flex: 0 0 auto;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 70px;
+      background: white;
+      border: 1px solid transparent;
+    }
+
+    .calendar-day:hover {
+      border-color: var(--primary);
+    }
+
+    .calendar-day.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .calendar-day-name {
+      font-size: 11px;
+      color: #999;
+      text-transform: uppercase;
+    }
+
+    .calendar-day-number {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 4px 0;
+    }
+
+    .calendar-day-count {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .calendar-day.active .calendar-day-count {
+      color: white;
+    }
+
+    /* ===== EVENTS GRID ===== */
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .event-card {
+      background: white;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .event-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+
+    .event-banner {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, #273970, #1f2b52);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .event-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--primary);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .event-badge.featured {
+      background: #FF9800;
+    }
+
+    .event-content {
+      padding: 16px;
+    }
+
+    .event-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .event-meta {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .event-date {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .event-location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .event-distance {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .event-fee {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .event-footer {
+      display: flex;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px 12px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1f2b52;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text);
+      flex: 0.3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* ===== EVENT DETAIL PAGE ===== */
+    .event-detail-header {
+      background: white;
+      margin-bottom: 20px;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .event-detail-banner {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #273970, #1f2b52);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      position: relative;
+    }
+
+    .event-detail-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .event-detail-info {
+      padding: 24px;
+    }
+
+    .event-detail-title {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .event-detail-title h1 {
+      font-size: 32px;
+      margin: 0;
+    }
+
+    .event-detail-badges {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .event-detail-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-icon {
+      font-size: 18px;
+    }
+
+    .meta-label {
+      color: #999;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .meta-value {
+      font-weight: 600;
+    }
+
+    .event-cta {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-large {
+      padding: 12px 24px;
+      font-size: 16px;
+    }
+
+    /* ===== DETAIL BODY ===== */
+    .event-detail-body {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .detail-section {
+      background: white;
+      padding: 24px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 8px;
+    }
+
+    .event-description {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    .entry-info {
+      background: #f9f9f9;
+      padding: 16px;
+      border-radius: var(--border-radius);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .entry-status {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .entry-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+    }
+
+    .entry-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .sidebar {
+      background: white;
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      height: fit-content;
+    }
+
+    .sidebar-section {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .sidebar-title {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-content {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .share-links {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .share-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .share-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .event-detail-body {
+        grid-template-columns: 1fr;
+      }
+
+      .event-detail-meta {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-content {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .header-cta {
+        width: 100%;
+      }
+
+      .events-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .calendar-strip {
+        overflow-x: scroll;
+      }
+
+      .filter-row {
+        flex-direction: column;
+      }
+
+      .filter-chip {
+        width: 100%;
+      }
+
+      .event-detail-banner {
+        height: 200px;
+        font-size: 40px;
+      }
+
+      .event-detail-title h1 {
+        font-size: 24px;
+      }
+
+      .event-detail-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .entry-info {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .event-cta {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== PAGE 1: EVENTS BROWSE ===== -->
+<div id="page-browse" class="page">
+  <div class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="header-title">📅 CycleMart Events</div>
+        <button class="header-cta">+ Add Event</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- SEARCH & FILTERS -->
+    <div class="search-section">
+      <div class="search-input-wrapper">
+        <input type="text" class="search-input" placeholder="Search events, races, organizers...">
+        <button class="filter-toggle">☰ Filters</button>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-chip">All Types</div>
+        <div class="filter-chip active">Race</div>
+        <div class="filter-chip">Sportive</div>
+        <div class="filter-chip">Fun Ride</div>
+        <div class="filter-chip">Training Camp</div>
+        <div class="filter-chip">📍 Western Cape</div>
+        <div class="filter-chip">🎯 This Month</div>
+      </div>
+    </div>
+
+    <!-- CALENDAR STRIP -->
+    <div class="calendar-strip">
+      <div class="calendar-day">
+        <div class="calendar-day-name">Sun</div>
+        <div class="calendar-day-number">1</div>
+        <div class="calendar-day-count">2 events</div>
+      </div>
+      <div class="calendar-day">
+        <div class="calendar-day-name">Mon</div>
+        <div class="calendar-day-number">2</div>
+        <div class="calendar-day-count">0 events</div>
+      </div>
+      <div class="calendar-day active">
+        <div class="calendar-day-name">Tue</div>
+        <div class="calendar-day-number">3</div>
+        <div class="calendar-day-count">5 events</div>
+      </div>
+      <div class="calendar-day">
+        <div class="calendar-day-name">Wed</div>
+        <div class="calendar-day-number">4</div>
+        <div class="calendar-day-count">1 event</div>
+      </div>
+      <div class="calendar-day">
+        <div class="calendar-day-name">Thu</div>
+        <div class="calendar-day-number">5</div>
+        <div class="calendar-day-count">3 events</div>
+      </div>
+      <div class="calendar-day">
+        <div class="calendar-day-name">Fri</div>
+        <div class="calendar-day-number">6</div>
+        <div class="calendar-day-count">2 events</div>
+      </div>
+      <div class="calendar-day">
+        <div class="calendar-day-name">Sat</div>
+        <div class="calendar-day-number">7</div>
+        <div class="calendar-day-count">8 events</div>
+      </div>
+    </div>
+
+    <!-- EVENTS GRID -->
+    <div class="events-grid">
+      <!-- Card 1 -->
+      <div class="event-card" onclick="showDetail()">
+        <div class="event-banner">
+          🏁
+          <div class="event-badge featured">Featured</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Cape Epic 2026</div>
+          <div class="event-meta">
+            <span class="event-date">📅 Mar 12-14, 2026</span>
+            <span class="event-location">📍 Western Cape</span>
+          </div>
+          <div class="event-meta">
+            <span class="event-distance">🚴 40km (Stage)</span>
+            <span class="event-fee">R2,450</span>
+          </div>
+          <div class="event-footer">
+            <button class="btn btn-primary">Enter Now</button>
+            <button class="btn btn-secondary">❤️</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="event-card">
+        <div class="event-banner">
+          🏃
+          <div class="event-badge">Sportive</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Attakwas Extreme 2026</div>
+          <div class="event-meta">
+            <span class="event-date">📅 Apr 11-12, 2026</span>
+            <span class="event-location">📍 Western Cape</span>
+          </div>
+          <div class="event-meta">
+            <span class="event-distance">🚴 108km</span>
+            <span class="event-fee">R850</span>
+          </div>
+          <div class="event-footer">
+            <button class="btn btn-primary">Enter Now</button>
+            <button class="btn btn-secondary">❤️</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="event-card">
+        <div class="event-banner">
+          🚴
+          <div class="event-badge">Road Race</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Cape Town Cycle Tour</div>
+          <div class="event-meta">
+            <span class="event-date">📅 Mar 8, 2026</span>
+            <span class="event-location">📍 Cape Town</span>
+          </div>
+          <div class="event-meta">
+            <span class="event-distance">🚴 109km</span>
+            <span class="event-fee">R280</span>
+          </div>
+          <div class="event-footer">
+            <button class="btn btn-primary">Enter Now</button>
+            <button class="btn btn-secondary">❤️</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="event-card">
+        <div class="event-banner">
+          🏆
+          <div class="event-badge">Road Race</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">JoBerg2C 2026</div>
+          <div class="event-meta">
+            <span class="event-date">📅 Nov 8-15, 2026</span>
+            <span class="event-location">📍 Multi-province</span>
+          </div>
+          <div class="event-meta">
+            <span class="event-distance">🚴 Stages</span>
+            <span class="event-fee">R4,999</span>
+          </div>
+          <div class="event-footer">
+            <button class="btn btn-primary">Enter Now</button>
+            <button class="btn btn-secondary">❤️</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="event-card">
+        <div class="event-banner">
+          🚴
+          <div class="event-badge">Gravel</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Gravel Rush 2026</div>
+          <div class="event-meta">
+            <span class="event-date">📅 Apr 11, 2026</span>
+            <span class="event-location">📍 Free State</span>
+          </div>
+          <div class="event-meta">
+            <span class="event-distance">🚴 75km</span>
+            <span class="event-fee">R350</span>
+          </div>
+          <div class="event-footer">
+            <button class="btn btn-primary">Enter Now</button>
+            <button class="btn btn-secondary">❤️</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="event-card">
+        <div class="event-banner">
+          👥
+          <div class="event-badge">Fun Ride</div>
+        </div>
+        <div class="event-content">
+          <div class="event-title">Ride Joburg Monthly</div>
+          <div class="event-meta">
+            <span class="event-date">📅 Apr 5, 2026</span>
+            <span class="event-location">📍 Johannesburg</span>
+          </div>
+          <div class="event-meta">
+            <span class="event-distance">🚴 30-50km</span>
+            <span class="event-fee">Free</span>
+          </div>
+          <div class="event-footer">
+            <button class="btn btn-primary">Learn More</button>
+            <button class="btn btn-secondary">❤️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 2: EVENT DETAIL ===== -->
+<div id="page-detail" class="page" style="display:none;">
+  <div class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="header-title">📅 CycleMart Events</div>
+        <button class="header-cta" onclick="backToBrowse()">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="event-detail-header">
+      <div class="event-detail-banner">🏁</div>
+      <div class="event-detail-info">
+        <div class="event-detail-title">
+          <h1>Cape Epic 2026</h1>
+          <div style="margin-left: 12px;">
+            <div class="event-badge featured">Featured</div>
+          </div>
+        </div>
+
+        <div class="event-detail-meta">
+          <div class="meta-item">
+            <span class="meta-icon">📅</span>
+            <div>
+              <div class="meta-label">When</div>
+              <div class="meta-value">Mar 12-14, 2026</div>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">📍</span>
+            <div>
+              <div class="meta-label">Where</div>
+              <div class="meta-value">Western Cape</div>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">🚴</span>
+            <div>
+              <div class="meta-label">Distance</div>
+              <div class="meta-value">40km/stage</div>
+            </div>
+          </div>
+          <div class="meta-item">
+            <span class="meta-icon">💰</span>
+            <div>
+              <div class="meta-label">Entry Fee</div>
+              <div class="meta-value">R2,450</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-cta">
+          <button class="btn btn-primary btn-large">🔗 Enter on EntryNinja</button>
+          <button class="btn btn-secondary" style="flex: 0.2;">❤️</button>
+          <button class="btn btn-secondary" style="flex: 0.2;">📤</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="event-detail-body">
+      <div>
+        <!-- ABOUT -->
+        <div class="detail-section">
+          <h2 class="section-title">About This Event</h2>
+          <p class="event-description">
+            The Cape Epic is Africa's leading three-day mountain bike stage race. Held annually in the Western Cape province, the Cape Epic attracts riders from across the globe. The event features challenging singletrack, stunning scenery, and a vibrant camping experience. Riders compete on a mixture of technical terrain and high-speed trails. The event is known for its organization, support, and inclusive atmosphere.
+          </p>
+        </div>
+
+        <!-- ENTRY INFORMATION -->
+        <div class="detail-section">
+          <h2 class="section-title">Entry Information</h2>
+          
+          <div class="entry-info">
+            <div class="entry-status">
+              <div class="entry-label">Current Entries</div>
+              <div class="entry-value">1,287 / 1,500</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="color: #4CAF50; font-weight: 700;">Entries Open</div>
+              <div style="font-size: 12px; color: #999;">Closes May 30, 2026</div>
+            </div>
+          </div>
+
+          <div style="background: #e8f5e9; padding: 12px; border-radius: var(--border-radius); margin-bottom: 12px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Entry includes:</div>
+            <ul style="padding-left: 20px; font-size: 13px;">
+              <li>3-day camping experience</li>
+              <li>Daily meals (dinner, breakfast, lunch)</li>
+              <li>Professional timing & results</li>
+              <li>Event t-shirt & race bib</li>
+              <li>Mechanical support & medical team</li>
+            </ul>
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%;">→ Continue to EntryNinja</button>
+        </div>
+
+        <!-- ORGANISER -->
+        <div class="detail-section">
+          <h2 class="section-title">Organiser</h2>
+          <div style="display: flex; gap: 12px;">
+            <div style="width: 64px; height: 64px; background: #e8e8e8; border-radius: var(--border-radius); flex-shrink: 0;"></div>
+            <div>
+              <div style="font-weight: 700; margin-bottom: 4px;">Cape Epic Organizers</div>
+              <div style="font-size: 13px; color: #666; margin-bottom: 8px;">Professional race promotion since 2004</div>
+              <div style="font-size: 13px;">
+                📧 info@capeepic.com | 📞 (021) 555-0199 | 🌐 capeepic.com
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div>
+        <div class="sidebar">
+          <div class="sidebar-section">
+            <div class="sidebar-title">Event Type</div>
+            <div class="sidebar-content">
+              <div style="display: inline-block; background: var(--primary); color: white; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 700;">
+                MTB Stage Race
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">Location Details</div>
+            <div class="sidebar-content">
+              <div style="margin-bottom: 8px;">
+                <div style="font-weight: 600; margin-bottom: 2px;">Start Point</div>
+                Wellington, WC
+              </div>
+              <div>
+                <div style="font-weight: 600; margin-bottom: 2px;">Finish Point</div>
+                Hermanus, WC
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">Share Event</div>
+            <div class="share-links">
+              <button class="share-btn" title="WhatsApp">💬</button>
+              <button class="share-btn" title="Twitter">𝕏</button>
+              <button class="share-btn" title="Facebook">👍</button>
+              <button class="share-btn" title="Strava">🏃</button>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">Quick Info</div>
+            <div class="sidebar-content">
+              <div style="font-size: 12px; line-height: 1.8;">
+                <div>📌 Multi-day event</div>
+                <div>🎯 Advanced level</div>
+                <div>🌍 International</div>
+                <div>✓ Verified event</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%; margin-top: 16px;">Save Event</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showDetail() {
+    document.getElementById('page-browse').style.display = 'none';
+    document.getElementById('page-detail').style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+
+  function backToBrowse() {
+    document.getElementById('page-detail').style.display = 'none';
+    document.getElementById('page-browse').style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+</script>
+
+</body>
+</html>
