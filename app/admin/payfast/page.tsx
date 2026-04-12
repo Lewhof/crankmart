@@ -277,7 +277,7 @@ export default function PayfastAdminPage() {
           This URL must be set in your PayFast merchant account → Settings → Instant Transaction Notification.
         </div>
         <div style={{ background: '#f5f5f5', borderRadius: 7, padding: '10px 14px', fontSize: 13, fontFamily: 'monospace', color: '#1a1a1a', wordBreak: 'break-all' }}>
-          https://cyclemart.co.za/api/payments/payfast/itn
+          https://crankmart.com/api/payments/payfast/itn
         </div>
         <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
           <a href={`${host}/eng/account/login`} target="_blank" rel="noreferrer"
@@ -296,7 +296,7 @@ export default function PayfastAdminPage() {
             <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: 12, color: '#B45309', lineHeight: 1.8 }}>
               <li>Enable Sandbox mode above before testing to avoid real charges</li>
               <li>Sandbox test cards: use any Visa/Mastercard on the sandbox checkout</li>
-              <li>ITN won&apos;t fire in sandbox unless your server is publicly accessible (cyclemart.co.za is ✓)</li>
+              <li>ITN won&apos;t fire in sandbox unless your server is publicly accessible (crankmart.com is ✓)</li>
               <li>Check boost activation: after payment, go to <strong>/admin/boosts</strong> and confirm status = active</li>
               <li>To test live: select the cheapest boost (Bump R20), pay, verify ITN, then refund in PayFast portal</li>
             </ul>

@@ -91,7 +91,7 @@ body {
   }
 }
 
-/* ===== CycleMart Component Styles ===== */
+/* ===== CrankMart Component Styles ===== */
 
 /* Listing card */
 .cm-card {
@@ -196,7 +196,7 @@ body {
 }
 .cm-btn-primary:hover { background: #C44A0A; }
 
-/* ===== CycleMart responsive nav ===== */
+/* ===== CrankMart responsive nav ===== */
 .cm-desktop-only { display: none; }
 .cm-mobile-only { display: flex; }
 

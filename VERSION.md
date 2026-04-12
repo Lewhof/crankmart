@@ -1,4 +1,4 @@
-# CycleMart Version Reference
+# CrankMart Version Reference
 
 ## Current Version: v0.2.1
 **Date:** 2026-04-03
@@ -39,18 +39,18 @@
 ---
 
 ## Infrastructure
-- **Server:** velo-server, systemd `cyclemart.service`, port 3099
+- **Server:** velo-server, systemd `crankmart.service`, port 3099
 - **DB:** Neon PostgreSQL (pooler endpoint)
 - **Next.js:** 16.2.1 (Turbopack)
 - **Drizzle ORM** + **NextAuth** credentials
 - **PayFast:** merchant 24040660 (LIVE — toggle sandbox in `/admin/payfast`)
-- **Storage:** `/home/velo/storage/cyclemart/uploads/{listings,avatars,events,directory}/`
-- **Nginx:** `cyclemart.co.za` + `cyclemart.fibreflow.app` → proxy :3099
+- **Storage:** `/home/velo/storage/crankmart/uploads/{listings,avatars,events,directory}/`
+- **Nginx:** `crankmart.com` + `crankmart.fibreflow.app` → proxy :3099
 
 ---
 
 ## Known Issues
-- ❌ PayFast sandbox not yet tested end-to-end (ITN needs public URL — works on cyclemart.co.za)
+- ❌ PayFast sandbox not yet tested end-to-end (ITN needs public URL — works on crankmart.com)
 - ❌ Full-text listing search (basic ILIKE only)
 - ❌ Email SMTP not yet configured (templates ready, sender wired)
 - ❌ Routes table has no `submitted_by` user link — My Routes tab not yet built

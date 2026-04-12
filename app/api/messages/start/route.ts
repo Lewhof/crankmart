@@ -81,10 +81,10 @@ export async function POST(request: NextRequest) {
       )
       const seller = ((sellerResult.rows ?? sellerResult)[0] as unknown as UserRow | undefined)
       if (seller?.email) {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cyclemart.co.za'
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
         await sendEmail({
           to: seller.email,
-          subject: `New message about "${listing.title}" on CycleMart`,
+          subject: `New message about "${listing.title}" on CrankMart`,
           html: newMessageEmail({
             sellerName: seller.name || 'there',
             buyerName: session.user.name || 'A buyer',

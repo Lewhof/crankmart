@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cyclemart.co.za'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
 
     // Find saved listings expiring in < 5 days that haven't been alerted yet
     const result = await db.execute(sql`
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
   <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #ebebeb">
     <div style="background:#0D1B2A;padding:28px 32px">
-      <div style="color:#fff;font-size:22px;font-weight:800">🚲 CycleMart</div>
+      <div style="color:#fff;font-size:22px;font-weight:800">🚲 CrankMart</div>
     </div>
     <div style="padding:32px">
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">A saved listing is expiring soon ⏰</h2>
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      You saved this listing on <a href="${baseUrl}" style="color:#0D1B2A">cyclemart.co.za</a>
+      You saved this listing on <a href="${baseUrl}" style="color:#0D1B2A">crankmart.com</a>
     </div>
   </div>
 </body>

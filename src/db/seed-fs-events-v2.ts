@@ -22,7 +22,7 @@ async function main() {
   for (const e of fsEvents) {
     const exists = await sql`SELECT id FROM events WHERE slug = ${e.slug}`;
     if (exists.length) { console.log('SKIP:', e.title); skipped++; continue; }
-    const cover = `https://cyclemart.co.za/uploads/events/${e.slug}.jpg?v=20260330`;
+    const cover = `https://crankmart.com/uploads/events/${e.slug}.jpg?v=20260330`;
     await sql`
       INSERT INTO events (
         title, slug, description, event_type, city, province, venue_name,

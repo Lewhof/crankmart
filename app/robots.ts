@@ -25,9 +25,9 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: [
-      'https://cyclemart.co.za/sitemap.xml',
-      'https://cyclemart.co.za/sitemap-listings.xml',
-      'https://cyclemart.co.za/sitemap-blog.xml',
+      'https://crankmart.com/sitemap.xml',
+      'https://crankmart.com/sitemap-listings.xml',
+      'https://crankmart.com/sitemap-blog.xml',
     ],
   }
 }

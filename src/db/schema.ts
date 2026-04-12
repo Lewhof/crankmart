@@ -499,3 +499,75 @@ export const businesses = pgTable('businesses', {
 export const businessesRelations = relations(businesses, ({ one }) => ({
   owner: one(users, { fields: [businesses.claimedBy], references: [users.id] }),
 }))
+
+// ---- Messaging (ported from src/db/migrate-messaging.ts) ----
+export const conversations = pgTable('conversations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  listingId: uuid('listing_id').notNull(),
+  buyerId: uuid('buyer_id').notNull(),
+  sellerId: uuid('seller_id').notNull(),
+  subject: varchar('subject', { length: 255 }),
+  status: varchar('status', { length: 50 }).default('active'),
+  buyerUnreadCount: integer('buyer_unread_count').default(0),
+  sellerUnreadCount: integer('seller_unread_count').default(0),
+  lastMessageAt: timestamp('last_message_at').defaultNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
+export const messages = pgTable('messages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  conversationId: uuid('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+  senderId: uuid('sender_id').notNull(),
+  body: text('body').notNull(),
+  isRead: boolean('is_read').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+})
+
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  listing: one(listings, { fields: [conversations.listingId], references: [listings.id] }),
+  buyer: one(users, { fields: [conversations.buyerId], references: [users.id] }),
+  seller: one(users, { fields: [conversations.sellerId], references: [users.id] }),
+  messages: many(messages),
+}))
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, { fields: [messages.conversationId], references: [conversations.id] }),
+  sender: one(users, { fields: [messages.senderId], references: [users.id] }),
+}))
+
+// ---- News / Editorial (ported from src/db/migrate-news.ts) ----
+export const newsStatusEnum = pgEnum('news_status', [
+  'pending',
+  'approved',
+  'rejected',
+  'draft',
+])
+
+export const newsArticles = pgTable('news_articles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  excerpt: text('excerpt'),
+  body: text('body').notNull(),
+  coverImageUrl: text('cover_image_url'),
+  category: varchar('category', { length: 100 }).default('general'),
+  tags: text('tags').array(),
+  authorName: varchar('author_name', { length: 150 }),
+  authorEmail: varchar('author_email', { length: 255 }),
+  authorBio: text('author_bio'),
+  sourceUrl: text('source_url'),
+  status: newsStatusEnum('status').default('pending'),
+  isFeatured: boolean('is_featured').default(false),
+  viewsCount: integer('views_count').default(0),
+  submittedBy: uuid('submitted_by').references(() => users.id, { onDelete: 'set null' }),
+  approvedBy: uuid('approved_by').references(() => users.id, { onDelete: 'set null' }),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+})
+
+export const newsArticlesRelations = relations(newsArticles, ({ one }) => ({
+  submitter: one(users, { fields: [newsArticles.submittedBy], references: [users.id] }),
+  approver: one(users, { fields: [newsArticles.approvedBy], references: [users.id] }),
+}))

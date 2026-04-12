@@ -113,7 +113,7 @@ export default function AdminSettingsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>Settings</h1>
-        <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>Configure email notifications and SMTP settings for CycleMart</p>
+        <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>Configure email notifications and SMTP settings for CrankMart</p>
       </div>
 
       {/* Settings Card */}
@@ -371,7 +371,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.smtp_from_name || ''}
                 onChange={(e) => handleSettingChange('smtp_from_name', e.target.value)}
-                placeholder="CycleMart"
+                placeholder="CrankMart"
                 style={{
                   width: '100%',
                   padding: '10px 12px',
@@ -400,7 +400,7 @@ export default function AdminSettingsPage() {
                 type="email"
                 value={settings.smtp_from_email || ''}
                 onChange={(e) => handleSettingChange('smtp_from_email', e.target.value)}
-                placeholder="noreply@cyclemart.co.za"
+                placeholder="noreply@crankmart.com"
                 style={{
                   width: '100%',
                   padding: '10px 12px',

@@ -15,7 +15,7 @@ import {
   adListingInviteEmail,
 } from '@/lib/email-templates'
 
-const BASE = 'https://cyclemart.co.za'
+const BASE = 'https://crankmart.com'
 
 const SAMPLE = {
   businessName:  'Cape Town Cycles',

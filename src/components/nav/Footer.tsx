@@ -158,7 +158,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="cm-footer-bottom">
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)' }}>
-            © {new Date().getFullYear()} CycleMart · H10 Holdings (Pty) Ltd
+            © {new Date().getFullYear()} CrankMart · H10 Holdings (Pty) Ltd
           </span>
           <div className="cm-footer-legal">
             {[

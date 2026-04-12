@@ -52,7 +52,7 @@ export default function SubmitEventPage() {
         </div>
         <h2 style={{ fontSize:24, fontWeight:900, color:'#1a1a1a', margin:'0 0 12px' }}>Event Submitted!</h2>
         <p style={{ fontSize:15, color:'#6b7280', margin:'0 0 28px', lineHeight:1.5 }}>
-          Thank you for submitting your event. Our team will review it and you'll be notified by email once it's approved and listed on CycleMart.
+          Thank you for submitting your event. Our team will review it and you'll be notified by email once it's approved and listed on CrankMart.
         </p>
         <div style={{ display:'flex', gap:12, justifyContent:'center' }}>
           <Link href="/events" style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'10px 20px', background:'var(--color-primary)', color:'#fff', borderRadius:8, textDecoration:'none', fontSize:14, fontWeight:700 }}>

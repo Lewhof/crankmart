@@ -134,11 +134,11 @@ export default function ClaimForm({ business, token }: Props) {
 
         <div style={{ background: '#f9fafb', borderRadius: 8, padding: '14px 16px', border: '1px solid #e4e4e7' }}>
           <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 10px', lineHeight: 1.6 }}>
-            <strong>POPIA Notice:</strong> CycleMart will store and display the information above to help SA cyclists find your business. Your contact details will be shown on your public listing. You may request removal at any time by emailing info@cyclemart.co.za.
+            <strong>POPIA Notice:</strong> CrankMart will store and display the information above to help SA cyclists find your business. Your contact details will be shown on your public listing. You may request removal at any time by emailing info@crankmart.com.
           </p>
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer' }}>
             <input type="checkbox" checked={form.consent} onChange={e => handleChange('consent', e.target.checked)} style={{ marginTop: 2, flexShrink: 0 }} />
-            <span style={{ fontSize: 13, color: '#374151' }}>I consent to CycleMart storing and displaying this information in accordance with POPIA.</span>
+            <span style={{ fontSize: 13, color: '#374151' }}>I consent to CrankMart storing and displaying this information in accordance with POPIA.</span>
           </label>
         </div>
 

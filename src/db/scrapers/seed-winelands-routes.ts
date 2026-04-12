@@ -250,7 +250,7 @@ async function scrapeImages(websiteUrl: string, routeName: string): Promise<stri
   if (!websiteUrl) return []
   try {
     const res = await fetch(websiteUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CycleMartBot/1.0)' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CrankMartBot/1.0)' },
       signal: AbortSignal.timeout(TIMEOUT_MS),
       redirect: 'follow',
     })

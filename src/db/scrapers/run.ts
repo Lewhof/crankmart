@@ -8,7 +8,7 @@ import { sql } from 'drizzle-orm'
 const source = process.argv[2] ?? 'all'
 
 async function main() {
-  console.log(`🚴 CycleMart Route Scraper — source: ${source}`)
+  console.log(`🚴 CrankMart Route Scraper — source: ${source}`)
 
   const results: Record<string, { added: number; updated: number; errors: string[] }> = {}
 

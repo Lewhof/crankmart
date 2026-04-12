@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
         .error-box { background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 14px; font-size: 13px; color: #991B1B; text-align: center; }
       `}</style>
       <div className="auth-card">
-        <div className="auth-logo">CycleMart</div>
+        <div className="auth-logo">CrankMart</div>
         <Link href="/login" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#9a9a9a', fontSize: 13, textDecoration: 'none', marginBottom: 20 }}>
           <ArrowLeft size={14} /> Back to sign in
         </Link>

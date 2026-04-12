@@ -3,7 +3,7 @@ import { auth } from '@/auth'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 
-// CycleMart launch blog posts — Phase 1 GEO/SEO
+// CrankMart launch blog posts — Phase 1 GEO/SEO
 // Authorised by Hein (CEO) via Elon (CTO) — 2026-03-28
 
 interface BlogPost {
@@ -28,7 +28,7 @@ Cape Town is South Africa's cycling heartland. With world-class routes, a boomin
 
 Whether you're hunting for a high-end road bike, a rugged MTB, gravel gear, or just a quick repair, Cape Town's bike shops range from tiny neighbourhood specialists to full-service megastores. This guide covers every major area of the city, from the City Bowl to the Winelands, so you can find the shop that's right for you.
 
-Find all Cape Town bike shops on [CycleMart](https://cyclemart.co.za/directory?city=Cape+Town).
+Find all Cape Town bike shops on [CrankMart](https://crankmart.com/directory?city=Cape+Town).
 
 ---
 
@@ -98,9 +98,9 @@ Cycle Lab Stellenbosch is the flagship store for the Cycle Lab chain in the Wine
 
 ## How to Find More Cape Town Bike Shops
 
-Browse the full directory of Cape Town bike shops on [CycleMart](https://cyclemart.co.za/directory?city=Cape+Town). Each listing includes contact details, opening hours, brands stocked, services offered, and customer reviews.
+Browse the full directory of Cape Town bike shops on [CrankMart](https://crankmart.com/directory?city=Cape+Town). Each listing includes contact details, opening hours, brands stocked, services offered, and customer reviews.
 
-Whether you're looking for a bike fitting specialist, a specific brand, or just the nearest shop for emergency repairs, CycleMart's Cape Town directory has you covered.`,
+Whether you're looking for a bike fitting specialist, a specific brand, or just the nearest shop for emergency repairs, CrankMart's Cape Town directory has you covered.`,
     category: 'guides',
     tags: ['bike shops', 'Cape Town', 'cycling', 'Western Cape', 'road bikes', 'MTB'],
     featured: false,
@@ -114,7 +114,7 @@ Whether you're looking for a bike fitting specialist, a specific brand, or just 
 
 Johannesburg is South Africa's cycling powerhouse. With the iconic 94.7 Cycle Challenge drawing over 35,000 riders annually, a thriving commuter cycling culture, and booming MTB scene on routes from Cradle to Muldersdrift, Joburg has some of the best bike shops in the country.
 
-Find all Johannesburg bike shops on [CycleMart](https://cyclemart.co.za/directory?city=Johannesburg).
+Find all Johannesburg bike shops on [CrankMart](https://crankmart.com/directory?city=Johannesburg).
 
 ---
 
@@ -172,13 +172,13 @@ Serving the East Rand cycling community with a strong selection of road bikes, c
 
 Joburg's premier cycling event, the 94.7 Cycle Challenge, draws preparation from bike shops across the city every year. Most shops ramp up stock and workshop capacity in the months leading up to the race. If you're training for the 94.7, most Joburg bike shops can advise on gear selection, bike setup, and training routes.
 
-Check the [CycleMart events calendar](https://cyclemart.co.za/events) for 94.7 registration details and other Joburg cycling events.
+Check the [CrankMart events calendar](https://crankmart.com/events) for 94.7 registration details and other Joburg cycling events.
 
 ---
 
 ## How to Find More Johannesburg Bike Shops
 
-Browse the full directory of Johannesburg bike shops on [CycleMart](https://cyclemart.co.za/directory?city=Johannesburg). Each listing includes contact details, opening hours, brands stocked, and services offered.`,
+Browse the full directory of Johannesburg bike shops on [CrankMart](https://crankmart.com/directory?city=Johannesburg). Each listing includes contact details, opening hours, brands stocked, and services offered.`,
     category: 'guides',
     tags: ['bike shops', 'Johannesburg', 'cycling', 'Gauteng', '94.7 Cycle Challenge', 'MTB'],
     featured: false,
@@ -192,7 +192,7 @@ Browse the full directory of Johannesburg bike shops on [CycleMart](https://cycl
 
 South Africa is one of the world's premier cycling destinations. From the iconic Cape Town Cycle Tour to the brutal Attakwas Extreme mountain bike race, the 94.7 Cycle Challenge to the multi-day Cape Pioneer Trek, the calendar is packed with world-class events.
 
-Find all 2026 cycling events on [CycleMart's events calendar](https://cyclemart.co.za/events).
+Find all 2026 cycling events on [CrankMart's events calendar](https://crankmart.com/events).
 
 ---
 
@@ -204,7 +204,7 @@ The Cape Town Cycle Tour is South Africa's biggest cycling event and one of the 
 
 - **Distance:** 109km
 - **Location:** Cape Town, Western Cape
-- **Entry:** Registration opens several months before race day — check [cyclemart.co.za/events](https://cyclemart.co.za/events)
+- **Entry:** Registration opens several months before race day — check [crankmart.com/events](https://crankmart.com/events)
 
 ### 94.7 Cycle Challenge
 
@@ -269,67 +269,67 @@ South Africa's gravel and adventure cycling scene has exploded in recent years. 
 Most major SA cycling events open registration months in advance and fill up quickly — particularly the CTCT and 94.7. Key tips:
 
 1. **Register early** — popular events sell out in minutes when registration opens
-2. **Check CycleMart** — [cyclemart.co.za/events](https://cyclemart.co.za/events) lists all events with registration links
+2. **Check CrankMart** — [crankmart.com/events](https://crankmart.com/events) lists all events with registration links
 3. **Medical requirements** — most events require a medical certificate for riders over a certain age
-4. **Gear up** — visit a local bike shop (find yours on [CycleMart](https://cyclemart.co.za/directory)) for race preparation advice
+4. **Gear up** — visit a local bike shop (find yours on [CrankMart](https://crankmart.com/directory)) for race preparation advice
 
 ---
 
-Browse the full 2026 cycling events calendar at [cyclemart.co.za/events](https://cyclemart.co.za/events).`,
+Browse the full 2026 cycling events calendar at [crankmart.com/events](https://crankmart.com/events).`,
     category: 'events',
     tags: ['events', 'cycling calendar', 'South Africa', 'Cape Town Cycle Tour', 'MTB', 'Cape Epic', '94.7'],
     featured: true,
   },
   {
-    title: "What is CycleMart? South Africa's Cycling Marketplace Explained",
-    slug: 'what-is-cyclemart-sa-cycling-marketplace',
+    title: "What is CrankMart? South Africa's Cycling Marketplace Explained",
+    slug: 'what-is-crankmart-sa-cycling-marketplace',
     excerpt:
-      "CycleMart is South Africa's first dedicated online cycling marketplace and business directory, connecting cyclists with bike shops, brands, coaches, gear retailers, and cycling services across the country.",
-    body: `# What is CycleMart? South Africa's Cycling Marketplace Explained
+      "CrankMart is South Africa's first dedicated online cycling marketplace and business directory, connecting cyclists with bike shops, brands, coaches, gear retailers, and cycling services across the country.",
+    body: `# What is CrankMart? South Africa's Cycling Marketplace Explained
 
-CycleMart is South Africa's first dedicated online cycling marketplace and business directory, connecting cyclists with bike shops, brands, coaches, gear retailers, and cycling services across the country. It solves the fragmentation problem that has plagued the SA cycling community for years — the fact that there's been no single, authoritative place to find cycling businesses, gear, events, and services all in one platform.
+CrankMart is South Africa's first dedicated online cycling marketplace and business directory, connecting cyclists with bike shops, brands, coaches, gear retailers, and cycling services across the country. It solves the fragmentation problem that has plagued the SA cycling community for years — the fact that there's been no single, authoritative place to find cycling businesses, gear, events, and services all in one platform.
 
-Visit [cyclemart.co.za](https://cyclemart.co.za) to explore the full platform.
+Visit [crankmart.com](https://crankmart.com) to explore the full platform.
 
 ---
 
-## What Does CycleMart Do?
+## What Does CrankMart Do?
 
-CycleMart brings together every part of the South African cycling ecosystem in one place:
+CrankMart brings together every part of the South African cycling ecosystem in one place:
 
 ### Business Directory
 
-The CycleMart [business directory](https://cyclemart.co.za/directory) lists bike shops, cycling brands, coaches, mechanics, tour operators, and cycling clubs across South Africa. Each listing includes full contact details, location, services, brands stocked, opening hours, and customer reviews.
+The CrankMart [business directory](https://crankmart.com/directory) lists bike shops, cycling brands, coaches, mechanics, tour operators, and cycling clubs across South Africa. Each listing includes full contact details, location, services, brands stocked, opening hours, and customer reviews.
 
-Whether you're looking for a bike shop in Cape Town, a cycling coach in Johannesburg, or a mobile mechanic in Durban, CycleMart's directory makes it easy to find exactly what you need.
+Whether you're looking for a bike shop in Cape Town, a cycling coach in Johannesburg, or a mobile mechanic in Durban, CrankMart's directory makes it easy to find exactly what you need.
 
 ### Classifieds
 
-The CycleMart classifieds section lets cyclists buy and sell second-hand bikes, components, and gear. List your old road bike, find a bargain MTB, or source rare components — all within a cycling-specific community that understands the market.
+The CrankMart classifieds section lets cyclists buy and sell second-hand bikes, components, and gear. List your old road bike, find a bargain MTB, or source rare components — all within a cycling-specific community that understands the market.
 
 ### Events Calendar
 
-The [CycleMart events calendar](https://cyclemart.co.za/events) lists every major cycling race, sportive, gran fondo, and charity ride in South Africa. From the Cape Town Cycle Tour to the Absa Cape Epic, the 94.7 Cycle Challenge to local club rides — if it's on the SA cycling calendar, it's on CycleMart.
+The [CrankMart events calendar](https://crankmart.com/events) lists every major cycling race, sportive, gran fondo, and charity ride in South Africa. From the Cape Town Cycle Tour to the Absa Cape Epic, the 94.7 Cycle Challenge to local club rides — if it's on the SA cycling calendar, it's on CrankMart.
 
 ---
 
-## Why CycleMart Exists
+## Why CrankMart Exists
 
-Before CycleMart, South African cyclists had to search across multiple platforms to find what they needed:
+Before CrankMart, South African cyclists had to search across multiple platforms to find what they needed:
 - Facebook groups for second-hand gear
 - Google for bike shops (with inconsistent results)
 - Event-specific websites for race information
 - WhatsApp groups for local club rides
 
-CycleMart consolidates all of this into one cycling-specific platform, built for South African cyclists by people who understand the local market.
+CrankMart consolidates all of this into one cycling-specific platform, built for South African cyclists by people who understand the local market.
 
 ---
 
-## Who is CycleMart For?
+## Who is CrankMart For?
 
 **Cyclists:** Find bike shops near you, buy and sell gear, discover upcoming events, connect with coaches.
 
-**Bike Shops & Cycling Businesses:** List your business for free and reach thousands of SA cyclists searching for your services. [List your business](https://cyclemart.co.za/list).
+**Bike Shops & Cycling Businesses:** List your business for free and reach thousands of SA cyclists searching for your services. [List your business](https://crankmart.com/list).
 
 **Event Organisers:** Publish your event to reach the entire SA cycling community.
 
@@ -337,21 +337,21 @@ CycleMart consolidates all of this into one cycling-specific platform, built for
 
 ---
 
-## Is CycleMart Free?
+## Is CrankMart Free?
 
-Basic business listings on CycleMart are completely free. There are no hidden fees for standard directory listings. Premium features and advertising options may be available in the future.
+Basic business listings on CrankMart are completely free. There are no hidden fees for standard directory listings. Premium features and advertising options may be available in the future.
 
-[List your cycling business for free](https://cyclemart.co.za/list) today.
+[List your cycling business for free](https://crankmart.com/list) today.
 
 ---
 
-## Who Built CycleMart?
+## Who Built CrankMart?
 
-CycleMart is a product of H10 Holdings (Pty) Ltd, a South African technology company. It was built to serve the South African cycling community — one of the most passionate and active cycling communities in the world.
+CrankMart is a product of H10 Holdings (Pty) Ltd, a South African technology company. It was built to serve the South African cycling community — one of the most passionate and active cycling communities in the world.
 
-For questions, partnerships, or media enquiries: [info@cyclemart.co.za](mailto:info@cyclemart.co.za)`,
+For questions, partnerships, or media enquiries: [info@crankmart.com](mailto:info@crankmart.com)`,
     category: 'guides',
-    tags: ['CycleMart', 'about', 'cycling marketplace', 'South Africa', 'bike directory'],
+    tags: ['CrankMart', 'about', 'cycling marketplace', 'South Africa', 'bike directory'],
     featured: false,
   },
 ]
@@ -386,8 +386,8 @@ export async function POST() {
           '${bodyEsc}',
           '${catEsc}',
           ${tagsLiteral},
-          'CycleMart Editorial',
-          'info@cyclemart.co.za',
+          'CrankMart Editorial',
+          'info@crankmart.com',
           'approved',
           ${post.featured},
           0,

@@ -35,7 +35,7 @@
 ## 1. Executive Summary
 
 ### 1.1 What CrankMart Is
-CrankMart is the international evolution of CycleMart.co.za, a production-grade cycling community platform combining:
+CrankMart is the international evolution of CrankMart.co.za, a production-grade cycling community platform combining:
 - **Classifieds marketplace** (2,000+ listings target)
 - **Business directory** (bike shops, brands, service centres, tour operators, event organisers)
 - **Cycling routes library** (500+ SA routes from Trailforks/Komoot/MTB Trails SA)
@@ -48,7 +48,7 @@ Built on Next.js 16 + Neon Postgres + Vercel + Drizzle ORM, with PayFast (SA) an
 ### 1.2 Why We're Rebuilding
 | Driver | Detail |
 |--------|--------|
-| **Rebrand** | CycleMart -> CrankMart (new domain, brand, social, email) |
+| **Rebrand** | CrankMart -> CrankMart (new domain, brand, social, email) |
 | **International scalability** | Phased rollout: SA -> AU -> NZ -> UK -> EU -> US |
 | **Stack modernisation** | Move from self-hosted velo-server to Neon + Vercel serverless |
 | **Infrastructure simplification** | Decommission nginx, systemd, manual uploads; adopt Vercel Blob, edge CDN |
@@ -56,7 +56,7 @@ Built on Next.js 16 + Neon Postgres + Vercel + Drizzle ORM, with PayFast (SA) an
 
 ### 1.3 Strategic Outcomes (12-month horizon)
 - crankmart.com live globally with /za as the first country vertical
-- SA user base migrated from cyclemart.co.za (301 redirects preserve SEO)
+- SA user base migrated from crankmart.com (301 redirects preserve SEO)
 - Australia launched (Phase 2) using the same framework
 - 99.9% uptime, sub-2.5s LCP, Lighthouse 90+ across all pages
 - R25,000+ monthly recurring revenue from SA boost packages
@@ -209,7 +209,7 @@ Once expanded to AU/NZ/UK, CrankMart competes with:
 | Metric | Target | Measurement |
 |--------|--------|-------------|
 | crankmart.com live | Day 1 | Uptime monitor |
-| cyclemart.co.za 301 -> crankmart.com/za | Day 1 | curl check |
+| crankmart.com 301 -> crankmart.com/za | Day 1 | curl check |
 | Lighthouse Performance | >= 90 | Vercel Speed Insights |
 | Zero P0 bugs in production | 100% | Sentry tracking |
 | All existing users migrated | 100% | DB row count match |
@@ -265,7 +265,7 @@ Once expanded to AU/NZ/UK, CrankMart competes with:
 
 # Part 2A: Feature Inventory
 
-Carried forward from CycleMart v0.2.1 and enhanced. Each feature has a status, owner persona, phase priority, and cross-reference to existing code.
+Carried forward from CrankMart v0.2.1 and enhanced. Each feature has a status, owner persona, phase priority, and cross-reference to existing code.
 
 ## 6. Feature Inventory
 
@@ -425,12 +425,12 @@ Carried forward from CycleMart v0.2.1 and enhanced. Each feature has a status, o
 ### 6.11 Rebrand (New)
 | ID | Feature | Status | Priority | Detail |
 |----|---------|--------|----------|--------|
-| F-RB-01 | All cyclemart references -> crankmart | **New** | P0 | 304+ locations (see REBRAND_INVENTORY.md) |
+| F-RB-01 | All crankmart references -> crankmart | **New** | P0 | 304+ locations (see REBRAND_INVENTORY.md) |
 | F-RB-02 | New logo + favicon set | **New** | P0 | 7 icon sizes |
 | F-RB-03 | New email templates (11) | **New** | P0 | crankmart branding |
 | F-RB-04 | New social handles | **New** | P1 | Secure @crankmart everywhere |
-| F-RB-05 | cyclemart.co.za 301 -> crankmart.com/za | **New** | P0 | Vercel redirect |
-| F-RB-06 | crankmart.co.za 301 -> crankmart.com/za | **New** | P0 | Vercel redirect |
+| F-RB-05 | crankmart.com 301 -> crankmart.com/za | **New** | P0 | Vercel redirect |
+| F-RB-06 | crankmart.com 301 -> crankmart.com/za | **New** | P0 | Vercel redirect |
 
 ### 6.12 Out of Scope (Phase 1)
 - Native mobile app (React Native / Expo) -- PWA only
@@ -1024,7 +1024,7 @@ CrankMart never stores raw card numbers, CVVs, or full banking details. All paym
 | POPIA Requirement | CrankMart Implementation |
 |-------------------|--------------------------|
 | Lawful basis for processing | Contract performance (listing, buying) + legitimate interest (platform safety) |
-| Information officer | Designated on privacy@crankmart.co.za |
+| Information officer | Designated on privacy@crankmart.com |
 | Privacy notice | /privacy page; shown at registration |
 | Data subject rights | Account deletion removes PII; listings anonymised; export (Phase 2) |
 | Breach notification | Within 72 hours to Information Regulator if >100 subjects affected |
@@ -1197,12 +1197,12 @@ git push → GitHub Actions
 
 ### 13.1 Overview
 
-Migration from CycleMart (VelocityFibre/cyclemart) to CrankMart (Lewhof/crankmart). No live traffic yet — this is a greenfield rebrand, not a live system cutover.
+Migration from CrankMart (VelocityFibre/crankmart) to CrankMart (Lewhof/crankmart). No live traffic yet — this is a greenfield rebrand, not a live system cutover.
 
 ### 13.2 Pre-Migration Checklist
 
 - [ ] crankmart.com DNS configured; Vercel project linked
-- [ ] crankmart.co.za 301 redirect to crankmart.com/za configured
+- [ ] crankmart.com 301 redirect to crankmart.com/za configured
 - [ ] Neon project created; connection string in Vercel env
 - [ ] AUTH_SECRET generated (openssl rand -base64 32)
 - [ ] RESEND_API_KEY set; from-address verified on crankmart.com
@@ -1225,9 +1225,9 @@ npm run db:studio  # Inspect tables in Drizzle Studio
 # Step 3: Seed reference data (categories, boost packages)
 npx tsx src/db/seed.ts
 
-# Step 4: Import production data from CycleMart (if applicable)
-# Export from cyclemart Neon → import to crankmart Neon
-# pg_dump cyclemart_db | psql crankmart_db
+# Step 4: Import production data from CrankMart (if applicable)
+# Export from crankmart Neon → import to crankmart Neon
+# pg_dump crankmart_db | psql crankmart_db
 # Then: UPDATE listings SET country_code = 'ZA' WHERE country_code IS NULL;
 ```
 
@@ -1257,7 +1257,7 @@ import { put } from '@vercel/blob';
 import fs from 'fs';
 import path from 'path';
 
-const UPLOAD_DIR = '/home/velo/storage/cyclemart/uploads';
+const UPLOAD_DIR = '/home/velo/storage/crankmart/uploads';
 const categories = ['directory', 'avatars', 'listings'];
 
 for (const cat of categories) {
@@ -1300,7 +1300,7 @@ main (production) ──► create branch: migration-test
 After deployment to production:
 
 - [ ] Home page loads on crankmart.com/za
-- [ ] crankmart.co.za redirects to crankmart.com/za (301)
+- [ ] crankmart.com redirects to crankmart.com/za (301)
 - [ ] Register flow: create account, receive email (check From address)
 - [ ] Sell flow: publish test listing; appears in /browse
 - [ ] PayFast sandbox boost: complete payment, boost activates
@@ -1397,7 +1397,7 @@ Features are gated by environment variable flags, not code branches. This allows
 
 | Phase | Scope | Trigger |
 |-------|-------|---------|
-| Phase 1 (MVP) | CrankMart /za fully operational; all CycleMart features rebranded | Launch |
+| Phase 1 (MVP) | CrankMart /za fully operational; all CrankMart features rebranded | Launch |
 | Phase 2 (Growth) | /au live; Stripe; Google OAuth; user export; Sentry; email marketing | 3 months post-launch |
 | Phase 3 (Scale) | /nz; mobile app (React Native); affiliate programme; API partner access | 6-12 months |
 
@@ -1413,7 +1413,7 @@ Features are gated by environment variable flags, not code branches. This allows
 | R-04 | NextAuth v5 breaking change in patch | Low | High | Pin exact NextAuth version; test upgrades in staging branch first |
 | R-05 | Listing spam from fake accounts | Medium | High | Email verification gate; admin moderation queue; rate limits on publish |
 | R-06 | Vercel function timeout on large DB seeds | Low | Low | Seeds run locally or in separate Neon branch; not in prod cron |
-| R-07 | crankmart.co.za 301 redirect not set correctly | Medium | High | Test redirect on go-live checklist; confirm 301 (not 302) in curl -I |
+| R-07 | crankmart.com 301 redirect not set correctly | Medium | High | Test redirect on go-live checklist; confirm 301 (not 302) in curl -I |
 | R-08 | tsvector index not updated after bulk insert | Low | Medium | Verify triggers on listings, routes tables; run REINDEX if search degrades |
 | R-09 | Country config returns wrong currency for new locale | Low | High | Unit test getCountryConfig for every supported country_code |
 | R-10 | SMTP deliverability issues on new crankmart.com domain | Medium | High | Warm up sending domain; SPF/DKIM/DMARC configured before go-live; monitor bounce rate |
@@ -1465,8 +1465,8 @@ app/ pages
 
 | Term | Definition |
 |------|------------|
-| CrankMart | The rebranded, international version of CycleMart. Domain: crankmart.com |
-| CycleMart | The original SA cycling marketplace (VelocityFibre/cyclemart). Source codebase. |
+| CrankMart | The rebranded, international version of CrankMart. Domain: crankmart.com |
+| CrankMart | The original SA cycling marketplace (VelocityFibre/crankmart). Source codebase. |
 | CDDP | CTO Deliberative Development Protocol — 8-step mandatory workflow before any build |
 | country_code | ISO 3166-1 alpha-2 code (ZA, AU, NZ) used to scope all content and config |
 | Country Config | The countryConfig map in src/lib/country-config.ts; returns currency, regions, payment gateway, timezone per country |
@@ -1484,7 +1484,7 @@ app/ pages
 | Sell Wizard | 4-step listing creation flow: category → details → photos → pricing/location |
 | Admin Todo | Internal admin task/whiteboard item stored in admin_todos table |
 | Concierge Mode | Directory registration mode where CrankMart team builds the listing on behalf of the business |
-| Phase 1 | MVP: CrankMart /za fully live with all CycleMart features rebranded |
+| Phase 1 | MVP: CrankMart /za fully live with all CrankMart features rebranded |
 | Phase 2 | /au live, Stripe, Google OAuth, GDPR export, marketing email |
 | Phase 3 | /nz, mobile app, affiliate programme, API partner access |
 

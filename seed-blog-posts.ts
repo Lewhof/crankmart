@@ -3,10 +3,10 @@ import { sql } from 'drizzle-orm'
 import { readFileSync } from 'fs'
 
 const posts = [
-  { file: '/home/hein/.openclaw/workspace/cyclemart/content/blog/best-bike-shops-cape-town-2026.md', slug: 'best-bike-shops-cape-town-2026', category: 'guides', featured: true },
-  { file: '/home/hein/.openclaw/workspace/cyclemart/content/blog/best-bike-shops-johannesburg-2026.md', slug: 'best-bike-shops-johannesburg-2026', category: 'guides', featured: false },
-  { file: '/home/hein/.openclaw/workspace/cyclemart/content/blog/cycling-events-south-africa-2026.md', slug: 'cycling-events-south-africa-2026', category: 'events', featured: true },
-  { file: '/home/hein/.openclaw/workspace/cyclemart/content/blog/what-is-cyclemart-sa-cycling-marketplace.md', slug: 'what-is-cyclemart-sa-cycling-marketplace', category: 'about', featured: false },
+  { file: '/home/hein/.openclaw/workspace/crankmart/content/blog/best-bike-shops-cape-town-2026.md', slug: 'best-bike-shops-cape-town-2026', category: 'guides', featured: true },
+  { file: '/home/hein/.openclaw/workspace/crankmart/content/blog/best-bike-shops-johannesburg-2026.md', slug: 'best-bike-shops-johannesburg-2026', category: 'guides', featured: false },
+  { file: '/home/hein/.openclaw/workspace/crankmart/content/blog/cycling-events-south-africa-2026.md', slug: 'cycling-events-south-africa-2026', category: 'events', featured: true },
+  { file: '/home/hein/.openclaw/workspace/crankmart/content/blog/what-is-crankmart-sa-cycling-marketplace.md', slug: 'what-is-crankmart-sa-cycling-marketplace', category: 'about', featured: false },
 ]
 
 async function main() {
@@ -26,8 +26,8 @@ async function main() {
         '${excerpt.replace(/'/g, "''")}',
         '${body.replace(/'/g, "''")}',
         '${p.category}',
-        'CycleMart Editorial',
-        'editorial@cyclemart.co.za',
+        'CrankMart Editorial',
+        'editorial@crankmart.com',
         'published',
         ${p.featured},
         0,

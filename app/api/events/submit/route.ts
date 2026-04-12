@@ -92,12 +92,12 @@ export async function POST(request: NextRequest) {
     try {
       const admins = await db.execute(sql`SELECT email FROM users WHERE role = 'admin' LIMIT 3`)
       const adminRows = (admins.rows ?? admins) as any[]
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cyclemart.co.za'
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
       for (const admin of adminRows) {
         await sendEmail({
           to: admin.email,
           subject: `New event submission: "${title}"`,
-          html: `<div style="font-family:sans-serif;max-width:560px;margin:40px auto;background:#fff;border-radius:12px;border:1px solid #ebebeb;overflow:hidden"><div style="background:#0D1B2A;padding:24px 32px"><div style="color:#fff;font-size:20px;font-weight:800">🚲 CycleMart — New Event Submission</div></div><div style="padding:32px"><h2 style="margin:0 0 8px">${title}</h2><p style="color:#6b7280;font-size:14px;margin:0 0 4px">By <strong>${organiserName || organiserEmail}</strong></p><p style="color:#6b7280;font-size:14px;margin:0 0 16px">${city}${province ? ', ' + province : ''} · ${new Date(eventDateStart).toLocaleDateString('en-ZA')}</p><a href="${baseUrl}/admin/events" style="display:inline-block;background:#0D1B2A;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Review in Admin →</a></div></div>`
+          html: `<div style="font-family:sans-serif;max-width:560px;margin:40px auto;background:#fff;border-radius:12px;border:1px solid #ebebeb;overflow:hidden"><div style="background:#0D1B2A;padding:24px 32px"><div style="color:#fff;font-size:20px;font-weight:800">🚲 CrankMart — New Event Submission</div></div><div style="padding:32px"><h2 style="margin:0 0 8px">${title}</h2><p style="color:#6b7280;font-size:14px;margin:0 0 4px">By <strong>${organiserName || organiserEmail}</strong></p><p style="color:#6b7280;font-size:14px;margin:0 0 16px">${city}${province ? ', ' + province : ''} · ${new Date(eventDateStart).toLocaleDateString('en-ZA')}</p><a href="${baseUrl}/admin/events" style="display:inline-block;background:#0D1B2A;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Review in Admin →</a></div></div>`
         })
       }
     } catch {}

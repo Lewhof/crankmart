@@ -116,7 +116,7 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
       {/* Header */}
       <div style={{ background: 'white', padding: '20px 0', borderBottom: '1px solid #e0e0e0', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--color-primary)', margin: 0 }}>📅 CycleMart Events</h1>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--color-primary)', margin: 0 }}>📅 CrankMart Events</h1>
           <Link href="/events" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: '600', cursor: 'pointer' }}>← Back</Link>
         </div>
       </div>

@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'cyclemart.co.za',
+        hostname: 'crankmart.com',
         pathname: '/uploads/**',
       },
       {
@@ -47,7 +47,7 @@ const nextConfig: NextConfig = {
       },
     ],
     // Allow relative /uploads/ paths served by nginx
-    domains: ['cyclemart.co.za', 'localhost'],
+    domains: ['crankmart.com', 'localhost'],
   },
 }
 

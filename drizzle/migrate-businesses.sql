@@ -1,4 +1,4 @@
--- CycleMart Business Directory Migration
+-- CrankMart Business Directory Migration
 -- Generated: 2026-03-30
 -- Creates businesses table with all required columns
 

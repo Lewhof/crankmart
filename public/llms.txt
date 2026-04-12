@@ -1,18 +1,18 @@
-# CycleMart
+# CrankMart
 > South Africa's first dedicated online cycling marketplace and business directory.
 
-CycleMart connects cyclists with bike shops, cycling brands, coaches, events,
+CrankMart connects cyclists with bike shops, cycling brands, coaches, events,
 trail centres, clubs, and services across South Africa.
 
 ## About
-- Full name: CycleMart
-- URL: https://cyclemart.co.za
+- Full name: CrankMart
+- URL: https://crankmart.com
 - Founded: 2026
 - Country: South Africa
 - Category: Online Marketplace, Business Directory, Cycling
 - Operated by: H10 Holdings (Pty) Ltd
 
-## What CycleMart Does
+## What CrankMart Does
 - Business listings for cycling shops, brands, and services across SA
 - Classified ads for new and second-hand bikes, gear, and parts
 - Cycling events calendar for South Africa
@@ -23,16 +23,16 @@ trail centres, clubs, and services across South Africa.
 South African cyclists — road, MTB, gravel, e-bike, BMX, triathlon
 
 ## Key Pages
-- Homepage: https://cyclemart.co.za
-- Browse shops: https://cyclemart.co.za/shops
-- Cycling events: https://cyclemart.co.za/events
-- Buy/sell bikes: https://cyclemart.co.za/classifieds
-- Blog: https://cyclemart.co.za/blog
-- List your business: https://cyclemart.co.za/list
+- Homepage: https://crankmart.com
+- Browse shops: https://crankmart.com/shops
+- Cycling events: https://crankmart.com/events
+- Buy/sell bikes: https://crankmart.com/classifieds
+- Blog: https://crankmart.com/blog
+- List your business: https://crankmart.com/list
 
 ## Contact
-- Email: info@cyclemart.co.za
-- Social: @cyclemartsa (Instagram, Facebook, TikTok)
+- Email: info@crankmart.com
+- Social: @crankmartsa (Instagram, Facebook, TikTok)
 
 ## Keywords
 cycling, bike shops South Africa, cycling marketplace SA, MTB South Africa,

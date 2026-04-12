@@ -1,5 +1,5 @@
 /**
- * CycleMart Business Logo Scraper
+ * CrankMart Business Logo Scraper
  * Fetches logos from business websites and updates logo_url in DB
  * Run: npx tsx src/db/scrapers/scrape-business-logos.ts
  */
@@ -24,7 +24,7 @@ async function fetchWithRetry(url: string, retries = MAX_RETRIES): Promise<Respo
       const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
       const res = await fetch(url, {
         signal: controller.signal,
-        headers: { "User-Agent": "CycleMartBot/1.0 (+https://cyclemart.co.za)" },
+        headers: { "User-Agent": "CrankMartBot/1.0 (+https://crankmart.com)" },
       });
       clearTimeout(timer);
       return res;
@@ -52,7 +52,7 @@ async function isValidImage(url: string): Promise<boolean> {
     const res = await fetch(url, {
       method: "HEAD",
       signal: controller.signal,
-      headers: { "User-Agent": "CycleMartBot/1.0" },
+      headers: { "User-Agent": "CrankMartBot/1.0" },
     });
     clearTimeout(timer);
     if (!res.ok) return false;
@@ -127,7 +127,7 @@ async function findLogo(website: string): Promise<string | null> {
 }
 
 async function run() {
-  console.log("\n🔍 CycleMart Business Logo Scraper\n");
+  console.log("\n🔍 CrankMart Business Logo Scraper\n");
 
   // Fetch businesses without logos that have websites
   const businesses = await sql`

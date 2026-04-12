@@ -18,7 +18,7 @@ const BoostInitiateSchema = z.object({
   newsId:      optUuid,
 })
 
-const BASE_URL = process.env.NEXTAUTH_URL ?? 'https://cyclemart.co.za'
+const BASE_URL = process.env.NEXTAUTH_URL ?? 'https://crankmart.com'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Resolve human-readable target name for PayFast item_description
-  let targetName = 'CycleMart Boost'
+  let targetName = 'CrankMart Boost'
   if (listingId) {
     const r = await db.execute(sql`SELECT title FROM listings WHERE id = ${listingId} LIMIT 1`)
     targetName = String(((r.rows ?? r) as Record<string,unknown>[])[0]?.title ?? targetName)
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
 
   const boostId = String(((insertResult.rows ?? insertResult) as Record<string,unknown>[])[0]?.id)
   const amountRand = (pkg.priceCents / 100).toFixed(2)
-  const nameParts  = (user?.name ?? 'CycleMart User').split(' ')
+  const nameParts  = (user?.name ?? 'CrankMart User').split(' ')
 
   const rawFields: Record<string, string> = {
     merchant_id:      PAYFAST_MERCHANT_ID,

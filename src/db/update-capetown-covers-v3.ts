@@ -1,7 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 const sql = neon(process.env.DATABASE_URL!);
 
-const BASE = "https://cyclemart.fibreflow.app/shop-covers";
+const BASE = "https://crankmart.fibreflow.app/shop-covers";
 const GENERIC = `${BASE}/generic-bikeshop-ct.png`;
 const TRISPORTS_IMG = `${BASE}/trisports-ct.png`;
 

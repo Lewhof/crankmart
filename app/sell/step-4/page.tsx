@@ -63,7 +63,7 @@ function Step4Content() {
       } catch {}
 
       // Fallback to localStorage
-      const saved = localStorage.getItem('cyclemart-sell-draft')
+      const saved = localStorage.getItem('crankmart-sell-draft')
       if (saved) {
         try {
           const draft = JSON.parse(saved)
@@ -79,9 +79,9 @@ function Step4Content() {
 
   // Load preview data
   useEffect(() => {
-    const draft = localStorage.getItem('cyclemart-sell-draft')
-    const photos = localStorage.getItem('cyclemart-sell-photos')
-    const category = localStorage.getItem('cyclemart-sell-category') || 'other'
+    const draft = localStorage.getItem('crankmart-sell-draft')
+    const photos = localStorage.getItem('crankmart-sell-photos')
+    const category = localStorage.getItem('crankmart-sell-category') || 'other'
 
     if (draft) {
       const data = JSON.parse(draft)
@@ -115,9 +115,9 @@ function Step4Content() {
     setPublishing(true)
     try {
       // Get all data from localStorage
-      const draft = JSON.parse(localStorage.getItem('cyclemart-sell-draft') || '{}')
-      const photos = JSON.parse(localStorage.getItem('cyclemart-sell-photos') || '[]')
-      const category = localStorage.getItem('cyclemart-sell-category') || 'other'
+      const draft = JSON.parse(localStorage.getItem('crankmart-sell-draft') || '{}')
+      const photos = JSON.parse(localStorage.getItem('crankmart-sell-photos') || '[]')
+      const category = localStorage.getItem('crankmart-sell-category') || 'other'
 
       const publishPayload = {
         // Spread all draft fields (captures all step-2 attributes)
@@ -159,9 +159,9 @@ function Step4Content() {
       const listingTitle = encodeURIComponent(draft.title || 'Your listing')
 
       // Clear localStorage
-      localStorage.removeItem('cyclemart-sell-draft')
-      localStorage.removeItem('cyclemart-sell-photos')
-      localStorage.removeItem('cyclemart-sell-category')
+      localStorage.removeItem('crankmart-sell-draft')
+      localStorage.removeItem('crankmart-sell-photos')
+      localStorage.removeItem('crankmart-sell-category')
 
       // Delete draft from DB
       try {

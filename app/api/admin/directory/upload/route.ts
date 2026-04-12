@@ -4,7 +4,7 @@ import { join, extname } from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { checkAdminApi } from '@/lib/admin'
 
-const UPLOAD_DIR = '/home/velo/storage/cyclemart/uploads/directory'
+const UPLOAD_DIR = '/home/velo/storage/crankmart/uploads/directory'
 const PUBLIC_URL_BASE = '/uploads/directory'
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']

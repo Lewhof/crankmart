@@ -404,7 +404,7 @@ export default function AdminNewsPage() {
           )}
 
           <div style={{ padding: '12px 16px', background: '#f9f9f9', border: '1px solid #ebebeb', borderRadius: 8, fontSize: 12, color: '#9a9a9a' }}>
-            💡 Use these contacts to invite journalists to submit articles directly via <Link href="/news/submit" style={{ color: '#0D1B2A', fontWeight: 600 }}>/news/submit</Link>, or to pitch CycleMart as a media partner for SA cycling events and product launches.
+            💡 Use these contacts to invite journalists to submit articles directly via <Link href="/news/submit" style={{ color: '#0D1B2A', fontWeight: 600 }}>/news/submit</Link>, or to pitch CrankMart as a media partner for SA cycling events and product launches.
           </div>
         </div>
       )}

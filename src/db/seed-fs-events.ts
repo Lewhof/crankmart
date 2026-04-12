@@ -19,7 +19,7 @@ const fsEvents = [
     discipline: 'gravel',
     distance: '35km / 87km / 165km',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/race2thesky-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/race2thesky-2026.jpg',
   },
   {
     title: 'Munga Grit: Trans Xhariep',
@@ -38,7 +38,7 @@ const fsEvents = [
     discipline: 'gravel',
     distance: '70km / 160km / 500km',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/munga-trans-xhariep-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/munga-trans-xhariep-2026.jpg',
   },
   {
     title: 'The MATSA',
@@ -57,7 +57,7 @@ const fsEvents = [
     discipline: 'gravel',
     distance: '35km / 87km / 165km',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/the-matsa-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/the-matsa-2026.jpg',
   },
   {
     title: 'Gravel Rush: Lion and Tiger Edition',
@@ -76,7 +76,7 @@ const fsEvents = [
     discipline: 'gravel',
     distance: '165km / 265km',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/gravel-rush-lion-tiger-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/gravel-rush-lion-tiger-2026.jpg',
   },
   {
     title: 'Sandstone Unbound',
@@ -95,7 +95,7 @@ const fsEvents = [
     discipline: 'gravel',
     distance: '270km (4 days)',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/sandstone-unbound-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/sandstone-unbound-2026.jpg',
   },
   {
     title: 'Golden Gate MTB Challenge',
@@ -114,7 +114,7 @@ const fsEvents = [
     discipline: 'mtb',
     distance: '22km / 44km',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/golden-gate-mtb-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/golden-gate-mtb-2026.jpg',
   },
   {
     title: 'Sungazer 100 Miler',
@@ -133,7 +133,7 @@ const fsEvents = [
     discipline: 'gravel',
     distance: '44km / 87km',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/sungazer-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/sungazer-2026.jpg',
   },
   {
     title: 'Race2TheKaroo',
@@ -152,7 +152,7 @@ const fsEvents = [
     discipline: 'gravel',
     distance: '46km / 85km / 165km',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/race2thekaroo-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/race2thekaroo-2026.jpg',
   },
   {
     title: 'Battle of the Bikes',
@@ -171,7 +171,7 @@ const fsEvents = [
     discipline: 'gravel',
     distance: '140km',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/battle-of-the-bikes-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/battle-of-the-bikes-2026.jpg',
   },
   {
     title: 'Zuikerkop MTB Challenge',
@@ -190,7 +190,7 @@ const fsEvents = [
     discipline: 'mtb',
     distance: '6km / 11km / 16km / 20km / 30km / 60km',
     is_featured: false,
-    cover_image_url: 'https://cyclemart.co.za/uploads/events/zuikerkop-mtb-2026.jpg',
+    cover_image_url: 'https://crankmart.com/uploads/events/zuikerkop-mtb-2026.jpg',
   },
 ];
 

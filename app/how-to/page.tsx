@@ -2,8 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'How to Use CycleMart | South Africa\'s Cycling Marketplace',
-  description: 'Everything you need to know about buying, selling, and finding cycling gear on CycleMart. Step-by-step guides for listings, messages, events, and more.',
+  title: 'How to Use CrankMart | South Africa\'s Cycling Marketplace',
+  description: 'Everything you need to know about buying, selling, and finding cycling gear on CrankMart. Step-by-step guides for listings, messages, events, and more.',
 }
 
 const sections = [
@@ -23,11 +23,11 @@ const sections = [
       },
       {
         title: 'Contact the Seller',
-        body: 'Use the "Contact Seller" button on any listing to send a message. All messages stay inside CycleMart — your personal contact details are never shared automatically. Negotiate, ask questions, or arrange a viewing.',
+        body: 'Use the "Contact Seller" button on any listing to send a message. All messages stay inside CrankMart — your personal contact details are never shared automatically. Negotiate, ask questions, or arrange a viewing.',
       },
       {
         title: 'Arrange the Deal',
-        body: 'CycleMart is a marketplace — payment and handover happen directly between buyer and seller. Always meet in a safe, public place. Inspect the item before paying. Use EFT for large purchases and only pay once you\'re happy.',
+        body: 'CrankMart is a marketplace — payment and handover happen directly between buyer and seller. Always meet in a safe, public place. Inspect the item before paying. Use EFT for large purchases and only pay once you\'re happy.',
       },
       {
         title: 'Save Listings',
@@ -43,7 +43,7 @@ const sections = [
     steps: [
       {
         title: 'Create an Account',
-        body: 'You need a free CycleMart account to post listings. Register with your email address — takes under a minute. No subscription fees, ever.',
+        body: 'You need a free CrankMart account to post listings. Register with your email address — takes under a minute. No subscription fees, ever.',
       },
       {
         title: 'Post a Listing',
@@ -79,7 +79,7 @@ const sections = [
       },
       {
         title: 'View Business Profiles',
-        body: 'Each business profile shows their services, contact details, operating hours, location, and website. Some profiles include special offers for CycleMart users.',
+        body: 'Each business profile shows their services, contact details, operating hours, location, and website. Some profiles include special offers for CrankMart users.',
       },
       {
         title: 'List Your Business',
@@ -143,7 +143,7 @@ const sections = [
       },
       {
         title: 'Watch for Scams',
-        body: 'Be cautious if a seller insists on upfront payment with no viewing, offers a price that seems too good to be true, or only communicates outside CycleMart. If something feels off, trust your gut.',
+        body: 'Be cautious if a seller insists on upfront payment with no viewing, offers a price that seems too good to be true, or only communicates outside CrankMart. If something feels off, trust your gut.',
       },
       {
         title: 'Secure Payment',
@@ -168,10 +168,10 @@ export default function HowToPage() {
         textAlign: 'center',
       }}>
         <Link href="/" style={{ fontSize: 13, color: '#6a6a6a', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4, marginBottom: 24 }}>
-          ← Back to CycleMart
+          ← Back to CrankMart
         </Link>
         <h1 style={{ fontSize: 36, fontWeight: 900, color: '#fff', margin: '0 0 12px', letterSpacing: '-1px' }}>
-          How to Use CycleMart
+          How to Use CrankMart
         </h1>
         <p style={{ fontSize: 16, color: '#9a9a9a', margin: '0 auto 32px', maxWidth: 520, lineHeight: 1.6 }}>
           Everything you need to buy, sell, and discover cycling gear in South Africa.

@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         `
       )
 
-      const baseUrl = process.env.NEXTAUTH_URL ?? 'https://cyclemart.co.za'
+      const baseUrl = process.env.NEXTAUTH_URL ?? 'https://crankmart.com'
       const resetUrl = `${baseUrl}/reset-password?token=${token}`
       const firstName = user.name?.split(' ')[0] ?? 'there'
 
@@ -52,18 +52,18 @@ export async function POST(request: NextRequest) {
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
   <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #ebebeb">
     <div style="background:#0D1B2A;padding:28px 32px">
-      <div style="color:#fff;font-size:22px;font-weight:800;letter-spacing:-0.5px">CycleMart</div>
+      <div style="color:#fff;font-size:22px;font-weight:800;letter-spacing:-0.5px">CrankMart</div>
     </div>
     <div style="padding:32px">
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Reset your password</h2>
-      <p style="margin:0 0 24px;color:#6b7280;font-size:14px">Hi ${firstName}, click the button below to reset your CycleMart password. This link expires in 1 hour.</p>
+      <p style="margin:0 0 24px;color:#6b7280;font-size:14px">Hi ${firstName}, click the button below to reset your CrankMart password. This link expires in 1 hour.</p>
       <a href="${resetUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:16px">
         Reset Password &rarr;
       </a>
       <p style="font-size:12px;color:#9a9a9a;text-align:center;margin:0">If you didn&apos;t request this, you can safely ignore this email.</p>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a>
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
     </div>
   </div>
 </body>
@@ -71,16 +71,16 @@ export async function POST(request: NextRequest) {
 
       const result = await sendEmail({
         to: email,
-        subject: 'Reset your CycleMart password',
+        subject: 'Reset your CrankMart password',
         html,
-        fromEmail: 'info@cyclemart.co.za',
-        fromName: 'CycleMart',
+        fromEmail: 'info@crankmart.com',
+        fromName: 'CrankMart',
       })
 
       if (!result.ok) {
         if (result.reason === 'disabled' || result.reason === 'not_configured') {
           return Response.json(
-            { error: 'Password reset is not available right now. Please contact info@cyclemart.co.za directly.' },
+            { error: 'Password reset is not available right now. Please contact info@crankmart.com directly.' },
             { status: 503 }
           )
         }
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     const message = err instanceof Error ? err.message : String(err)
     if (message.includes('not_configured') || message.includes('disabled')) {
       return Response.json(
-        { error: 'Password reset is not available right now. Please contact info@cyclemart.co.za directly.' },
+        { error: 'Password reset is not available right now. Please contact info@crankmart.com directly.' },
         { status: 503 }
       )
     }

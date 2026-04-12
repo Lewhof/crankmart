@@ -55,7 +55,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         })
         .where(eq(businesses.id, id))
 
-      const baseUrl = process.env.NEXTAUTH_URL ?? 'https://cyclemart.co.za'
+      const baseUrl = process.env.NEXTAUTH_URL ?? 'https://crankmart.com'
       const claimUrl = `${baseUrl}/directory/claim?token=${token}`
       const previewUrl = `${baseUrl}/directory/${business.slug}`
       const unsubscribeUrl = `${baseUrl}/unsubscribe?bid=${id}`
@@ -70,10 +70,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         })
         await sendEmail({
           to: business.email,
-          subject: `Is this your shop on CycleMart? — ${business.name}`,
+          subject: `Is this your shop on CrankMart? — ${business.name}`,
           html,
-          fromName: 'CycleMart Directory',
-          fromEmail: 'directory@cyclemart.co.za',
+          fromName: 'CrankMart Directory',
+          fromEmail: 'directory@crankmart.com',
         })
       }
       break

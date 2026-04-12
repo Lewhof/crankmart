@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 
-const BASE = 'https://cyclemart.co.za'
+const BASE = 'https://crankmart.com'
 
 // City browse pages (per Elon spec 2026-03-28)
 const CITY_SLUGS = [

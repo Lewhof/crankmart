@@ -187,14 +187,14 @@ export default function DirectoryPage() {
     const itemListSchema = {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      '@id': `https://cyclemart.co.za/directory#itemlist`,
+      '@id': `https://crankmart.com/directory#itemlist`,
       name: pageTitle,
-      description: `Browse cycling businesses across South Africa on CycleMart`,
+      description: `Browse cycling businesses across South Africa on CrankMart`,
       numberOfItems: businesses.length,
       itemListElement: businesses.map((business, index) => ({
         '@type': 'ListItem',
         position: index + 1,
-        url: `https://cyclemart.co.za/directory/${business.slug}`,
+        url: `https://crankmart.com/directory/${business.slug}`,
         name: business.name,
         ...(business.description && { description: business.description }),
         ...(business.logo && { image: business.logo })

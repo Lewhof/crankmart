@@ -4,7 +4,7 @@ import { join, extname } from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { auth } from '@/auth'
 
-const UPLOAD_DIR = '/home/velo/storage/cyclemart/uploads/listings'
+const UPLOAD_DIR = '/home/velo/storage/crankmart/uploads/listings'
 const PUBLIC_URL_BASE = '/uploads/listings'
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']

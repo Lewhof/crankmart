@@ -483,7 +483,7 @@ export default function RoutesClient() {
               <div style={{ marginTop: 36, background: 'linear-gradient(135deg, #0D1B2A 0%, #1E3A5F 100%)', borderRadius: 14, padding: '28px', textAlign: 'center' }}>
                 <Navigation size={24} style={{ color: '#93C5FD', marginBottom: 10 }} />
                 <h3 style={{ color: '#fff', fontSize: 17, fontWeight: 800, margin: '0 0 8px' }}>Know a great route?</h3>
-                <p style={{ color: '#CBD5E1', fontSize: 13, margin: '0 0 18px', maxWidth: 360, marginLeft: 'auto', marginRight: 'auto' }}>Share your favourite ride with the CycleMart community.</p>
+                <p style={{ color: '#CBD5E1', fontSize: 13, margin: '0 0 18px', maxWidth: 360, marginLeft: 'auto', marginRight: 'auto' }}>Share your favourite ride with the CrankMart community.</p>
                 <button style={{ background: '#fff', color: 'var(--color-primary)', border: 'none', padding: '10px 24px', borderRadius: 2, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Submit a Route</button>
               </div>
             </div>

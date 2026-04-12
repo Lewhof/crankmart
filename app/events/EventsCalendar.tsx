@@ -45,7 +45,7 @@ export default function EventsCalendar({ events }: Props) {
   return (
     <div style={{ padding: '20px', maxWidth: 1280, margin: '0 auto' }}>
       <style>{`
-        /* FullCalendar overrides — match CycleMart design */
+        /* FullCalendar overrides — match CrankMart design */
         .fc { font-family: Inter, -apple-system, sans-serif; }
         .fc-toolbar-title { font-size: 16px !important; font-weight: 800 !important; color: #1a1a1a !important; }
         .fc-button-primary {

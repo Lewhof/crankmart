@@ -20,8 +20,8 @@ async function migrate() {
         ('smtp_secure', 'false'),
         ('smtp_user', ''),
         ('smtp_pass', ''),
-        ('smtp_from_name', 'CycleMart'),
-        ('smtp_from_email', 'noreply@cyclemart.co.za'),
+        ('smtp_from_name', 'CrankMart'),
+        ('smtp_from_email', 'noreply@crankmart.com'),
         ('email_notifications_enabled', 'true')
       ON CONFLICT (key) DO NOTHING
     `)

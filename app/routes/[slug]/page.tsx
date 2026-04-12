@@ -32,12 +32,12 @@ async function getRoute(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
   const data = await getRoute(slug)
-  if (!data?.route) return { title: 'Route — CycleMart' }
+  if (!data?.route) return { title: 'Route — CrankMart' }
   const r = data.route
   return {
-    title: `${r.name} — CycleMart`,
+    title: `${r.name} — CrankMart`,
     description: r.description?.slice(0, 155) ?? `${r.discipline} route in ${r.province}`,
-    openGraph: { title: `${r.name} — CycleMart`, description: r.description?.slice(0, 155) ?? '', images: r.hero_image_url ? [{ url: r.hero_image_url }] : [] },
+    openGraph: { title: `${r.name} — CrankMart`, description: r.description?.slice(0, 155) ?? '', images: r.hero_image_url ? [{ url: r.hero_image_url }] : [] },
   }
 }
 

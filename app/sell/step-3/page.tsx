@@ -18,13 +18,13 @@ function Step3Content() {
 
   useEffect(() => {
     // Guard: must have completed step 1 + 2
-    const step1 = localStorage.getItem('cyclemart-sell-category')
-    const step2 = localStorage.getItem('cyclemart-sell-draft')
+    const step1 = localStorage.getItem('crankmart-sell-category')
+    const step2 = localStorage.getItem('crankmart-sell-draft')
     if (!step1 || !step2) {
       router.replace('/sell/step-1')
       return
     }
-    const saved = localStorage.getItem('cyclemart-sell-photos')
+    const saved = localStorage.getItem('crankmart-sell-photos')
     if (saved) {
       try {
         setImages(JSON.parse(saved))
@@ -35,7 +35,7 @@ function Step3Content() {
   const savePhotos = (newImages: typeof images) => {
     // Only persist the server URL — blob previews are not serialisable
     const toSave = newImages.filter(i => i.url).map(({ url }) => ({ url }))
-    localStorage.setItem('cyclemart-sell-photos', JSON.stringify(toSave))
+    localStorage.setItem('crankmart-sell-photos', JSON.stringify(toSave))
   }
 
   const uploadFile = async (file: File) => {

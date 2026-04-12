@@ -1,5 +1,5 @@
 /**
- * CycleMart Business Directory — 80-Listing Seed
+ * CrankMart Business Directory — 80-Listing Seed
  * Generated: 2026-03-29 | Elon (CTO)
  *
  * All listings seeded with:
@@ -1106,7 +1106,7 @@ const businesses: Business[] = [
 ];
 
 async function seed() {
-  console.log(`\n🚀 CycleMart Directory Seed — ${businesses.length} businesses\n`);
+  console.log(`\n🚀 CrankMart Directory Seed — ${businesses.length} businesses\n`);
 
   let inserted = 0;
   let skipped = 0;

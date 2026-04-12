@@ -42,13 +42,13 @@ export async function PATCH(request: NextRequest) {
       const rows = result.rows ?? result
       const article = Array.isArray(rows) ? rows[0] : null
       if (article && article.author_email) {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cyclemart.co.za'
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
         const authorName = String(article.author_name || 'there')
         const articleSlug = String(article.slug)
-        const emailHtml = `<div style="font-family:sans-serif;max-width:560px;margin:40px auto;background:#fff;border-radius:12px;border:1px solid #ebebeb;overflow:hidden"><div style="background:#0D1B2A;padding:24px 32px"><div style="color:#fff;font-size:20px;font-weight:800">CycleMart</div></div><div style="padding:32px"><h2 style="margin:0 0 12px">Your article is live!</h2><p style="color:#6b7280">Hi ${authorName}, your article has been approved and is now live on CycleMart.</p><a href="${baseUrl}/news/${articleSlug}" style="display:inline-block;margin-top:16px;background:#0D1B2A;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">View Article →</a></div></div>`
+        const emailHtml = `<div style="font-family:sans-serif;max-width:560px;margin:40px auto;background:#fff;border-radius:12px;border:1px solid #ebebeb;overflow:hidden"><div style="background:#0D1B2A;padding:24px 32px"><div style="color:#fff;font-size:20px;font-weight:800">CrankMart</div></div><div style="padding:32px"><h2 style="margin:0 0 12px">Your article is live!</h2><p style="color:#6b7280">Hi ${authorName}, your article has been approved and is now live on CrankMart.</p><a href="${baseUrl}/news/${articleSlug}" style="display:inline-block;margin-top:16px;background:#0D1B2A;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">View Article →</a></div></div>`
         sendEmail({
           to: String(article.author_email),
-          subject: 'Your article is live on CycleMart',
+          subject: 'Your article is live on CrankMart',
           html: emailHtml
         })
       }

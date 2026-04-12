@@ -1,12 +1,12 @@
 // Pure email template functions — no server imports, safe for client components
 // Sending logic lives in email.ts (server only)
 
-const LOGO_HTML = '<img src="https://cyclemart.co.za/apple-icon.png" alt="CycleMart" style="width:48px;height:48px;border-radius:8px" />'
+const LOGO_HTML = '<img src="https://crankmart.com/apple-icon.png" alt="CrankMart" style="width:48px;height:48px;border-radius:8px" />'
 const HEADER = (subtitle?: string) => `
   <div style="background:#0D1B2A;padding:20px 32px;display:flex;align-items:center;gap:14px">
     ${LOGO_HTML}
     <div>
-      <div style="color:#fff;font-size:24px;font-weight:800">CycleMart</div>
+      <div style="color:#fff;font-size:24px;font-weight:800">CrankMart</div>
       ${subtitle ? `<div style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:2px">${subtitle}</div>` : ''}
     </div>
   </div>
@@ -41,7 +41,7 @@ export function newMessageEmail({
       </div>
       <div style="display:flex;gap:12px;flex-direction:column">
         <a href="${inboxUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">
-          Reply in CycleMart →
+          Reply in CrankMart →
         </a>
         <a href="${listingUrl}" style="display:block;text-align:center;background:#f5f5f5;color:#0D1B2A;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;border:1px solid #e4e4e7">
           View your listing
@@ -49,8 +49,8 @@ export function newMessageEmail({
       </div>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      You received this because someone messaged you on CycleMart.<br>
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a>
+      You received this because someone messaged you on CrankMart.<br>
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
     </div>
   </div>
 </body>
@@ -74,14 +74,14 @@ export function listingPublishedEmail({
     ${HEADER()}
     <div style="padding:32px">
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Your listing is live! 🎉</h2>
-      <p style="margin:0 0 24px;color:#6b7280;font-size:14px">Hi ${sellerName}, <strong>${listingTitle}</strong> is now visible to buyers on CycleMart.</p>
+      <p style="margin:0 0 24px;color:#6b7280;font-size:14px">Hi ${sellerName}, <strong>${listingTitle}</strong> is now visible to buyers on CrankMart.</p>
       <a href="${listingUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:16px">
         View your listing →
       </a>
       <p style="font-size:13px;color:#9a9a9a;text-align:center">Share it with friends to get more views</p>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a>
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
     </div>
   </div>
 </body>
@@ -110,7 +110,7 @@ export function shopClaimTouch1Email({
     <div style="padding:32px">
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Is this your shop?</h2>
       <p style="margin:0 0 16px;color:#6b7280;font-size:14px;line-height:1.6">
-        We've listed <strong>${businessName}</strong> in ${city} on CycleMart, South Africa's dedicated cycling directory. We'd love for you to claim and manage this listing — it's free.
+        We've listed <strong>${businessName}</strong> in ${city} on CrankMart, South Africa's dedicated cycling directory. We'd love for you to claim and manage this listing — it's free.
       </p>
       <p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.6">
         Claiming your listing lets you update contact details, trading hours, services, and get in front of thousands of SA cyclists.
@@ -123,7 +123,7 @@ export function shopClaimTouch1Email({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a> ·
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -151,7 +151,7 @@ export function shopClaimTouch2Email({
     <div style="padding:32px">
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Still waiting for you to claim ${businessName}</h2>
       <p style="margin:0 0 16px;color:#6b7280;font-size:14px;line-height:1.6">
-        Your listing in ${city} is live on CycleMart. Claiming it takes 2 minutes and is completely free.
+        Your listing in ${city} is live on CrankMart. Claiming it takes 2 minutes and is completely free.
       </p>
       <div style="background:#f9fafb;border-radius:8px;padding:16px;margin-bottom:24px;border-left:3px solid #0D1B2A">
         <div style="font-size:13px;color:#374151;font-weight:700;margin-bottom:8px">What you'll get for free:</div>
@@ -166,7 +166,7 @@ export function shopClaimTouch2Email({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a> ·
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -192,14 +192,14 @@ export function shopClaimTouch3Email({
     <div style="padding:32px">
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Last chance to claim ${businessName}</h2>
       <p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.6">
-        This is our last reminder. Your claim link expires in 7 days. After that, your listing will remain on CycleMart but won't be editable until you request a new link.
+        This is our last reminder. Your claim link expires in 7 days. After that, your listing will remain on CrankMart but won't be editable until you request a new link.
       </p>
       <a href="${claimUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">
         Claim Now →
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a> ·
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -229,7 +229,7 @@ export function shopVerifiedEmail({
         <span style="font-size:20px">✅</span>
         <span style="font-size:14px;font-weight:700;color:#065F46">Your listing is verified!</span>
       </div>
-      <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Welcome to CycleMart, ${ownerName}!</h2>
+      <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Welcome to CrankMart, ${ownerName}!</h2>
       <p style="margin:0 0 16px;color:#6b7280;font-size:14px;line-height:1.6">
         <strong>${businessName}</strong> is now a verified listing on SA's cycling directory. SA cyclists can find you, view your details, and get in touch.
       </p>
@@ -241,7 +241,7 @@ export function shopVerifiedEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a>
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
     </div>
   </div>
 </body>
@@ -268,9 +268,9 @@ export function eventOrganizerTouch1Email({
   <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #ebebeb">
     ${HEADER()}
     <div style="padding:32px">
-      <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Your event is listed on CycleMart</h2>
+      <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Your event is listed on CrankMart</h2>
       <p style="margin:0 0 16px;color:#6b7280;font-size:14px;line-height:1.6">
-        Hi ${organiserName}, we've added <strong>${eventTitle}</strong> (${eventDate}) to CycleMart. Use the link below to update details or make changes at any time.
+        Hi ${organiserName}, we've added <strong>${eventTitle}</strong> (${eventDate}) to CrankMart. Use the link below to update details or make changes at any time.
       </p>
       <a href="${editUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:12px">
         Manage My Event →
@@ -278,7 +278,7 @@ export function eventOrganizerTouch1Email({
       <p style="font-size:13px;color:#9a9a9a;text-align:center;margin:0">Keep this email — it's the only way to edit your event.</p>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a> ·
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -309,7 +309,7 @@ export function eventVerifiedEmail({
       </div>
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Hi ${organiserName} — you're live!</h2>
       <p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.6">
-        <strong>${eventTitle}</strong> has been verified and is now visible to SA cyclists on CycleMart.
+        <strong>${eventTitle}</strong> has been verified and is now visible to SA cyclists on CrankMart.
       </p>
       <a href="${eventUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:12px">
         View Event Page →
@@ -319,7 +319,7 @@ export function eventVerifiedEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a>
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
     </div>
   </div>
 </body>
@@ -353,7 +353,7 @@ export function boostRenewalEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a>
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
     </div>
   </div>
 </body>
@@ -387,7 +387,7 @@ export function adListingInviteEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a> ·
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -426,7 +426,7 @@ export function listingExpiryReminderEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://cyclemart.co.za" style="color:#0D1B2A">cyclemart.co.za</a>
+      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
     </div>
   </div>
 </body>

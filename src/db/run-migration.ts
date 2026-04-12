@@ -8,7 +8,7 @@ async function runMigration() {
   
   try {
     const migrationSQL = fs.readFileSync(
-      "/home/hein/Workspace/cyclemart/drizzle/0005_add_business_status.sql",
+      "/home/hein/Workspace/crankmart/drizzle/0005_add_business_status.sql",
       "utf-8"
     );
     

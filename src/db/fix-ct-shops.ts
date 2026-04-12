@@ -1,9 +1,9 @@
 import { neon } from "@neondatabase/serverless";
 const sql = neon(process.env.DATABASE_URL!);
 
-const AI_COVER = "https://cyclemart.fibreflow.app/shop-covers/generic-bikeshop-ct.png";
-const AI_TRISPORTS = "https://cyclemart.fibreflow.app/shop-covers/trisports-ct.png";
-const PLACEHOLDER = "/images/shop-placeholder.jpg"; // use existing CycleMart placeholder
+const AI_COVER = "https://crankmart.fibreflow.app/shop-covers/generic-bikeshop-ct.png";
+const AI_TRISPORTS = "https://crankmart.fibreflow.app/shop-covers/trisports-ct.png";
+const PLACEHOLDER = "/images/shop-placeholder.jpg"; // use existing CrankMart placeholder
 
 async function run() {
   // ── 1. Find all duplicates ──

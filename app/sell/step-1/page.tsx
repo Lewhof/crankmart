@@ -46,7 +46,7 @@ export default function SellStep1() {
   const handleContinue = () => {
     if (!selectedParent) return
     const finalSlug = selectedChild?.slug ?? selectedParent.slug
-    localStorage.setItem('cyclemart-sell-category', finalSlug)
+    localStorage.setItem('crankmart-sell-category', finalSlug)
     router.push(`/sell/step-2?category=${finalSlug}`)
   }
 

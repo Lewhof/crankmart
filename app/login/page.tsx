@@ -77,7 +77,7 @@ function LoginForm() {
       `}</style>
 
       <div className="auth-card">
-        <div className="auth-logo">🚲 CycleMart</div>
+        <div className="auth-logo">🚲 CrankMart</div>
         <h1 className="auth-title">Welcome back</h1>
         <p className="auth-sub">Sign in to your account</p>
 

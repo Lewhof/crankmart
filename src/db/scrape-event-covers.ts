@@ -53,7 +53,7 @@ async function fetchOgImage(url: string): Promise<string | null> {
     const timer = setTimeout(() => ctrl.abort(), 8000);
     const res = await fetch(url, {
       signal: ctrl.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CycleMartBot/1.0)' }
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CrankMartBot/1.0)' }
     });
     clearTimeout(timer);
     if (!res.ok) return null;

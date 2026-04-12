@@ -1,4 +1,4 @@
-# CycleMart robots.txt
+# CrankMart robots.txt
 
 # Search engines
 User-agent: Googlebot
@@ -46,6 +46,6 @@ Disallow: /_next/
 Allow: /
 
 # Sitemaps
-Sitemap: https://cyclemart.co.za/sitemap.xml
-Sitemap: https://cyclemart.co.za/sitemap-listings.xml
-Sitemap: https://cyclemart.co.za/sitemap-blog.xml
+Sitemap: https://crankmart.com/sitemap.xml
+Sitemap: https://crankmart.com/sitemap-listings.xml
+Sitemap: https://crankmart.com/sitemap-blog.xml
