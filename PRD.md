@@ -649,3 +649,431 @@ Critical P0 user stories with acceptance criteria (Gherkin-lite format). Full ba
 
 ---
 
+# Part 3: Flows, Data Model, Security, Privacy
+
+## 8. Critical User Flows
+
+### 8.1 Authentication Flow (Credentials)
+```
+User -> /login page
+  |
+  v
+Enter email + password, submit
+  |
+  v
+POST /api/auth/callback/credentials (NextAuth)
+  |
+  v
+Server: lookup users.email (lowercase)
+  |
+  +--(no match)--> Return "Invalid credentials" -> UI error
+  |
+  v (match)
+bcrypt.compare(password, passwordHash)
+  |
+  +--(mismatch)--> Return "Invalid credentials" -> UI error
+  |
+  v (match)
+Issue JWT with { id, email, name, province, role }
+  |
+  v
+Set httpOnly cookie
+  |
+  v
+Hard navigate to callback URL or /account
+```
+
+**Error states:**
+| Error | User sees | HTTP |
+|-------|-----------|------|
+| Invalid email format | Inline validation | N/A (client) |
+| User not found | "Invalid credentials" | 401 |
+| Wrong password | "Invalid credentials" | 401 |
+| User banned (is_active=false) | "Account suspended, contact support" | 403 |
+| Rate limit (5 attempts/5min) | "Too many attempts, try again in X min" | 429 |
+
+### 8.2 Payment Flow (PayFast)
+```
+User -> /boost/select?listingId=X
+  |
+  v
+Fetches GET /api/boosts/packages
+User selects package, clicks "Pay"
+  |
+  v
+POST /api/boosts/initiate { packageId, listingId }
+  |
+  v
+Server: validate ownership, create boost(status=pending)
+  |
+  v
+Build PayFast payload + MD5 signature (see src/lib/payfast.ts:15-33)
+  |
+  v
+Response: { checkoutUrl, fields, boostId }
+  |
+  v
+Client auto-submits hidden form to PayFast
+  |
+  v
+User pays on PayFast (external domain)
+  |
+  +--> return_url: /boost/success -> show confirmation (UI only)
+  +--> cancel_url: /boost/cancel -> show cancel page
+  |
+  v
+Meanwhile: PayFast -> POST /api/payments/payfast/itn (server-to-server)
+  |
+  v
+Verify PayFast IP whitelist + MD5 signature
+  |
+  +--(invalid)--> 400/403, log, no state change
+  |
+  v (valid)
+If payment_status='COMPLETE':
+  - Transaction: update boost(status=active, startsAt, expiresAt, pf_payment_id)
+  - Update listing/business/event (isFeatured=true, featuredExpiresAt)
+If payment_status='FAILED'|'CANCELLED':
+  - Update boost(status=failed)
+  |
+  v
+Return 200 "OK" (idempotent: duplicate IPN = no-op)
+```
+
+**Error states:**
+| Error | System behaviour |
+|-------|------------------|
+| Invalid IP | 403, log to Sentry |
+| Invalid signature | 400, log |
+| Boost not found | 404, log |
+| Already active (duplicate IPN) | 200 OK, no change |
+| Database transaction fail | 500, log, PayFast retries |
+
+### 8.3 Sell Flow (4-Step Wizard)
+```
+/sell/step-1 (category)
+  | [save to localStorage: crankmart-sell-category]
+  v
+/sell/step-2 (details)
+  | [guard: requires step-1 key]
+  | [load draft: GET /api/sell/draft || localStorage]
+  | [autosave: POST /api/sell/draft every 1.5s]
+  v
+/sell/step-3 (photos)
+  | [guard: requires step-1 + step-2 keys]
+  | [upload: POST /api/sell/upload per file, append to list]
+  | [localStorage: crankmart-sell-photos]
+  v
+/sell/step-4 (price + location)
+  | [auth required: redirect to /login if unauth]
+  | [load draft: GET /api/sell/draft]
+  v
+Submit -> POST /api/sell/publish
+  |
+  +--(duplicate detected)--> 409 + existingSlug -> Show modal "View existing or publish anyway"
+  |
+  v
+Listing created (status=active, moderationStatus=pending, expiresAt=+30d)
+  |
+  v
+DELETE /api/sell/draft (clear server draft)
+Clear localStorage
+Confirmation email sent
+  |
+  v
+Redirect /sell/success -> /browse/[slug]
+```
+
+**Error states:**
+| Error | User sees |
+|-------|-----------|
+| Missing required field | Inline validation |
+| Image upload fails | Toast: "Upload failed, retry"; placeholder removed |
+| Unauthenticated on step-4 | Redirect to /login with callback |
+| API 500 on publish | Toast: "Something went wrong, try again" + Sentry log |
+
+### 8.4 Business Claim Flow
+```
+Admin/System -> claim token generated (30-day TTL)
+  |
+  v
+Touch 1 email -> shop owner clicks link
+  |
+  v
+GET /za/directory/claim?token=X
+  | [SSR: validate token against businesses.claimToken + claimTokenExpiresAt]
+  |
+  +--(invalid/expired)--> Show error + "Request new link"
+  |
+  v (valid)
+Render ClaimForm with prefilled business data
+User fills: name/phone/email/website/address/description + POPIA consent
+  |
+  v
+POST /api/directory/claim
+  |
+  v
+Re-validate token (prevents race)
+Check phone OR email present
+  |
+  v
+Find or create user (role=shop_owner, random password)
+Update business: status=claimed, verified=true, claimedBy, consentAt
+Clear: claimToken, claimTokenExpiresAt
+  |
+  v
+Send verification email (shopVerifiedEmail)
+Redirect /za/directory/[slug]?claimed=1
+```
+
+**Error states:**
+| Error | User sees |
+|-------|-----------|
+| Token missing | 404 page |
+| Token expired | Error page + request-new link |
+| No contact provided | Inline: "Phone or email required" |
+| Consent not ticked | Submit disabled |
+
+---
+
+## 9. Data Model
+
+### 9.1 Core Tables (17)
+See src/db/schema.ts for full Drizzle definitions. Summary:
+
+| Table | PK | Key Columns | Relations |
+|-------|-----|-------------|-----------|
+| users | uuid | email (unique), name, role, kycStatus, province, avatarUrl, passwordHash | -> listings, saves, messages |
+| listing_categories | serial | slug (unique), parentId, name | <- listings |
+| listings | uuid | slug (unique), sellerId -> users, categoryId, title, price (numeric), condition, status, moderationStatus, searchVector (tsvector), **country_code** (new) | <- listing_images, listing_saves, messages |
+| listing_images | uuid | listingId, imageUrl, thumbUrl, displayOrder | |
+| listing_saves | uuid | userId, listingId, createdAt | |
+| conversations | uuid | listingId, buyerId, sellerId, lastMessageAt, unread counters | <- messages |
+| messages | uuid | conversationId, senderId, body, isRead, createdAt | |
+| businesses | uuid | slug (unique), name, businessType, status, verified, tier, boostTier, claimToken, claimedBy, searchVector, **country_code** (new) | |
+| events | uuid | slug (unique), eventType, status, startDate, editToken, organiserUserId, boostTier, **country_code** (new) | |
+| routes | uuid | slug (unique), discipline, difficulty, distanceKm, elevationM, lat, lng, status, submittedBy, **country_code** (new) | <- route_images, route_loops, route_reviews, route_saves |
+| route_images | uuid | routeId, url, displayOrder, isPrimary | |
+| route_loops | uuid | routeId, name, distanceKm, difficulty, category | |
+| route_reviews | uuid | routeId, userId, rating, body, conditionsNote | |
+| route_saves | uuid | userId, routeId | |
+| scrape_runs | uuid | sourceName, startedAt, finishedAt, stats | |
+| boost_packages | serial | type, name, priceCents, durationDays | <- boosts |
+| boosts | uuid | userId, packageId, listingId OR directoryId OR eventId OR routeId OR newsId, status, startsAt, expiresAt, payfastPaymentId | |
+| **admin_todos (new)** | uuid | title, description, status, priority, category, assignee, dueDate, createdAt | |
+
+### 9.2 Enums (16 + 1 new)
+```
+listing_condition: new, like_new, used, poor
+listing_status: draft, active, sold, expired, removed, paused
+user_role: buyer, seller, shop_owner, organiser, vendor, admin, superadmin
+seller_type: individual, shop, brand
+moderation_status: pending, approved, rejected, flagged
+kyc_status: not_submitted, pending, approved, rejected
+event_type: race, sportive, fun_ride, social_ride, training_camp, expo, club_event, charity_ride
+event_status: draft, pending_review, verified, cancelled, completed
+boost_type: bump, category_top, homepage, directory
+boost_status: pending, active, expired, failed, refunded
+route_discipline: road, mtb, gravel, urban, bikepacking
+route_difficulty: beginner, intermediate, advanced, expert
+route_surface: tarmac, gravel, singletrack, mixed
+route_status: pending, approved, rejected
+business_type: shop, brand, service_center, tour_operator, event_organiser
+business_status: pending, verified, suspended, claimed, removed
+todo_status (new): to_do, in_progress, done, blocked
+todo_priority (new): critical, high, medium, low
+```
+
+### 9.3 New Migration Required: 0008_country_code.sql
+```sql
+-- Add country_code to location-dependent tables
+ALTER TABLE listings ADD COLUMN country_code VARCHAR(2) NOT NULL DEFAULT 'ZA';
+ALTER TABLE businesses ADD COLUMN country_code VARCHAR(2) NOT NULL DEFAULT 'ZA';
+ALTER TABLE routes ADD COLUMN country_code VARCHAR(2) NOT NULL DEFAULT 'ZA';
+ALTER TABLE events ADD COLUMN country_code VARCHAR(2) NOT NULL DEFAULT 'ZA';
+ALTER TABLE users ADD COLUMN country_code VARCHAR(2) NOT NULL DEFAULT 'ZA';
+
+-- Indexes for country filtering
+CREATE INDEX idx_listings_country ON listings(country_code);
+CREATE INDEX idx_businesses_country ON businesses(country_code);
+CREATE INDEX idx_routes_country ON routes(country_code);
+CREATE INDEX idx_events_country ON events(country_code);
+
+-- Admin whiteboard
+CREATE TYPE todo_status AS ENUM ('to_do','in_progress','done','blocked');
+CREATE TYPE todo_priority AS ENUM ('critical','high','medium','low');
+
+CREATE TABLE admin_todos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  status todo_status NOT NULL DEFAULT 'to_do',
+  priority todo_priority NOT NULL DEFAULT 'medium',
+  category VARCHAR(50),
+  assignee_id UUID REFERENCES users(id),
+  due_date DATE,
+  created_by UUID REFERENCES users(id) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### 9.4 API Contracts
+See `docs/API_CONTRACTS.md` for full request/response schemas of all 91+ endpoints.
+
+---
+
+## Section 10: Security Threat Model
+
+### 10.1 OWASP Top 10 Mapped to CrankMart
+
+| OWASP Risk | CrankMart Attack Surface | Mitigation |
+|------------|--------------------------|------------|
+| A01 Broken Access Control | Admin routes, listing ownership, conversation access | requireAdmin() middleware on all /api/admin/*; session userId checked against resource owner before every PATCH/DELETE; conversations locked to buyer/seller IDs |
+| A02 Cryptographic Failures | Passwords at rest, PayFast signature, session tokens | bcrypt (cost=12) for passwords; PayFast MD5 signature validated server-side; NextAuth JWT signed with AUTH_SECRET (HS256, 256-bit random); HTTPS enforced via Vercel |
+| A03 Injection | Listing search, directory search, slug params | Drizzle ORM parameterised queries throughout — no raw SQL interpolation; tsvector full-text search via Drizzle sql tagged template (auto-escaped) |
+| A04 Insecure Design | Sell wizard multi-step, free-form description field, event submission | Server-side re-validation of all draft data at publish time; XSS-safe rendering (React escapes by default); admin moderation queue before listing goes live |
+| A05 Security Misconfiguration | ENV vars, CORS, headers | All secrets in Vercel Environment Variables (never in code); Next.js default security headers; no CORS wildcard on mutation endpoints |
+| A06 Vulnerable Components | npm dependency chain | Dependabot alerts enabled on repo; lock file committed; regular npm audit in CI |
+| A07 Auth Failures | Login brute force, session fixation, password reset | Rate-limit login attempts (3 per IP per 15 min via middleware); NextAuth rotates session on sign-in; reset tokens are UUID v4, single-use, 1-hour TTL, hashed in DB |
+| A08 Software & Data Integrity | PayFast webhook spoofing | IP whitelist (PayFast published CIDR blocks) + MD5 signature check; webhook body parsed before any DB write |
+| A09 Logging Failures | Audit trail for admin actions, payment events | Structured logs via console.error captured by Vercel Log Drain; payment events logged to boosts table with full PayFast response payload |
+| A10 SSRF | Directory concierge mode accepts website_url | URL validated against allowlist scheme (https only); no server-side URL fetching from user input; scraper runs in isolated cron, not triggered by user input |
+
+### 10.2 CrankMart-Specific Threat Scenarios
+
+#### T-01: Fake Listing Spam
+- **Attack:** Bot creates accounts and floods listings with spam/scam content.
+- **Mitigations:** Email verification required before listing; admin moderation queue (status=pending to active); rate limit POST /api/sell/publish to 5/hour per user.
+
+#### T-02: PayFast Replay Attack
+- **Attack:** Attacker re-sends a valid ITN webhook to credit a boost multiple times.
+- **Mitigations:** pf_payment_id stored in boosts table with UNIQUE constraint; duplicate ITN silently ignored (idempotent handler); m_payment_id maps to a single internal boostId.
+
+#### T-03: Listing Hijack via IDOR
+- **Attack:** User guesses another listing's UUID and PATCHes it.
+- **Mitigations:** PATCH /api/listings/by-id/[id]/edit requires session.user.id === listing.sellerId; admin role required to override; UUID v4 (2^122 space) makes enumeration infeasible.
+
+#### T-04: Avatar/Image Upload Abuse
+- **Attack:** User uploads malicious file disguised as image.
+- **Mitigations:** MIME type checked server-side (not just extension); max size enforced (10MB listings, 5MB avatars); images stored in Vercel Blob (isolated, no execution); filenames replaced with UUID on write.
+
+#### T-05: Credential Stuffing on Login
+- **Attack:** Attacker uses leaked credential list against /api/auth/credentials.
+- **Mitigations:** NextAuth rate-limiting middleware (IP + email); bcrypt ensures slow comparison; no username enumeration on forgot-password (always 200).
+
+#### T-06: Password Reset Token Theft
+- **Attack:** Attacker intercepts or brute-forces reset token.
+- **Mitigations:** Token = UUID v4 (2^122 space); stored as bcrypt hash in DB; expires in 1 hour; single-use (deleted on successful reset); sent only to verified email.
+
+#### T-07: Admin Route Escalation
+- **Attack:** Regular user calls /api/admin/* directly.
+- **Mitigations:** requireAdmin() checks session.user.role === 'admin' on every admin route; role stored in JWT (not localStorage); role promoted only via direct DB update by platform owner.
+
+#### T-08: XSS via Listing Content
+- **Attack:** Seller injects script tags in description; displayed to buyers.
+- **Mitigations:** React JSX renders text nodes (auto-escaped); no dangerouslySetInnerHTML on user content; rich text (if added) must use DOMPurify sanitiser.
+
+#### T-09: Country Scope Bypass
+- **Attack:** User from /za attempts to post listings under /au scope.
+- **Mitigations:** country_code derived server-side from URL path segment (/za, /au), not from user-supplied payload; publish endpoint sets country_code from middleware-resolved locale.
+
+#### T-10: Scraper Bot Abuse
+- **Attack:** CrankMartBot user-agent mimicked to scrape or flood target sites.
+- **Mitigations:** Scrapers run on server cron only; no public-facing endpoint triggers scraping; rate limits respected in scraper code; robots.txt respected.
+
+### 10.3 Security Headers
+
+```typescript
+// next.config.ts — headers()
+const securityHeaders = [
+  { key: 'X-DNS-Prefetch-Control', value: 'on' },
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+];
+```
+
+### 10.4 Dependency Security Policy
+
+- **Lock file:** package-lock.json committed; CI fails on lock mismatch.
+- **Audit:** npm audit --audit-level=high runs in GitHub Actions on every PR.
+- **Dependabot:** Weekly dependency update PRs auto-opened.
+- **No eval:** ESLint rule no-eval enforced; no dynamic require() with user input.
+
+---
+
+## Section 11: Privacy & Compliance
+
+### 11.1 Data Classification
+
+| Data Class | Examples | Storage | Retention |
+|------------|----------|---------|-----------|
+| Public | Listing content, business profiles, route data | PostgreSQL + Blob | Indefinite (until deleted) |
+| User PII | Name, email, province, avatar | PostgreSQL (encrypted at rest via Neon) | Until account deletion |
+| Sensitive | Hashed passwords, reset tokens | PostgreSQL | Passwords: indefinite; tokens: 1h TTL |
+| Payment | PayFast payment IDs (no card data) | PostgreSQL | 7 years (financial records) |
+| Logs | API request logs, error traces | Vercel Log Drain | 30 days |
+
+CrankMart never stores raw card numbers, CVVs, or full banking details. All payment processing is delegated to PayFast (PCI-DSS Level 1 certified).
+
+### 11.2 POPIA Compliance (South Africa — /za scope)
+
+| POPIA Requirement | CrankMart Implementation |
+|-------------------|--------------------------|
+| Lawful basis for processing | Contract performance (listing, buying) + legitimate interest (platform safety) |
+| Information officer | Designated on privacy@crankmart.co.za |
+| Privacy notice | /privacy page; shown at registration |
+| Data subject rights | Account deletion removes PII; listings anonymised; export (Phase 2) |
+| Breach notification | Within 72 hours to Information Regulator if >100 subjects affected |
+| Cross-border transfers | Data stored on Neon (AWS us-east-1); covered by contractual clauses |
+| Children's data | No under-18 accounts; ToS requires 18+ |
+| Direct marketing | Opt-in email only; unsubscribe in every email footer |
+
+POPIA Operator agreements: Neon, Vercel, and Resend (email) are data operators with DPAs in place.
+
+### 11.3 GDPR Readiness (/au and /nz scope — Phase 2)
+
+| GDPR Requirement | Status | Action Required |
+|------------------|--------|-----------------|
+| Lawful basis | Planned | Contract + legitimate interest basis documented |
+| Cookie consent | Phase 2 | Cookie banner with consent manager |
+| Right to erasure | Partial | Account delete flow implemented; full cascading delete needed |
+| Data portability | Not yet | Export endpoint: GET /api/account/export (Phase 2) |
+| DPO designation | Phase 2 | Required if processing at scale |
+| Privacy by design | Ongoing | country_code isolation ensures AU data never mingles with ZA |
+
+### 11.4 Data Retention & Deletion
+
+```
+User requests deletion → POST /api/account/delete (Phase 2)
+  ├─ Set users.deleted_at = NOW()
+  ├─ Anonymise: users.email = deleted_{id}@crankmart.com, name = 'Deleted User'
+  ├─ Nullify: avatar_url, phone, address fields
+  ├─ Mark listings status = 'removed'
+  ├─ Preserve: payment records (7-year legal hold), anonymised analytics
+  └─ Queue: Blob avatar deletion (async job)
+```
+
+### 11.5 Cookies & Tracking
+
+| Cookie | Type | Purpose | TTL |
+|--------|------|---------|-----|
+| next-auth.session-token | Essential | Auth session | 30 days |
+| next-auth.csrf-token | Essential | CSRF protection | Session |
+| crankmart-locale | Functional | Country preference | 1 year |
+| Analytics (Phase 2) | Analytics | Usage metrics | Provider-dependent |
+
+No third-party advertising cookies. Analytics to be privacy-first (Plausible or self-hosted PostHog).
+
+### 11.6 Email Compliance
+
+- Every transactional email includes: sender identity, physical address, unsubscribe link.
+- Marketing emails (Phase 2): double opt-in, list stored in DB, honour unsubscribe within 48h.
+- SPF, DKIM, DMARC records configured for crankmart.com sending domain.
+- Resend (SMTP provider) DPA signed.
+
+---
+
