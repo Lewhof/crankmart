@@ -2,6 +2,9 @@
   "name": "crankmart",
   "version": "0.2.1",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev -p 3010",
     "dev:test": "next dev -p 3011",
