@@ -13,6 +13,9 @@
     "lint": "eslint",
     "db:seed": "tsx src/db/seed.ts",
     "db:seed:directory": "tsx seed-directory.ts",
+    "db:seed:all": "tsx src/db/seeds/index.ts --all",
+    "db:seed:entity": "tsx src/db/seeds/index.ts",
+    "db:apply-migration": "tsx src/db/apply-migration.ts",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {

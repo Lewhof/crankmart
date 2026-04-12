@@ -320,6 +320,7 @@ export const routes = pgTable('routes', {
   submittedBy:     uuid('submitted_by').references(() => users.id),
   viewsCount:      integer('views_count').default(0),
   savesCount:      integer('saves_count').default(0),
+  source:          varchar('source', { length: 100 }),
   createdAt:       timestamp('created_at').defaultNow(),
   updatedAt:       timestamp('updated_at').defaultNow(),
 })
@@ -426,6 +427,7 @@ export const events = pgTable('events', {
   outreachSentAt: timestamp('outreach_sent_at'),
   viewsCount: integer('views_count').default(0),
   savesCount: integer('saves_count').default(0),
+  source: varchar('source', { length: 100 }),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 })
@@ -492,6 +494,7 @@ export const businesses = pgTable('businesses', {
   claimedAt: timestamp('claimed_at'),
   verifiedAt: timestamp('verified_at'),
   searchVector: tsvector('search_vector'),
+  source: varchar('source', { length: 100 }),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 })

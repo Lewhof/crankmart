@@ -31,5 +31,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/db/seeds/_legacy", "scripts/migrate-business-seeds.ts", "scripts/migrate-routes-seed.cjs"]
 }
