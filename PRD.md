@@ -261,6 +261,188 @@ Once expanded to AU/NZ/UK, CrankMart competes with:
 
 ## End of Part 1
 
-**Next: Part 2 will cover Functional Requirements with User Stories, Feature Inventory with Cross-References, and Data Model.**
+---
 
-*Part 1 word count: ~2,800 words. Full PRD target: ~12,000 words across 4 parts.*
+# Part 2A: Feature Inventory
+
+Carried forward from CycleMart v0.2.1 and enhanced. Each feature has a status, owner persona, phase priority, and cross-reference to existing code.
+
+## 6. Feature Inventory
+
+### 6.1 Authentication & User Management
+| ID | Feature | Status | Persona | Priority | Code Reference |
+|----|---------|--------|---------|----------|----------------|
+| F-AUTH-01 | Email/password login | Exists | All | P0 | src/auth.ts:18-46 |
+| F-AUTH-02 | Google OAuth login | Exists | All | P0 | src/auth.ts:14-17 |
+| F-AUTH-03 | Email verification | Schema exists, not wired | All | P1 | users.emailVerified |
+| F-AUTH-04 | Password reset (email token) | Exists | All | P0 | app/api/auth/forgot-password |
+| F-AUTH-05 | Session management (JWT) | Exists | All | P0 | src/auth.ts:53 |
+| F-AUTH-06 | Role-based access (7 roles) | Exists | Admin | P0 | userRoleEnum |
+| F-AUTH-07 | KYC workflow | Schema exists, UI pending | Seller/Shop | P2 | users.kycStatus |
+| F-AUTH-08 | Profile editing (name, province, password) | Exists | All | P0 | /api/account/update |
+| F-AUTH-09 | Avatar upload | Exists | All | P1 | /api/account/avatar |
+| F-AUTH-10 | Account deletion (POPIA/GDPR) | **New** | All | P1 | Schema + DELETE /api/account |
+
+### 6.2 Classifieds Marketplace
+| ID | Feature | Status | Persona | Priority | Code Reference |
+|----|---------|--------|---------|----------|----------------|
+| F-LIST-01 | Browse listings (filters, pagination) | Exists | Buyer | P0 | app/browse/page.tsx |
+| F-LIST-02 | Listing detail page | Exists | Buyer | P0 | app/browse/[slug]/ListingDetail.tsx |
+| F-LIST-03 | 4-step sell wizard | Exists | Seller | P0 | app/sell/step-1..4 |
+| F-LIST-04 | Draft autosave (server + localStorage) | Exists | Seller | P0 | /api/sell/draft |
+| F-LIST-05 | Multi-image upload (up to 15, 10MB each) | Exists | Seller | P0 | /api/sell/upload |
+| F-LIST-06 | Bike-spec fields (brand, model, year, frame, wheels, drivetrain) | Exists | Seller | P0 | listings table |
+| F-LIST-07 | Condition grading (new/like_new/used/poor) | Exists | Seller | P0 | conditionEnum |
+| F-LIST-08 | Price + negotiable flag | Exists | Seller | P0 | listings.price/negotiable |
+| F-LIST-09 | Shipping availability | Exists | Seller | P1 | listings.shippingAvailable |
+| F-LIST-10 | Duplicate detection on publish | Exists | Seller | P0 | publish route |
+| F-LIST-11 | Edit own listing | Exists | Seller | P0 | /api/listings/by-id/[id]/edit |
+| F-LIST-12 | Mark as sold | Exists | Seller | P0 | /api/listings/[id]/mark-sold |
+| F-LIST-13 | Save/favourite listings | Exists | Buyer | P0 | /api/listings/save |
+| F-LIST-14 | Listing renewal (30-day expiry) | Exists | Seller | P1 | /api/listings/[slug]/renew |
+| F-LIST-15 | Full-text search (tsvector) | Schema exists, needs wiring | Buyer | P1 | listings.searchVector |
+| F-LIST-16 | Filter by category, condition, price, province | Exists | Buyer | P0 | Browse query params |
+| F-LIST-17 | Listing moderation (pending -> approved) | Exists | Admin | P0 | moderationStatusEnum |
+| F-LIST-18 | Saved-listing alerts (cron email) | Exists | Buyer | P2 | /api/cron/saved-listing-alerts |
+| F-LIST-19 | Similar/related listings | Stubbed | Buyer | P2 | Sprint 2 |
+| F-LIST-20 | Report listing | **New** | Buyer/Admin | P1 | Schema + UI |
+
+### 6.3 Business Directory
+| ID | Feature | Status | Persona | Priority | Code Reference |
+|----|---------|--------|---------|----------|----------------|
+| F-DIR-01 | Browse directory (filter by type/province/city) | Exists | All | P0 | /api/directory |
+| F-DIR-02 | Business detail page | Exists | Buyer | P0 | BusinessDetail.tsx |
+| F-DIR-03 | Map view (Leaflet) | Exists | Buyer | P1 | app/directory/MapComponent |
+| F-DIR-04 | Proximity search (lat/lng/radius) | Exists | Buyer | P1 | /api/directory?lat&lng&nearbyKm |
+| F-DIR-05 | Self-serve business registration | Exists | Shop Owner | P0 | /api/directory/register |
+| F-DIR-06 | Concierge registration (admin-assisted) | Exists | Shop Owner | P0 | mode=concierge |
+| F-DIR-07 | Business claim via JWT token link | Exists | Shop Owner | P0 | /api/directory/claim |
+| F-DIR-08 | 3-touch outreach email sequence | Exists | Admin -> Shop | P0 | email-templates touch1/2/3 |
+| F-DIR-09 | Verification pipeline (pending/verified/suspended) | Exists | Admin | P0 | businessStatusEnum |
+| F-DIR-10 | Business hours (JSON) | Schema exists | Shop Owner | P1 | businesses.hours |
+| F-DIR-11 | Brands stocked + services arrays | Exists | Shop Owner | P0 | text[] columns |
+| F-DIR-12 | WhatsApp contact button | Exists | Buyer | P0 | BusinessDetail |
+| F-DIR-13 | Reviews/ratings | **New** | All | P2 | New schema |
+| F-DIR-14 | Admin verification dashboard | Exists | Admin | P0 | /admin/verifications |
+| F-DIR-15 | Boost tiers (Free/Starter/Pro/Anchor) | Exists | Shop Owner | P0 | businesses.tier/boostTier |
+
+### 6.4 Cycling Routes
+| ID | Feature | Status | Persona | Priority | Code Reference |
+|----|---------|--------|---------|----------|----------------|
+| F-RT-01 | Browse routes (filter by discipline, difficulty, distance, province) | Exists | All | P0 | /api/routes |
+| F-RT-02 | Route detail with gallery, loops, reviews | Exists | All | P0 | app/routes/[slug] |
+| F-RT-03 | Route map + GPX download | Partial | Buyer | P1 | routes.gpxUrl |
+| F-RT-04 | Route loops with colour-coded difficulty | Exists | All | P1 | route_loops table |
+| F-RT-05 | Reviews + conditions notes | Exists | All | P1 | route_reviews |
+| F-RT-06 | Save route | Exists | All | P1 | /api/routes/[slug]/save |
+| F-RT-07 | Proximity search | Exists | All | P1 | ?lat&lng&nearbyKm |
+| F-RT-08 | Admin route management (create/edit/images) | Exists | Admin | P0 | /admin/routes/* |
+| F-RT-09 | Scrape integrations (Trailforks, Komoot, MTB Trails SA) | Exists | Admin | P1 | src/db/scrapers/ |
+| F-RT-10 | "My Routes" tab (user's submissions) | **New** | All | P2 | Needs submitted_by index |
+
+### 6.5 Events
+| ID | Feature | Status | Persona | Priority | Code Reference |
+|----|---------|--------|---------|----------|----------------|
+| F-EV-01 | Calendar + list + map views | Exists | All | P0 | EventsCalendar, EventsMap |
+| F-EV-02 | 8 event types (race/sportive/fun_ride/etc.) | Exists | All | P0 | eventTypeEnum |
+| F-EV-03 | Event detail page | Exists | All | P0 | app/events/[slug] |
+| F-EV-04 | Event submission form | Exists | Organiser | P0 | /api/events/submit |
+| F-EV-05 | Organiser portal via token edit link | Exists | Organiser | P0 | /api/events/manage/[token] |
+| F-EV-06 | Moderation workflow | Exists | Admin | P0 | eventStatusEnum |
+| F-EV-07 | Entry fee + registration URL | Exists | Organiser | P0 | entry_url, entry_fee |
+| F-EV-08 | Event boost (Featured/Headline tiers) | Exists | Organiser | P1 | boostTier on events |
+| F-EV-09 | Filter by month/province/type | Exists | All | P0 | Query params |
+| F-EV-10 | Organiser outreach emails | Exists | Admin | P1 | email templates |
+
+### 6.6 Messaging
+| ID | Feature | Status | Persona | Priority | Code Reference |
+|----|---------|--------|---------|----------|----------------|
+| F-MSG-01 | Buyer-seller direct messaging | Exists | Buyer/Seller | P0 | /api/messages/* |
+| F-MSG-02 | Conversation threads | Exists | All | P0 | /api/messages |
+| F-MSG-03 | Unread count badge | Exists | All | P0 | /api/messages/unread-count |
+| F-MSG-04 | Start conversation from listing | Exists | Buyer | P0 | /api/messages/start |
+| F-MSG-05 | Email notifications on new message | Exists | All | P1 | email-templates |
+| F-MSG-06 | Rate limiting / spam protection | **New** | Admin | P1 | Middleware |
+| F-MSG-07 | Report conversation | **New** | All | P2 | New schema |
+
+### 6.7 Monetisation (Boosts & Payments)
+| ID | Feature | Status | Persona | Priority | Code Reference |
+|----|---------|--------|---------|----------|----------------|
+| F-PAY-01 | Boost package catalogue | Exists | Seller/Shop | P0 | /api/boosts/packages |
+| F-PAY-02 | 4 boost types (bump, category_top, homepage, directory) | Exists | All | P0 | boostTypeEnum |
+| F-PAY-03 | PayFast checkout + signature + IPN | Exists | Seller | P0 | src/lib/payfast.ts |
+| F-PAY-04 | Boost expiry cron | Exists | System | P0 | /api/cron/expire-boosts |
+| F-PAY-05 | Business tier pricing (R0/R149/R399/R999) | Exists | Shop Owner | P0 | /pricing page |
+| F-PAY-06 | Event boost pricing (R0/R299/R799) | Exists | Organiser | P0 | /pricing page |
+| F-PAY-07 | Admin payment reconciliation | Exists | Admin | P0 | /admin/payfast |
+| F-PAY-08 | Refund workflow | Manual | Admin | P2 | DB update |
+| F-PAY-09 | Stripe integration (international) | **New** | Future | P2 (Phase 2+) | lib/payments/stripe.ts |
+| F-PAY-10 | Country-aware gateway selection | **New** | System | P1 | payment interface |
+
+### 6.8 News & Editorial
+| ID | Feature | Status | Persona | Priority | Code Reference |
+|----|---------|--------|---------|----------|----------------|
+| F-NEWS-01 | Browse articles | Exists | All | P1 | app/news |
+| F-NEWS-02 | Article detail page | Exists | All | P1 | app/news/[slug] |
+| F-NEWS-03 | Submit article | Exists | All | P2 | /api/news/submit |
+| F-NEWS-04 | Admin news management | Exists | Admin | P1 | /admin/news |
+| F-NEWS-05 | Author byline / "My Articles" | **New** | All | P2 | Needs author_id |
+
+### 6.9 Admin Platform
+| ID | Feature | Status | Persona | Priority | Code Reference |
+|----|---------|--------|---------|----------|----------------|
+| F-ADM-01 | Dashboard (stats overview) | Exists | Admin | P0 | /admin |
+| F-ADM-02 | User management + role assignment | Exists | Admin | P0 | /admin/users |
+| F-ADM-03 | Listing moderation | Exists | Admin | P0 | /admin/listings |
+| F-ADM-04 | Event moderation | Exists | Admin | P0 | /admin/events |
+| F-ADM-05 | Directory moderation | Exists | Admin | P0 | /admin/directory |
+| F-ADM-06 | Route management | Exists | Admin | P0 | /admin/routes |
+| F-ADM-07 | Boost package CRUD | Exists | Admin | P0 | /admin/boosts |
+| F-ADM-08 | PayFast payment monitoring | Exists | Admin | P0 | /admin/payfast |
+| F-ADM-09 | Verification queue | Exists | Admin | P0 | /admin/verifications |
+| F-ADM-10 | Email template preview | Exists | Admin | P1 | /admin/email-templates |
+| F-ADM-11 | Theme customisation | Exists | Admin | P2 | /admin/theme |
+| F-ADM-12 | SEO audit tools | Exists | Admin | P1 | /admin/seo-audit |
+| F-ADM-13 | Analytics dashboard | Exists | Admin | P0 | /admin/analytics |
+| F-ADM-14 | Site settings (SMTP, general) | Exists | Admin | P0 | /admin/settings |
+| F-ADM-15 | **Admin Whiteboard (new)** | **New** | Admin | P1 | /admin/whiteboard |
+| F-ADM-16 | Reports management | Exists | Admin | P2 | /admin/reports |
+
+### 6.10 International Framework (New)
+| ID | Feature | Status | Priority | Spec |
+|----|---------|--------|----------|------|
+| F-INTL-01 | Country config system | **New** | P0 | src/config/countries/[code].ts |
+| F-INTL-02 | Dynamic /[country]/ routing | **New** | P0 | app/[country]/ segment |
+| F-INTL-03 | Currency abstraction | **New** | P0 | formatPrice(cents, countryCode) |
+| F-INTL-04 | Region/province abstraction | **New** | P0 | Country-specific regions |
+| F-INTL-05 | Phone format abstraction | **New** | P1 | Country phoneFormat |
+| F-INTL-06 | Payment gateway interface | **New** | P0 | lib/payments/interface.ts |
+| F-INTL-07 | Timezone abstraction | **New** | P1 | Country timezone |
+| F-INTL-08 | country_code column on content tables | **New** | P0 | Drizzle migration 0008 |
+| F-INTL-09 | IP-based country auto-detect (root) | **New** | P1 | middleware.ts |
+| F-INTL-10 | Country-aware sitemap | **New** | P1 | app/[country]/sitemap.ts |
+
+### 6.11 Rebrand (New)
+| ID | Feature | Status | Priority | Detail |
+|----|---------|--------|----------|--------|
+| F-RB-01 | All cyclemart references -> crankmart | **New** | P0 | 304+ locations (see REBRAND_INVENTORY.md) |
+| F-RB-02 | New logo + favicon set | **New** | P0 | 7 icon sizes |
+| F-RB-03 | New email templates (11) | **New** | P0 | crankmart branding |
+| F-RB-04 | New social handles | **New** | P1 | Secure @crankmart everywhere |
+| F-RB-05 | cyclemart.co.za 301 -> crankmart.com/za | **New** | P0 | Vercel redirect |
+| F-RB-06 | crankmart.co.za 301 -> crankmart.com/za | **New** | P0 | Vercel redirect |
+
+### 6.12 Out of Scope (Phase 1)
+- Native mobile app (React Native / Expo) -- PWA only
+- Multi-language translation -- English only
+- AI pricing recommendations
+- Integrated shipping/logistics
+- Real-time chat (WebSockets)
+- Push notifications
+- Bike valuation tool
+- Insurance partnerships
+- Affiliate programme
+- Video content / live streaming
+
+---
+
