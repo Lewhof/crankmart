@@ -5,12 +5,12 @@ import { Palette, RotateCcw, Save, Check, Loader2, Eye } from 'lucide-react'
 
 // ── Preset concepts ───────────────────────────────────────────────────────
 const PRESETS = [
-  { id: 'b', label: 'Signal Orange', primary: '#EA580C', primaryHover: '#C44A0A', accent: '#EA580C', accentHover: '#C44A0A', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
-  { id: 'a', label: 'Precision Red',  primary: '#CC1F2D', primaryHover: '#A8172A', accent: '#CC1F2D', accentHover: '#A8172A', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
-  { id: 'c', label: 'Electric Blue',  primary: '#2563EB', primaryHover: '#1D4FBF', accent: '#2563EB', accentHover: '#1D4FBF', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
-  { id: 'd', label: 'Volt Green',     primary: '#65A30D', primaryHover: '#4D7A09', accent: '#65A30D', accentHover: '#4D7A09', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
-  { id: 'e', label: 'Titanium Gold',  primary: '#D4A017', primaryHover: '#AA8012', accent: '#D4A017', accentHover: '#AA8012', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
-  { id: 'baseline', label: 'Night Ride (Classic)', primary: '#273970', primaryHover: '#1E2E5C', accent: '#273970', accentHover: '#1E2E5C', nightRide: 'var(--admin-text)', background: 'var(--admin-surface)', surface: 'var(--admin-surface)' },
+  { id: 'b', label: 'Signal Orange', primary: '#EA580C', primaryHover: '#C44A0A', accent: '#EA580C', accentHover: '#C44A0A', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
+  { id: 'a', label: 'Precision Red',  primary: '#CC1F2D', primaryHover: '#A8172A', accent: '#CC1F2D', accentHover: '#A8172A', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
+  { id: 'c', label: 'Electric Blue',  primary: '#2563EB', primaryHover: '#1D4FBF', accent: '#2563EB', accentHover: '#1D4FBF', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
+  { id: 'd', label: 'Volt Green',     primary: '#65A30D', primaryHover: '#4D7A09', accent: '#65A30D', accentHover: '#4D7A09', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
+  { id: 'e', label: 'Titanium Gold',  primary: '#D4A017', primaryHover: '#AA8012', accent: '#D4A017', accentHover: '#AA8012', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
+  { id: 'baseline', label: 'Night Ride (Classic)', primary: '#273970', primaryHover: '#1E2E5C', accent: '#273970', accentHover: '#1E2E5C', nightRide: '#0D1B2A', background: '#ffffff', surface: '#ffffff' },
 ]
 
 interface Theme {
@@ -28,9 +28,9 @@ const DEFAULT_THEME: Theme = {
   theme_primary_hover: '#C44A0A',
   theme_accent:        '#EA580C',
   theme_accent_hover:  '#C44A0A',
-  theme_night_ride:    'var(--admin-text)',
-  theme_background:    'var(--admin-surface-2)',
-  theme_surface:       'var(--admin-surface)',
+  theme_night_ride:    '#0D1B2A',
+  theme_background:    '#f5f5f5',
+  theme_surface:       '#ffffff',
 }
 
 // ── Live CSS preview injector ─────────────────────────────────────────────
