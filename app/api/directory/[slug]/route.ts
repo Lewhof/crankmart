@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+import { getCountry } from "@/lib/country";
 
 export async function GET(
   request: NextRequest,
@@ -9,13 +10,14 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const { slug } = resolvedParams;
+    const country = await getCountry();
 
-    // Get business (only show active businesses)
+    // Get business (country-scoped)
     const result = await db.execute(
       sql`
         SELECT *
         FROM businesses
-        WHERE slug = ${slug}
+        WHERE slug = ${slug} AND country = ${country}
         LIMIT 1
       `
     );
@@ -29,7 +31,7 @@ export async function GET(
 
     const business = result.rows[0] as any;
 
-    // Get related businesses (same type, same province, excluding current, only active)
+    // Get related businesses (same type, same province, excluding current, country-scoped)
     const relatedResult = await db.execute(
       sql`
         SELECT id, name, slug, business_type, province, city, logo_url, description, is_verified, is_premium
@@ -37,17 +39,18 @@ export async function GET(
         WHERE business_type = ${business.business_type}
           AND province = ${business.province}
           AND slug != ${slug}
+          AND country = ${country}
         ORDER BY is_premium DESC, is_verified DESC, name ASC
         LIMIT 4
       `
     );
 
-    // Increment views count
+    // Increment views count (country-scoped)
     await db.execute(
       sql`
         UPDATE businesses
         SET views_count = views_count + 1
-        WHERE slug = ${slug}
+        WHERE slug = ${slug} AND country = ${country}
       `
     );
 

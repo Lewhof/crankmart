@@ -2,7 +2,8 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/db'
 import { businesses } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 import Link from 'next/link'
 import MyListingForm from './MyListingForm'
 
@@ -10,10 +11,12 @@ export default async function MyListingPage() {
   const session = await auth()
   if (!session?.user?.id) redirect('/login?callbackUrl=/account/my-listing')
 
+  const country = await getCountry()
+
   const [business] = await db
     .select()
     .from(businesses)
-    .where(eq(businesses.claimedBy, session.user.id))
+    .where(and(eq(businesses.claimedBy, session.user.id), eq(businesses.country, country)))
     .limit(1)
 
   if (!business) {

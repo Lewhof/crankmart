@@ -3,21 +3,29 @@ import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { auth } from '@/auth'
 import { sendEmail } from '@/lib/email'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session?.user || (session.user as any).role !== 'admin') {
+    const role = (session?.user as any)?.role
+    if (!session?.user || (role !== 'admin' && role !== 'superadmin')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const status = request.nextUrl.searchParams.get('status') || 'pending'
     const limit = parseInt(request.nextUrl.searchParams.get('limit') || '200')
-    const whereClause = status === 'all' ? '' : `WHERE status = '${status}'`
-    const result = await db.execute(sql.raw(`
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(session) && request.nextUrl.searchParams.get('all') === '1'
+
+    const statusCond = status === 'all' ? sql`` : sql` AND status = ${status}`
+    const countryCond = seeAll ? sql`` : sql` AND country = ${country}`
+
+    const result = await db.execute(sql`
       SELECT id, title, slug, excerpt, category, author_name, author_email, status, is_featured, created_at, published_at, views_count
-      FROM news_articles ${whereClause}
+      FROM news_articles
+      WHERE 1=1 ${countryCond} ${statusCond}
       ORDER BY created_at DESC LIMIT ${limit}
-    `))
+    `)
     return NextResponse.json({ articles: result.rows ?? result })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })

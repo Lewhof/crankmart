@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 function slugify(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -20,6 +21,9 @@ export async function GET(request: NextRequest) {
     const limit = 20
     const offset = (page - 1) * limit
 
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(adminCheck.session) && searchParams.get('all') === '1'
+    const countryFilter = seeAll ? sql`` : sql` AND r.country = ${country}`
     const statusFilter     = status !== 'all' ? sql` AND r.status = ${status}` : sql``
     const disciplineFilter = discipline !== 'all' ? sql` AND r.discipline = ${discipline}` : sql``
     const searchFilter     = search ? sql` AND (r.name ILIKE ${'%' + search + '%'} OR r.province ILIKE ${'%' + search + '%'} OR r.town ILIKE ${'%' + search + '%'})` : sql``
@@ -33,6 +37,7 @@ export async function GET(request: NextRequest) {
         FROM routes r
         LEFT JOIN route_images ri ON ri.route_id = r.id
         WHERE 1=1
+        ${countryFilter}
         ${statusFilter}
         ${disciplineFilter}
         ${searchFilter}
@@ -79,16 +84,18 @@ export async function POST(request: NextRequest) {
     const facilitiesJson = facilities ? JSON.stringify(facilities) : '{}'
     const tagsArray = tags && tags.length ? tags : []
 
+    const insertCountry = await getAdminCountry()
     const insert = await db.execute(
       sql`
         INSERT INTO routes (
-          slug, name, description, discipline, difficulty, surface,
+          country, slug, name, description, discipline, difficulty, surface,
           distance_km, elevation_m, est_time_min,
           province, region, town, lat, lng,
           website_url, contact_email, contact_phone, gpx_url,
           facilities, tags, is_featured, is_verified, status,
           image_count, created_at, updated_at
         ) VALUES (
+          ${insertCountry},
           ${slug},
           ${name},
           ${description ?? null},

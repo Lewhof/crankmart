@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Check, X, Star, Eye, ExternalLink, Mail, Globe, User } from 'lucide-react'
+import {
+  PageHeader, Table, StatusPill, toneForStatus, Button, Empty,
+} from '@/components/admin/primitives'
 
 interface Article {
   id: string
@@ -19,15 +22,7 @@ interface Article {
   views_count: number
 }
 
-const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
-  pending:  { bg: '#FEF9C3', color: '#854D0E' },
-  approved: { bg: '#DCFCE7', color: '#166534' },
-  rejected: { bg: '#FEE2E2', color: '#991B1B' },
-}
-
-// ─── Cycling Sources Data ──────────────────────────────────────────────────────
 const OUTLETS = [
-  // South Africa
   { name: 'Cyclingnews SA', url: 'https://cyclingnews.com', region: 'SA/Global', type: 'Magazine', focus: 'Road, MTB, Racing', contact: 'editorial@cyclingnews.com' },
   { name: 'Bicycling South Africa', url: 'https://bicycling.co.za', region: 'SA', type: 'Magazine', focus: 'Road, MTB, Lifestyle', contact: 'editor@bicycling.co.za' },
   { name: 'MTB South Africa', url: 'https://www.facebook.com/MTBSouthAfrica', region: 'SA', type: 'Social/Community', focus: 'MTB', contact: '' },
@@ -35,7 +30,6 @@ const OUTLETS = [
   { name: 'Ride Magazine', url: 'https://ridemagazine.co.za', region: 'SA', type: 'Magazine', focus: 'Road, Cycling Culture', contact: 'info@ridemagazine.co.za' },
   { name: 'SA Mountain Bike', url: 'https://www.samountainbike.co.za', region: 'SA', type: 'Online', focus: 'MTB Racing & Trails', contact: '' },
   { name: 'ProCycling SA', url: 'https://procyclingsa.com', region: 'SA', type: 'Online', focus: 'Road Racing', contact: '' },
-  // International
   { name: 'Cyclingnews', url: 'https://cyclingnews.com', region: 'Global', type: 'Magazine', focus: 'Road, Racing, Tech', contact: 'editorial@cyclingnews.com' },
   { name: 'Velonews', url: 'https://velonews.com', region: 'USA', type: 'Magazine', focus: 'Road, Gravel, Race Coverage', contact: 'editor@velonews.com' },
   { name: 'BikeRadar', url: 'https://bikeradar.com', region: 'UK', type: 'Online', focus: 'MTB, Road, Reviews', contact: 'editorial@bikeradar.com' },
@@ -49,26 +43,23 @@ const OUTLETS = [
 ]
 
 const JOURNALISTS = [
-  // South Africa
-  { name: 'Selma Uahengo', outlet: 'Bicycling SA', region: 'SA', beat: 'Road, MTB, Features', twitter: '', email: '' },
-  { name: 'Stuart Bailey', outlet: 'Ride Magazine', region: 'SA', beat: 'Road Racing, Pro Cycling', twitter: '@stuartbailey', email: '' },
-  { name: 'Yolande de Villiers', outlet: 'Bicycling SA', region: 'SA', beat: 'Lifestyle, Women\'s Cycling', twitter: '', email: '' },
-  { name: 'Myles Kelsey', outlet: 'Freelance', region: 'SA', beat: 'MTB, Adventure, Epic Rides', twitter: '', email: '' },
-  // International
-  { name: 'Daniel Benson', outlet: 'Cyclingnews', region: 'Global', beat: 'Road Racing, Pro Cycling', twitter: '@dbenson_cn', email: '' },
-  { name: 'Barry Ryan', outlet: 'Cyclingnews', region: 'Global', beat: 'Road, Grand Tours', twitter: '@BarryRyanCN', email: '' },
-  { name: 'James Huang', outlet: 'CyclingTips / Escape Collective', region: 'Global', beat: 'Tech, Components, Reviews', twitter: '@jameshuang', email: '' },
-  { name: 'Matt Beaudin', outlet: 'Velonews', region: 'USA', beat: 'Gravel, MTB, Features', twitter: '@mbeaudin', email: '' },
-  { name: 'Joe Lindsey', outlet: 'Freelance (Velo, Bicycling)', region: 'USA', beat: 'Bikes, Industry, Long-form', twitter: '@joelindsey', email: '' },
-  { name: 'Caley Fretz', outlet: 'Escape Collective', region: 'Global', beat: 'Road Racing, Culture', twitter: '@caleyfretz', email: '' },
-  { name: 'Adam Becket', outlet: 'Cycling Weekly', region: 'UK', beat: 'Road, Racing, Pro Cycling', twitter: '@AdamBecket_CW', email: '' },
-  { name: 'Chris Marshall-Bell', outlet: 'Road.cc', region: 'UK', beat: 'Road, Reviews, Tech', twitter: '@cmarshallbell', email: '' },
-  { name: 'Laura Fletcher', outlet: 'Bikeradar', region: 'UK', beat: 'MTB, Gravel, Women\'s', twitter: '', email: '' },
-  { name: 'Seb Stott', outlet: 'Pinkbike', region: 'Global', beat: 'MTB Tech, Reviews', twitter: '@sebstott', email: '' },
-  { name: 'Levy Labrideau', outlet: 'Singletracks', region: 'USA', beat: 'MTB, Trails', twitter: '', email: '' },
+  { name: 'Selma Uahengo', outlet: 'Bicycling SA', region: 'SA', beat: 'Road, MTB, Features', twitter: '' },
+  { name: 'Stuart Bailey', outlet: 'Ride Magazine', region: 'SA', beat: 'Road Racing, Pro Cycling', twitter: '@stuartbailey' },
+  { name: 'Yolande de Villiers', outlet: 'Bicycling SA', region: 'SA', beat: "Lifestyle, Women's Cycling", twitter: '' },
+  { name: 'Myles Kelsey', outlet: 'Freelance', region: 'SA', beat: 'MTB, Adventure, Epic Rides', twitter: '' },
+  { name: 'Daniel Benson', outlet: 'Cyclingnews', region: 'Global', beat: 'Road Racing, Pro Cycling', twitter: '@dbenson_cn' },
+  { name: 'Barry Ryan', outlet: 'Cyclingnews', region: 'Global', beat: 'Road, Grand Tours', twitter: '@BarryRyanCN' },
+  { name: 'James Huang', outlet: 'CyclingTips / Escape Collective', region: 'Global', beat: 'Tech, Components, Reviews', twitter: '@jameshuang' },
+  { name: 'Matt Beaudin', outlet: 'Velonews', region: 'USA', beat: 'Gravel, MTB, Features', twitter: '@mbeaudin' },
+  { name: 'Joe Lindsey', outlet: 'Freelance (Velo, Bicycling)', region: 'USA', beat: 'Bikes, Industry, Long-form', twitter: '@joelindsey' },
+  { name: 'Caley Fretz', outlet: 'Escape Collective', region: 'Global', beat: 'Road Racing, Culture', twitter: '@caleyfretz' },
+  { name: 'Adam Becket', outlet: 'Cycling Weekly', region: 'UK', beat: 'Road, Racing, Pro Cycling', twitter: '@AdamBecket_CW' },
+  { name: 'Chris Marshall-Bell', outlet: 'Road.cc', region: 'UK', beat: 'Road, Reviews, Tech', twitter: '@cmarshallbell' },
+  { name: 'Laura Fletcher', outlet: 'Bikeradar', region: 'UK', beat: "MTB, Gravel, Women's", twitter: '' },
+  { name: 'Seb Stott', outlet: 'Pinkbike', region: 'Global', beat: 'MTB Tech, Reviews', twitter: '@sebstott' },
+  { name: 'Levy Labrideau', outlet: 'Singletracks', region: 'USA', beat: 'MTB, Trails', twitter: '' },
 ]
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function AdminNewsPage() {
   const [tab, setTab] = useState<'articles' | 'sources'>('articles')
   const [articles, setArticles] = useState<Article[]>([])
@@ -78,7 +69,7 @@ export default function AdminNewsPage() {
   const [sourceSearch, setSourceSearch] = useState('')
   const [sourceTab, setSourceTab] = useState<'outlets' | 'journalists'>('outlets')
 
-  const fetchArticles = async (status: string) => {
+  const fetchArticles = useCallback(async (status: string) => {
     setLoading(true)
     try {
       const url = status === 'all' ? '/api/admin/news?status=all&limit=200' : `/api/admin/news?status=${status}&limit=200`
@@ -86,25 +77,27 @@ export default function AdminNewsPage() {
       const data = await res.json()
       setArticles(data.articles || [])
     } finally { setLoading(false) }
-  }
+  }, [])
 
-  useEffect(() => { if (tab === 'articles') fetchArticles(statusFilter) }, [statusFilter, tab])
+  useEffect(() => { if (tab === 'articles') fetchArticles(statusFilter) }, [statusFilter, tab, fetchArticles])
 
-  const action = async (id: string, act: 'approve' | 'reject' | 'feature') => {
+  async function action(id: string, act: 'approve' | 'reject' | 'feature') {
     setActioning(id)
-    await fetch('/api/admin/news', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, action: act }),
-    })
-    if (act === 'feature') {
-      setArticles(prev => prev.map(a => a.id === id ? { ...a, is_featured: !a.is_featured } : a))
-    } else {
-      // Update status in-place rather than remove, so "all" view stays populated
-      const newStatus = act === 'approve' ? 'approved' : 'rejected'
-      setArticles(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
+    try {
+      await fetch('/api/admin/news', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: act }),
+      })
+      if (act === 'feature') {
+        setArticles(prev => prev.map(a => a.id === id ? { ...a, is_featured: !a.is_featured } : a))
+      } else {
+        const newStatus = act === 'approve' ? 'approved' : 'rejected'
+        setArticles(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
+      }
+    } finally {
+      setActioning(null)
     }
-    setActioning(null)
   }
 
   const filteredOutlets = OUTLETS.filter(o =>
@@ -118,297 +111,187 @@ export default function AdminNewsPage() {
     j.beat.toLowerCase().includes(sourceSearch.toLowerCase())
   )
 
+  const tabBtn = (active: boolean): React.CSSProperties => ({
+    padding: '8px 16px',
+    background: 'none', border: 'none',
+    borderBottom: active ? '2px solid var(--admin-accent)' : '2px solid transparent',
+    color: active ? 'var(--admin-accent)' : 'var(--admin-text-dim)',
+    fontSize: 13, fontWeight: 600, cursor: 'pointer',
+  })
+  const pillBtn = (active: boolean): React.CSSProperties => ({
+    padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+    border: '1px solid',
+    borderColor: active ? 'var(--admin-accent)' : 'var(--admin-border)',
+    background: active ? 'color-mix(in oklch, var(--admin-accent) 20%, transparent)' : 'var(--admin-surface-2)',
+    color: active ? 'var(--admin-accent)' : 'var(--admin-text)',
+  })
+
+  const articleRows = articles.map(a => ({
+    id: a.id,
+    cells: [
+      <div key="t" style={{ maxWidth: 320 }}>
+        <div style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {a.is_featured && <Star size={11} style={{ color: 'var(--admin-warn)', marginRight: 4 }} />}
+          {a.title}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--admin-text-dim)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {a.excerpt?.slice(0, 80)}
+        </div>
+      </div>,
+      <StatusPill key="c" label={a.category} tone="neutral" />,
+      <div key="au">
+        <div style={{ fontWeight: 600 }}>{a.author_name || '—'}</div>
+        <div style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>{a.author_email}</div>
+      </div>,
+      <StatusPill key="s" label={a.status} tone={toneForStatus(a.status)} />,
+      <span key="v">{Number(a.views_count || 0).toLocaleString()}</span>,
+      <span key="d" style={{ color: 'var(--admin-text-dim)', fontSize: 12 }}>
+        {new Date(a.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+      </span>,
+      <div key="a" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {a.status === 'approved' && (
+          <Button variant="ghost" size="sm" href={`/news/${a.slug}`}><Eye size={12} /></Button>
+        )}
+        <Button variant={a.is_featured ? 'primary' : 'ghost'} size="sm" onClick={() => action(a.id, 'feature')} disabled={actioning === a.id}>
+          <Star size={12} />
+        </Button>
+        {a.status === 'pending' && (
+          <>
+            <Button variant="primary" size="sm" onClick={() => action(a.id, 'approve')} disabled={actioning === a.id}>
+              <Check size={12} /> Approve
+            </Button>
+            <Button variant="danger" size="sm" onClick={() => action(a.id, 'reject')} disabled={actioning === a.id}>
+              <X size={12} />
+            </Button>
+          </>
+        )}
+        {a.status === 'rejected' && (
+          <Button variant="primary" size="sm" onClick={() => action(a.id, 'approve')} disabled={actioning === a.id}>
+            <Check size={12} /> Approve
+          </Button>
+        )}
+      </div>,
+    ],
+  }))
+
+  const outletRows = filteredOutlets.map((o, i) => ({
+    id: String(i),
+    cells: [
+      <div key="n" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 28, height: 28, borderRadius: 6, background: 'var(--admin-surface-2)', border: '1px solid var(--admin-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Globe size={13} style={{ color: 'var(--admin-accent)' }} />
+        </div>
+        <div>
+          <div style={{ fontWeight: 600 }}>{o.name}</div>
+          <a href={o.url} target="_blank" rel="noopener noreferrer"
+            style={{ fontSize: 11, color: 'var(--admin-accent)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+            {o.url.replace('https://', '')} <ExternalLink size={9} />
+          </a>
+        </div>
+      </div>,
+      <StatusPill key="r" label={o.region} tone={o.region === 'SA' ? 'success' : o.region === 'Global' ? 'accent' : 'neutral'} />,
+      <span key="t" style={{ color: 'var(--admin-text-dim)' }}>{o.type}</span>,
+      <span key="f">{o.focus}</span>,
+      o.contact
+        ? <a key="c" href={`mailto:${o.contact}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--admin-accent)', textDecoration: 'none', fontSize: 12 }}>
+            <Mail size={12} /> {o.contact}
+          </a>
+        : <span key="c" style={{ color: 'var(--admin-text-dim)', fontSize: 12 }}>—</span>,
+    ],
+  }))
+
+  const journalistRows = filteredJournalists.map((j, i) => ({
+    id: String(i),
+    cells: [
+      <div key="n" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--admin-surface-2)', border: '1px solid var(--admin-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <User size={13} style={{ color: 'var(--admin-accent)' }} />
+        </div>
+        <span style={{ fontWeight: 600 }}>{j.name}</span>
+      </div>,
+      <span key="o">{j.outlet}</span>,
+      <StatusPill key="r" label={j.region} tone={j.region === 'SA' ? 'success' : j.region === 'Global' ? 'accent' : 'neutral'} />,
+      <span key="b" style={{ color: 'var(--admin-text-dim)' }}>{j.beat}</span>,
+      j.twitter
+        ? <a key="t" href={`https://twitter.com/${j.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer"
+            style={{ color: 'var(--admin-accent)', textDecoration: 'none', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+            {j.twitter} <ExternalLink size={9} />
+          </a>
+        : <span key="t" style={{ color: 'var(--admin-text-dim)', fontSize: 12 }}>—</span>,
+    ],
+  }))
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <PageHeader title="News" subtitle="Manage articles, sources and journalist contacts" />
 
-      {/* Header */}
-      <div>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>News</h1>
-        <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>Manage articles, sources and journalist contacts</p>
-      </div>
-
-      {/* Main tabs */}
-      <div style={{ display: 'flex', gap: 2, borderBottom: '2px solid #ebebeb' }}>
-        {[
+      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--admin-border)' }}>
+        {([
           { key: 'articles', label: 'All Articles' },
-          { key: 'sources',  label: '📡 Sources & Journalists' },
-        ].map(t => (
-          <button key={t.key} onClick={() => setTab(t.key as any)}
-            style={{
-              padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-              background: 'none', border: 'none',
-              borderBottom: tab === t.key ? '2px solid #0D1B2A' : '2px solid transparent',
-              color: tab === t.key ? '#0D1B2A' : '#9a9a9a',
-              marginBottom: -2,
-            }}>
-            {t.label}
-          </button>
+          { key: 'sources', label: '📡 Sources & Journalists' },
+        ] as const).map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)} style={tabBtn(tab === t.key)}>{t.label}</button>
         ))}
       </div>
 
-      {/* ── ARTICLES TAB ── */}
       {tab === 'articles' && (
         <>
-          {/* Status filter */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {['all', 'pending', 'approved', 'rejected'].map(s => (
-              <button key={s} onClick={() => setStatusFilter(s)}
-                style={{
-                  padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                  border: '1.5px solid',
-                  borderColor: statusFilter === s ? '#0D1B2A' : '#ebebeb',
-                  background: statusFilter === s ? '#0D1B2A' : '#fff',
-                  color: statusFilter === s ? '#fff' : '#374151',
-                }}>
+              <button key={s} onClick={() => setStatusFilter(s)} style={pillBtn(statusFilter === s)}>
                 {s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>
 
           {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
-              <div style={{ width: 28, height: 28, border: '3px solid #ebebeb', borderTopColor: '#0D1B2A', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
-              <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
-            </div>
+            <Empty message="Loading articles…" />
           ) : articles.length === 0 ? (
-            <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 8, padding: '40px', textAlign: 'center', color: '#9a9a9a' }}>
-              No articles found
-            </div>
+            <Empty message="No articles found" />
           ) : (
-            <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 8, overflow: 'hidden' }}>
-              {/* Summary row */}
-              <div style={{ padding: '12px 20px', borderBottom: '1px solid #ebebeb', display: 'flex', gap: 16, fontSize: 13, color: '#6b7280' }}>
-                <span><strong style={{ color: '#1a1a1a' }}>{articles.length}</strong> articles</span>
-                {['pending','approved','rejected'].map(s => {
-                  const n = articles.filter(a => a.status === s).length
-                  if (!n) return null
-                  const st = STATUS_STYLE[s]
-                  return <span key={s} style={{ background: st.bg, color: st.color, padding: '2px 8px', borderRadius: 4, fontWeight: 700, fontSize: 12 }}>{n} {s}</span>
-                })}
-              </div>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead>
-                    <tr style={{ borderBottom: '2px solid #f0f0f0', background: '#fafafa' }}>
-                      {['Title', 'Category', 'Author', 'Status', 'Views', 'Date', 'Actions'].map(h => (
-                        <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#6b7280', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {articles.map(a => {
-                      const st = STATUS_STYLE[a.status] || { bg: '#f0f0f0', color: '#666' }
-                      return (
-                        <tr key={a.id} style={{ borderBottom: '1px solid #f5f5f5' }}>
-                          <td style={{ padding: '10px 14px', maxWidth: 280 }}>
-                            <div style={{ fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {a.is_featured && <span title="Featured" style={{ marginRight: 4 }}>⭐</span>}
-                              {a.title}
-                            </div>
-                            <div style={{ fontSize: 11, color: '#9a9a9a', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.excerpt?.slice(0, 80)}</div>
-                          </td>
-                          <td style={{ padding: '10px 14px', whiteSpace: 'nowrap' }}>
-                            <span style={{ background: '#E9ECF5', color: '#0D1B2A', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700 }}>{a.category}</span>
-                          </td>
-                          <td style={{ padding: '10px 14px', whiteSpace: 'nowrap' }}>
-                            <div style={{ fontWeight: 600, color: '#374151' }}>{a.author_name || '—'}</div>
-                            <div style={{ fontSize: 11, color: '#9a9a9a' }}>{a.author_email}</div>
-                          </td>
-                          <td style={{ padding: '10px 14px', whiteSpace: 'nowrap' }}>
-                            <span style={{ background: st.bg, color: st.color, padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, textTransform: 'capitalize' }}>{a.status}</span>
-                          </td>
-                          <td style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700, color: '#0D1B2A' }}>
-                            {Number(a.views_count || 0).toLocaleString()}
-                          </td>
-                          <td style={{ padding: '10px 14px', whiteSpace: 'nowrap', color: '#9a9a9a', fontSize: 12 }}>
-                            {new Date(a.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </td>
-                          <td style={{ padding: '10px 14px', whiteSpace: 'nowrap' }}>
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              {a.status === 'approved' && (
-                                <Link href={`/news/${a.slug}`} target="_blank"
-                                  style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 10px', border: '1.5px solid #e4e4e7', borderRadius: 6, fontSize: 12, fontWeight: 600, color: '#1a1a1a', textDecoration: 'none' }}>
-                                  <Eye size={12} />
-                                </Link>
-                              )}
-                              <button onClick={() => action(a.id, 'feature')} disabled={actioning === a.id}
-                                title={a.is_featured ? 'Unfeature' : 'Feature'}
-                                style={{ display: 'flex', alignItems: 'center', padding: '5px 10px', border: '1.5px solid', borderColor: a.is_featured ? '#854D0E' : '#e4e4e7', borderRadius: 6, cursor: 'pointer', background: a.is_featured ? '#FEF9C3' : '#fff', color: a.is_featured ? '#854D0E' : '#9a9a9a' }}>
-                                <Star size={12} />
-                              </button>
-                              {a.status === 'pending' && (
-                                <>
-                                  <button onClick={() => action(a.id, 'approve')} disabled={actioning === a.id}
-                                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 10px', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: '#10B981', color: '#fff' }}>
-                                    <Check size={12} /> Approve
-                                  </button>
-                                  <button onClick={() => action(a.id, 'reject')} disabled={actioning === a.id}
-                                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 10px', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: '#EF4444', color: '#fff' }}>
-                                    <X size={12} />
-                                  </button>
-                                </>
-                              )}
-                              {a.status === 'rejected' && (
-                                <button onClick={() => action(a.id, 'approve')} disabled={actioning === a.id}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '5px 10px', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: '#10B981', color: '#fff' }}>
-                                  <Check size={12} /> Approve
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <Table head={['Title', 'Category', 'Author', 'Status', 'Views', 'Date', 'Actions']} rows={articleRows} />
           )}
         </>
       )}
 
-      {/* ── SOURCES TAB ── */}
       {tab === 'sources' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <p style={{ margin: 0, color: '#6b7280', fontSize: 14 }}>
+          <p style={{ margin: 0, color: 'var(--admin-text-dim)', fontSize: 13 }}>
             Cycling media outlets and journalists to approach for content partnerships, press submissions, and coverage.
           </p>
 
-          {/* Search */}
           <input
             type="text"
             placeholder="Search outlets, journalists, regions, beats…"
             value={sourceSearch}
             onChange={e => setSourceSearch(e.target.value)}
-            style={{ padding: '10px 14px', border: '1.5px solid #ebebeb', borderRadius: 8, fontSize: 14, width: '100%', maxWidth: 420, outline: 'none', boxSizing: 'border-box' }}
+            style={{
+              padding: '9px 12px',
+              border: '1px solid var(--admin-border)',
+              background: 'var(--admin-surface-2)',
+              color: 'var(--admin-text)',
+              borderRadius: 6, fontSize: 13, width: '100%', maxWidth: 420,
+            }}
           />
 
-          {/* Sub-tabs */}
           <div style={{ display: 'flex', gap: 8 }}>
-            {[{ key: 'outlets', label: `Outlets (${filteredOutlets.length})` }, { key: 'journalists', label: `Journalists (${filteredJournalists.length})` }].map(t => (
-              <button key={t.key} onClick={() => setSourceTab(t.key as any)}
-                style={{ padding: '7px 18px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid', borderColor: sourceTab === t.key ? '#0D1B2A' : '#ebebeb', background: sourceTab === t.key ? '#0D1B2A' : '#fff', color: sourceTab === t.key ? '#fff' : '#374151' }}>
-                {t.label}
-              </button>
+            {([
+              { key: 'outlets', label: `Outlets (${filteredOutlets.length})` },
+              { key: 'journalists', label: `Journalists (${filteredJournalists.length})` },
+            ] as const).map(t => (
+              <button key={t.key} onClick={() => setSourceTab(t.key)} style={pillBtn(sourceTab === t.key)}>{t.label}</button>
             ))}
           </div>
 
-          {/* Outlets */}
-          {sourceTab === 'outlets' && (
-            <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 8, overflow: 'hidden' }}>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead>
-                    <tr style={{ background: '#fafafa', borderBottom: '2px solid #f0f0f0' }}>
-                      {['Outlet', 'Region', 'Type', 'Focus', 'Contact'].map(h => (
-                        <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredOutlets.map((o, i) => (
-                      <tr key={i} style={{ borderBottom: '1px solid #f5f5f5' }}>
-                        <td style={{ padding: '12px 16px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <div style={{ width: 32, height: 32, borderRadius: 6, background: '#f0f4ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <Globe size={14} color="#0D1B2A" />
-                            </div>
-                            <div>
-                              <div style={{ fontWeight: 700, color: '#1a1a1a' }}>{o.name}</div>
-                              <a href={o.url} target="_blank" rel="noopener noreferrer"
-                                style={{ fontSize: 11, color: '#3B82F6', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
-                                {o.url.replace('https://', '')} <ExternalLink size={9} />
-                              </a>
-                            </div>
-                          </div>
-                        </td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <span style={{
-                            padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700,
-                            background: o.region === 'SA' ? '#DCFCE7' : o.region === 'Global' ? '#EDE9FE' : '#EFF6FF',
-                            color: o.region === 'SA' ? '#166534' : o.region === 'Global' ? '#5B21B6' : '#1D4ED8',
-                          }}>
-                            {o.region}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px', color: '#6b7280' }}>{o.type}</td>
-                        <td style={{ padding: '12px 16px', color: '#374151' }}>{o.focus}</td>
-                        <td style={{ padding: '12px 16px' }}>
-                          {o.contact ? (
-                            <a href={`mailto:${o.contact}`}
-                              style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#3B82F6', textDecoration: 'none', fontSize: 12 }}>
-                              <Mail size={12} /> {o.contact}
-                            </a>
-                          ) : (
-                            <span style={{ color: '#d1d5db', fontSize: 12 }}>—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          {sourceTab === 'outlets' && <Table head={['Outlet', 'Region', 'Type', 'Focus', 'Contact']} rows={outletRows} empty="No outlets match." />}
+          {sourceTab === 'journalists' && <Table head={['Name', 'Outlet', 'Region', 'Beat / Speciality', 'Twitter']} rows={journalistRows} empty="No journalists match." />}
 
-          {/* Journalists */}
-          {sourceTab === 'journalists' && (
-            <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 8, overflow: 'hidden' }}>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead>
-                    <tr style={{ background: '#fafafa', borderBottom: '2px solid #f0f0f0' }}>
-                      {['Name', 'Outlet', 'Region', 'Beat / Speciality', 'Twitter'].map(h => (
-                        <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredJournalists.map((j, i) => (
-                      <tr key={i} style={{ borderBottom: '1px solid #f5f5f5' }}>
-                        <td style={{ padding: '12px 16px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#f0f4ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <User size={14} color="#0D1B2A" />
-                            </div>
-                            <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{j.name}</span>
-                          </div>
-                        </td>
-                        <td style={{ padding: '12px 16px', color: '#374151' }}>{j.outlet}</td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <span style={{
-                            padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700,
-                            background: j.region === 'SA' ? '#DCFCE7' : j.region === 'Global' ? '#EDE9FE' : '#EFF6FF',
-                            color: j.region === 'SA' ? '#166534' : j.region === 'Global' ? '#5B21B6' : '#1D4ED8',
-                          }}>
-                            {j.region}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px', color: '#6b7280' }}>{j.beat}</td>
-                        <td style={{ padding: '12px 16px' }}>
-                          {j.twitter ? (
-                            <a href={`https://twitter.com/${j.twitter.replace('@','')}`} target="_blank" rel="noopener noreferrer"
-                              style={{ color: '#3B82F6', textDecoration: 'none', fontSize: 12, display: 'flex', alignItems: 'center', gap: 3 }}>
-                              {j.twitter} <ExternalLink size={9} />
-                            </a>
-                          ) : (
-                            <span style={{ color: '#d1d5db', fontSize: 12 }}>—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          <div style={{ padding: '12px 16px', background: '#f9f9f9', border: '1px solid #ebebeb', borderRadius: 8, fontSize: 12, color: '#9a9a9a' }}>
-            💡 Use these contacts to invite journalists to submit articles directly via <Link href="/news/submit" style={{ color: '#0D1B2A', fontWeight: 600 }}>/news/submit</Link>, or to pitch CrankMart as a media partner for SA cycling events and product launches.
+          <div style={{ padding: '12px 16px', background: 'var(--admin-surface-2)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12, color: 'var(--admin-text-dim)' }}>
+            💡 Use these contacts to invite journalists to submit articles directly via{' '}
+            <Link href="/news/submit" style={{ color: 'var(--admin-accent)', fontWeight: 600 }}>/news/submit</Link>, or to pitch CrankMart as a media partner for SA cycling events and product launches.
           </div>
         </div>
       )}
-
     </div>
   )
 }

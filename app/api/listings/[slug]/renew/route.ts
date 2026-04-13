@@ -3,7 +3,8 @@ import { z } from 'zod'
 import { auth } from '@/auth'
 import { db } from '@/db'
 import { listings } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 const ParamSchema = z.object({
   slug: z.string().min(1, 'Slug is required'),
@@ -27,9 +28,11 @@ export async function POST(
     const userId = session.user.id
     const { slug: validatedSlug } = paramValidation.data
 
-    // Fetch listing by slug (not ID)
+    const country = await getCountry()
+
+    // Fetch listing by slug (not ID), country-scoped
     const [listing] = await db.select().from(listings)
-      .where(eq(listings.slug, validatedSlug))
+      .where(and(eq(listings.slug, validatedSlug), eq(listings.country, country)))
       .limit(1)
 
     if (!listing) {

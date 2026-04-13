@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql, SQL } from "drizzle-orm";
 import { db } from "@/db";
+import { getCountry } from "@/lib/country";
 
 // Helper: join SQL conditions with AND and prepend WHERE
 // NOTE: We avoid nesting sql`WHERE ${fragment}` inside another sql template
@@ -30,7 +31,10 @@ export async function GET(request: NextRequest) {
     const nearbyKm  = parseInt(searchParams.get("nearbyKm")   || "0");
     const hasProximity = !isNaN(userLat) && !isNaN(userLng) && nearbyKm > 0;
 
+    const country = await getCountry();
+
     const conditions: SQL[] = [];
+    conditions.push(sql`country = ${country}`);
     // Show verified and claimed businesses (hide pending/suspended/removed)
     conditions.push(sql`status IN ('verified', 'claimed')`);
     // Exclude event_organiser from the default directory (shops) view

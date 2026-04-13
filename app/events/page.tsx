@@ -192,6 +192,9 @@ export default function EventsPage() {
   const [organisers, setOrganisers] = useState<Organiser[]>([])
   const [orgLoading, setOrgLoading] = useState(false)
   const [orgLoaded, setOrgLoaded] = useState(false)
+  const [pastEvents, setPastEvents] = useState<Event[]>([])
+  const [pastLoaded, setPastLoaded] = useState(false)
+  const [pastOpen, setPastOpen] = useState(false)
   const [userLat, setUserLat] = useState<number | null>(null)
   const [userLng, setUserLng] = useState<number | null>(null)
   const [nearMe, setNearMe] = useState(false)
@@ -232,6 +235,15 @@ export default function EventsPage() {
       .then(d => { setOrganisers(Array.isArray(d.data) ? d.data : []); setOrgLoaded(true) })
       .finally(() => setOrgLoading(false))
   }, [activeTab, orgLoaded])
+
+  // Lazy-load past events (last 60 days) when user opens the section
+  useEffect(() => {
+    if (!pastOpen || pastLoaded) return
+    fetch('/api/events?past=1&limit=50')
+      .then(r => r.json())
+      .then(d => { setPastEvents(Array.isArray(d) ? d : []); setPastLoaded(true) })
+      .catch(() => setPastLoaded(true))
+  }, [pastOpen, pastLoaded])
 
   const currentMonth = new Date().getMonth()
   const monthsWithEvents = new Set(events.map(e => getMonth(e.event_date_start)))
@@ -618,6 +630,36 @@ export default function EventsPage() {
               ) : (
                 <div className="events-grid">
                   {filteredEvents.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} />)}
+                </div>
+              )}
+
+              {/* Past events — collapsed by default, last 60 days */}
+              {!hasFilters && !nearMe && !loading && filteredEvents.length > 0 && (
+                <div style={{ marginTop: 32, borderTop: '1px solid #ebebeb', paddingTop: 20 }}>
+                  <button
+                    onClick={() => setPastOpen(v => !v)}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'none', border: 'none', padding: '8px 0', cursor: 'pointer', textAlign: 'left' }}
+                    aria-expanded={pastOpen}
+                  >
+                    <div>
+                      <h2 style={{ fontSize: 15, fontWeight: 800, color: '#1a1a1a', margin: 0 }}>Past events</h2>
+                      <p style={{ fontSize: 12, color: '#9CA3AF', margin: '3px 0 0' }}>Last 60 days{pastLoaded ? ` · ${pastEvents.length} event${pastEvents.length !== 1 ? 's' : ''}` : ''}</p>
+                    </div>
+                    <ChevronRight size={18} style={{ color: '#9CA3AF', transform: pastOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform .2s' }} />
+                  </button>
+                  {pastOpen && (
+                    <div style={{ marginTop: 14 }}>
+                      {!pastLoaded ? (
+                        <p style={{ fontSize: 13, color: '#9a9a9a', textAlign: 'center', padding: 24 }}>Loading…</p>
+                      ) : pastEvents.length === 0 ? (
+                        <p style={{ fontSize: 13, color: '#9a9a9a', textAlign: 'center', padding: 24 }}>No past events in the last 60 days.</p>
+                      ) : (
+                        <div className="events-grid" style={{ opacity: 0.75 }}>
+                          {pastEvents.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} />)}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 

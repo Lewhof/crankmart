@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 export type CheckStatus = 'pass' | 'fail' | 'warn' | 'manual' | 'pending'
 export type CheckCategory = 'content' | 'technical_seo' | 'geo' | 'marketing'
@@ -69,7 +70,10 @@ async function fetchWithTimeout(url: string, method = 'GET', timeoutMs = 5000): 
   }
 }
 
-async function runDbChecks(): Promise<CheckResult[]> {
+async function runDbChecks(country: string, seeAll: boolean): Promise<CheckResult[]> {
+  // Whitelist country for raw SQL
+  const safeCountry = /^[a-z]{2}$/.test(country) ? country : 'za'
+  const countryCond = seeAll ? '' : ` AND country = '${safeCountry}'`
   const results: CheckResult[] = []
 
   interface CountRow { count: string | number }
@@ -85,9 +89,9 @@ async function runDbChecks(): Promise<CheckResult[]> {
   }
 
   // Businesses
-  const totalBiz = await q(`SELECT COUNT(*) as count FROM businesses`)
-  const disabledBiz = await q(`SELECT COUNT(*) as count FROM businesses WHERE status = 'pending'`)
-  const activeBiz = await q(`SELECT COUNT(*) as count FROM businesses WHERE status IN ('verified','claimed')`)
+  const totalBiz = await q(`SELECT COUNT(*) as count FROM businesses WHERE 1=1 ${countryCond}`)
+  const disabledBiz = await q(`SELECT COUNT(*) as count FROM businesses WHERE status = 'pending' ${countryCond}`)
+  const activeBiz = await q(`SELECT COUNT(*) as count FROM businesses WHERE status IN ('verified','claimed') ${countryCond}`)
 
   results.push({
     id: 'businesses_total',
@@ -110,8 +114,8 @@ async function runDbChecks(): Promise<CheckResult[]> {
   })
 
   // Classifieds / listings
-  const totalListings = await q(`SELECT COUNT(*) as count FROM listings`)
-  const activeListings = await q(`SELECT COUNT(*) as count FROM listings WHERE status = 'active'`)
+  const totalListings = await q(`SELECT COUNT(*) as count FROM listings WHERE 1=1 ${countryCond}`)
+  const activeListings = await q(`SELECT COUNT(*) as count FROM listings WHERE status = 'active' ${countryCond}`)
   results.push({
     id: 'classifieds_check',
     category: 'content',
@@ -123,7 +127,7 @@ async function runDbChecks(): Promise<CheckResult[]> {
   })
 
   // Events
-  const eventsCount = await q(`SELECT COUNT(*) as count FROM events WHERE status IN ('verified','pending_review')`)
+  const eventsCount = await q(`SELECT COUNT(*) as count FROM events WHERE status IN ('verified','pending_review') ${countryCond}`)
   results.push({
     id: 'events_count',
     category: 'content',
@@ -135,7 +139,7 @@ async function runDbChecks(): Promise<CheckResult[]> {
   })
 
   // Routes
-  const routesCount = await q(`SELECT COUNT(*) as count FROM routes WHERE status = 'approved'`)
+  const routesCount = await q(`SELECT COUNT(*) as count FROM routes WHERE status = 'approved' ${countryCond}`)
   results.push({
     id: 'routes_count',
     category: 'content',
@@ -147,7 +151,7 @@ async function runDbChecks(): Promise<CheckResult[]> {
   })
 
   // News/GEO blog posts
-  const newsCount = await q(`SELECT COUNT(*) as count FROM news_articles WHERE status = 'published'`)
+  const newsCount = await q(`SELECT COUNT(*) as count FROM news_articles WHERE status = 'published' ${countryCond}`)
   results.push({
     id: 'news_count',
     category: 'content',
@@ -459,10 +463,12 @@ export async function GET(request: NextRequest) {
 
   const deep = request.nextUrl.searchParams.get('deep') === 'true'
   const manual = readManual()
+  const country = await getAdminCountry()
+  const seeAll = isSuperadminSession(adminCheck.session) && request.nextUrl.searchParams.get('all') === '1'
 
   try {
     const [dbResults, codeResults, manualResults] = await Promise.all([
-      runDbChecks(),
+      runDbChecks(country, seeAll),
       Promise.resolve(runCodeChecks()),
       Promise.resolve(manualChecks(manual)),
     ])

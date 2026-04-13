@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { listings, listingImages, users, listingCategories } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function GET(
   request: NextRequest,
@@ -9,12 +10,13 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
+    const country = await getCountry()
 
     const result = await db
       .select({ listing: listings, user: users })
       .from(listings)
       .leftJoin(users, eq(listings.sellerId, users.id))
-      .where(eq(listings.slug, slug))
+      .where(and(eq(listings.slug, slug), eq(listings.country, country)))
       .limit(1)
 
     if (!result.length) {

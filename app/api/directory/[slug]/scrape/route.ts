@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function GET(
   _req: NextRequest,
@@ -8,7 +9,8 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
-    const result = await db.execute(sql.raw(`SELECT website, name FROM businesses WHERE slug = '${slug.replace(/'/g, "''")}'`))
+    const country = await getCountry()
+    const result = await db.execute(sql`SELECT website, name FROM businesses WHERE slug = ${slug} AND country = ${country}`)
     const rows = Array.isArray(result.rows) ? result.rows : (Array.isArray(result) ? result : [])
     const business = rows[0] as any
     if (!business?.website) return NextResponse.json({ scraped: null })

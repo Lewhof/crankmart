@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 export async function PATCH(
   request: NextRequest,
@@ -13,19 +14,21 @@ export async function PATCH(
     const { action } = await request.json()
     const { id } = await params
 
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(adminCheck.session) && request.nextUrl.searchParams.get('all') === '1'
+    const g = seeAll ? sql`` : sql` AND country = ${country}`
+
     if (action === 'make_admin') {
-      await db.execute(sql`UPDATE users SET is_admin = true WHERE id = ${id}`)
+      await db.execute(sql`UPDATE users SET is_admin = true WHERE id = ${id} ${g}`)
       return NextResponse.json({ success: true, action: 'made_admin' })
     } else if (action === 'remove_admin') {
-      await db.execute(sql`UPDATE users SET is_admin = false WHERE id = ${id}`)
+      await db.execute(sql`UPDATE users SET is_admin = false WHERE id = ${id} ${g}`)
       return NextResponse.json({ success: true, action: 'removed_admin' })
     } else if (action === 'ban') {
-      await db.execute(
-        sql`UPDATE users SET status = 'banned', banned_at = NOW() WHERE id = ${id}`,
-      )
+      await db.execute(sql`UPDATE users SET status = 'banned', banned_at = NOW() WHERE id = ${id} ${g}`)
       return NextResponse.json({ success: true, action: 'banned' })
     } else if (action === 'unban') {
-      await db.execute(sql`UPDATE users SET status = 'active', banned_at = NULL WHERE id = ${id}`)
+      await db.execute(sql`UPDATE users SET status = 'active', banned_at = NULL WHERE id = ${id} ${g}`)
       return NextResponse.json({ success: true, action: 'unbanned' })
     }
 

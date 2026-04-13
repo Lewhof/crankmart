@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/db'
 import { listings, listingImages, listingCategories } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
+import { getCountry } from '@/lib/country'
 import { randomBytes } from 'crypto'
 import { sendEmail, listingPublishedEmail } from '@/lib/email'
 
@@ -93,6 +94,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const country = await getCountry()
+
     // Check for duplicate listing (if not forced)
     if (!forceDuplicate) {
       const userId = session.user?.id as string
@@ -100,7 +103,7 @@ export async function POST(request: NextRequest) {
         .select({ id: listings.id, title: listings.title, slug: listings.slug })
         .from(listings)
         .where(
-          eq(listings.sellerId, userId)
+          and(eq(listings.sellerId, userId), eq(listings.country, country))
         )
         .limit(10)
 
@@ -151,6 +154,7 @@ export async function POST(request: NextRequest) {
     await db.insert(listings).values({
       id: listingId,
       sellerId: session.user.id as string,
+      country,
       categoryId: categoryRecord.id,
       title: title.slice(0, 255),
       slug,

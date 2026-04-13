@@ -61,6 +61,8 @@ function gradientFor(type: string) {
 export default function EventsPage() {
   const [activeView, setActiveView] = useState<'events' | 'organisers'>('events')
   const [events, setEvents] = useState<Event[]>([])
+  const [pastEvents, setPastEvents] = useState<Event[]>([])
+  const [pastOpen, setPastOpen] = useState(false)
   const [organisers, setOrganisers] = useState<Organiser[]>([])
   const [loading, setLoading] = useState(true)
   const [orgLoading, setOrgLoading] = useState(false)
@@ -69,6 +71,9 @@ export default function EventsPage() {
   const [province, setProvince] = useState('')
   const [month, setMonth] = useState<number | null>(null)
   const [orgProvince, setOrgProvince] = useState('')
+
+  const hasActiveFilters = Boolean(search || type || province || month !== null)
+  const clearFilters = () => { setSearch(''); setType(''); setProvince(''); setMonth(null) }
 
   useEffect(() => {
     setLoading(true)
@@ -82,6 +87,13 @@ export default function EventsPage() {
       .then(d => setEvents(Array.isArray(d) ? d : []))
       .finally(() => setLoading(false))
   }, [type, province, month, search])
+
+  useEffect(() => {
+    fetch(`/api/events?past=1&limit=50`)
+      .then(r => r.json())
+      .then(d => setPastEvents(Array.isArray(d) ? d : []))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (activeView !== 'organisers' || organisers.length > 0) return
@@ -260,12 +272,41 @@ export default function EventsPage() {
               </div>
             ) : events.length === 0 ? (
               <div className="empty">
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 6 }}>No events found</p>
-                <p style={{ fontSize: 14, color: '#9a9a9a' }}>Try different filters or check back soon</p>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 6 }}>
+                  {hasActiveFilters ? 'No events match your filters' : 'No upcoming events right now'}
+                </p>
+                <p style={{ fontSize: 14, color: '#9a9a9a', marginBottom: 16 }}>
+                  {hasActiveFilters ? 'Try broadening the search, or clear filters to see everything.' : 'Check back soon — new events are added weekly.'}
+                </p>
+                {hasActiveFilters && (
+                  <button onClick={clearFilters} style={{ background: 'var(--color-primary)', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 2, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+                    Clear filters
+                  </button>
+                )}
               </div>
             ) : (
               <div className="events-grid">
                 {events.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} />)}
+              </div>
+            )}
+
+            {/* Past events — collapsed by default, last 60 days */}
+            {pastEvents.length > 0 && (
+              <div style={{ marginTop: 32, borderTop: '1px solid #ebebeb', paddingTop: 24 }}>
+                <button
+                  onClick={() => setPastOpen(o => !o)}
+                  style={{ width: '100%', background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', padding: '8px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a' }}>
+                    Recent past events ({pastEvents.length})
+                  </span>
+                  <span style={{ fontSize: 13, color: '#9a9a9a' }}>{pastOpen ? 'Hide' : 'Show'}</span>
+                </button>
+                {pastOpen && (
+                  <div className="events-grid" style={{ marginTop: 16, opacity: 0.75 }}>
+                    {pastEvents.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} />)}
+                  </div>
+                )}
               </div>
             )}
             <div style={{ textAlign: 'center', padding: '40px 0 20px' }}>

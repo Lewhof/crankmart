@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { auth } from '@/auth'
+import { getCountry } from '@/lib/country'
 
 export async function GET(
   _req: NextRequest,
@@ -11,13 +12,14 @@ export async function GET(
   if (!session?.user?.id) return NextResponse.json({ saved: false })
   const { slug } = await params
   const userId = session.user.id
+  const country = await getCountry()
   try {
-    const result = await db.execute(sql.raw(`
+    const result = await db.execute(sql`
       SELECT 1 FROM route_saves rs
       JOIN routes r ON r.id = rs.route_id
-      WHERE rs.user_id = '${userId}' AND r.slug = '${slug.replace(/'/g, "''")}'
+      WHERE rs.user_id = ${userId} AND r.slug = ${slug} AND r.country = ${country}
       LIMIT 1
-    `))
+    `)
     return NextResponse.json({ saved: (result.rows as any[]).length > 0 })
   } catch {
     return NextResponse.json({ saved: false })
@@ -32,9 +34,10 @@ export async function POST(
   if (!session?.user?.id) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   const { slug } = await params
   const userId = session.user.id
+  const country = await getCountry()
   try {
-    // Get route id
-    const routeResult = await db.execute(sql.raw(`SELECT id FROM routes WHERE slug = '${slug.replace(/'/g, "''")}' LIMIT 1`))
+    // Get route id (country-scoped)
+    const routeResult = await db.execute(sql`SELECT id FROM routes WHERE slug = ${slug} AND country = ${country} LIMIT 1`)
     const routeId = (routeResult.rows as any[])[0]?.id
     if (!routeId) return NextResponse.json({ error: 'Route not found' }, { status: 404 })
 

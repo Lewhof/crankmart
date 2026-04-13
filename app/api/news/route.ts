@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,6 +10,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(p.get('offset') || '0')
     const category = p.get('category')
     const featured = p.get('featured')
+    const country = await getCountry()
 
     const categoryFilter = category && category !== 'all'
       ? sql` AND category = ${category}`
@@ -19,12 +21,12 @@ export async function GET(request: NextRequest) {
       SELECT id, title, slug, excerpt, cover_image_url, category, tags,
              author_name, is_featured, views_count, published_at, created_at
       FROM news_articles
-      WHERE status = 'approved'${categoryFilter}${featuredFilter}
+      WHERE status = 'approved' AND country = ${country}${categoryFilter}${featuredFilter}
       ORDER BY is_featured DESC, published_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `)
 
-    const countResult = await db.execute(sql`SELECT COUNT(*) as total FROM news_articles WHERE status = 'approved'${categoryFilter}${featuredFilter}`)
+    const countResult = await db.execute(sql`SELECT COUNT(*) as total FROM news_articles WHERE status = 'approved' AND country = ${country}${categoryFilter}${featuredFilter}`)
     const total = parseInt((countResult.rows?.[0] as any)?.total || '0')
 
     return NextResponse.json({

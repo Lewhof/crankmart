@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,6 +10,11 @@ export async function GET(request: NextRequest) {
     if (adminCheck instanceof NextResponse) return adminCheck
 
     const days = parseInt(request.nextUrl.searchParams.get('days') || '30')
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(adminCheck.session) && request.nextUrl.searchParams.get('all') === '1'
+    // Note: page_views is session/visitor tracking — not geo-scoped by marketplace country;
+    // it retains its own geo fields (country_code, city from IP). Only entity queries get scoped below.
+    const cl = seeAll ? sql`` : sql` AND country = ${country}`
 
     const [
       totalViews, uniqueVisitors, uniqueSessions,
@@ -33,17 +39,18 @@ export async function GET(request: NextRequest) {
       db.execute(sql`SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - (${days * 2} || ' days')::interval AND created_at <= NOW() - (${days} || ' days')::interval`),
       db.execute(sql`SELECT COUNT(DISTINCT COALESCE(session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - (${days * 2} || ' days')::interval AND created_at <= NOW() - (${days} || ' days')::interval`),
 
-      // Entity stats
-      db.execute(sql`SELECT COUNT(*) as total, SUM(views_count) as total_views FROM listings WHERE status = 'active'`),
-      db.execute(sql`SELECT COUNT(*) as total, COUNT(CASE WHEN created_at > NOW() - (${days} || ' days')::interval THEN 1 END) as new_users FROM users`),
-      db.execute(sql`SELECT COUNT(*) as total FROM businesses`),
+      // Entity stats (country-scoped)
+      db.execute(sql`SELECT COUNT(*) as total, SUM(views_count) as total_views FROM listings WHERE status = 'active' ${cl}`),
+      db.execute(sql`SELECT COUNT(*) as total, COUNT(CASE WHEN created_at > NOW() - (${days} || ' days')::interval THEN 1 END) as new_users FROM users WHERE 1=1 ${cl}`),
+      db.execute(sql`SELECT COUNT(*) as total FROM businesses WHERE 1=1 ${cl}`),
 
-      // Category performance
+      // Category performance (country-scoped listings)
       db.execute(sql`
         SELECT lc.name as category, COUNT(l.id) as listing_count,
                SUM(l.views_count) as total_views, ROUND(AVG(l.views_count)::numeric, 1) as avg_views
         FROM listings l LEFT JOIN listing_categories lc ON l.category_id = lc.id
-        WHERE l.status = 'active' GROUP BY lc.name ORDER BY total_views DESC LIMIT 10
+        WHERE l.status = 'active' ${seeAll ? sql`` : sql` AND l.country = ${country}`}
+        GROUP BY lc.name ORDER BY total_views DESC LIMIT 10
       `),
 
       // Sell funnel

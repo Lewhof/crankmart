@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { businesses } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { checkAdminApi } from '@/lib/admin'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 import { shopClaimTouch1Email, sendEmail } from '@/lib/email'
 
 interface Params {
@@ -16,10 +17,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { id } = await params
   const { action } = await req.json()
 
+  const isSuperadmin = isSuperadminSession((check as any).session)
+  const country = await getAdminCountry()
+  const lookupWhere = isSuperadmin
+    ? eq(businesses.id, id)
+    : and(eq(businesses.id, id), eq(businesses.country, country))
+
   const [business] = await db
     .select()
     .from(businesses)
-    .where(eq(businesses.id, id))
+    .where(lookupWhere)
     .limit(1)
 
   if (!business) return NextResponse.json({ error: 'Not found' }, { status: 404 })

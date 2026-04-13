@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
+import { getCountry } from '@/lib/country'
 
 export async function GET(
   request: NextRequest,
@@ -14,14 +15,15 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { id: listingId } = await params
+    const country = await getCountry()
 
     const result = await db.execute(sql`
-      SELECT l.*, 
-        json_agg(json_build_object('id', li.id, 'imageUrl', li.image_url, 'displayOrder', li.display_order) ORDER BY li.display_order) 
+      SELECT l.*,
+        json_agg(json_build_object('id', li.id, 'imageUrl', li.image_url, 'displayOrder', li.display_order) ORDER BY li.display_order)
           FILTER (WHERE li.id IS NOT NULL) as images
       FROM listings l
       LEFT JOIN listing_images li ON li.listing_id = l.id
-      WHERE l.id = ${listingId}
+      WHERE l.id = ${listingId} AND l.country = ${country}
       GROUP BY l.id
     `)
     const rows = (result.rows ?? result) as any[]
@@ -71,10 +73,11 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const { id: listingId } = await params
+    const country = await getCountry()
     const body = await request.json()
 
-    // Verify ownership using parameterised query
-    const check = await db.execute(sql`SELECT seller_id, slug FROM listings WHERE id = ${listingId}`)
+    // Verify ownership using parameterised query (country-scoped)
+    const check = await db.execute(sql`SELECT seller_id, slug FROM listings WHERE id = ${listingId} AND country = ${country}`)
     const rows = (check.rows ?? check) as any[]
     if (!rows.length) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     if (rows[0].seller_id !== session.user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

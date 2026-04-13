@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,14 +10,23 @@ export async function GET(request: NextRequest) {
     const province = searchParams.get('province')
     const month    = searchParams.get('month')
     const search   = searchParams.get('search')
+    const past     = searchParams.get('past') === '1'
     const limit    = parseInt(searchParams.get('limit') || '200')
     const page     = parseInt(searchParams.get('page') || '1')
     const offset   = (page - 1) * limit
+
+    const country = await getCountry()
 
     const typeFilter     = type     ? sql` AND event_type = ${type}`                                        : sql``
     const provinceFilter = province ? sql` AND province ILIKE ${'%' + province + '%'}`                       : sql``
     const monthFilter    = month    ? sql` AND EXTRACT(MONTH FROM start_date) = ${parseInt(month)}`          : sql``
     const searchFilter   = search   ? sql` AND (title ILIKE ${'%' + search + '%'} OR city ILIKE ${'%' + search + '%'})` : sql``
+    const timeFilter     = past
+      ? sql` AND start_date <  now() - interval '1 day' AND start_date >= now() - interval '60 days'`
+      : sql` AND start_date >= now() - interval '1 day'`
+    const orderClause    = past
+      ? sql`ORDER BY start_date DESC`
+      : sql`ORDER BY is_featured DESC, start_date ASC`
 
     const events = await db.execute(sql`
       SELECT id, title, slug, description, event_type, city, province,
@@ -29,11 +39,12 @@ export async function GET(request: NextRequest) {
              entry_fee, distance, organiser_name,
              website_url           AS organiser_website
       FROM events
-      WHERE status = 'verified'
+      WHERE country = ${country}
+        AND status = 'verified'
         AND moderation_status = 'approved'
-        AND start_date >= now() - interval '1 day'
+        ${timeFilter}
         ${typeFilter}${provinceFilter}${monthFilter}${searchFilter}
-      ORDER BY is_featured DESC, start_date ASC
+      ${orderClause}
       LIMIT ${limit} OFFSET ${offset}
     `)
 

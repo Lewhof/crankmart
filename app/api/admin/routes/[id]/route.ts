@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 function slugify(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -16,8 +17,12 @@ export async function GET(
     if (adminCheck instanceof NextResponse) return adminCheck
 
     const { id } = await params
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(adminCheck.session) && _request.nextUrl.searchParams.get('all') === '1'
+    const safeId = id.replace(/'/g, "''")
+    const countryCond = seeAll ? '' : ` AND country = '${country.replace(/'/g, "''")}'`
     const result = await db.execute(sql.raw(`
-      SELECT * FROM routes WHERE id = '${id.replace(/'/g, "''")}'
+      SELECT * FROM routes WHERE id = '${safeId}' ${countryCond}
     `))
     const route = result.rows?.[0] || (result as unknown as unknown[])[0]
     if (!route) return NextResponse.json({ error: 'Route not found' }, { status: 404 })
@@ -79,10 +84,13 @@ export async function PATCH(
 
     if (sets.length === 0) return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
 
+    const patchCountry = await getAdminCountry()
+    const patchSeeAll = isSuperadminSession(adminCheck.session) && request.nextUrl.searchParams.get('all') === '1'
     const safeId = id.replace(/'/g, "''")
+    const patchCountryCond = patchSeeAll ? '' : ` AND country = '${patchCountry.replace(/'/g, "''")}'`
     const result = await db.execute(sql.raw(`
       UPDATE routes SET ${sets.join(', ')}
-      WHERE id = '${safeId}'
+      WHERE id = '${safeId}' ${patchCountryCond}
       RETURNING *
     `))
     const updated = result.rows?.[0] || (result as unknown as unknown[])[0]
@@ -102,10 +110,17 @@ export async function DELETE(
     if (adminCheck instanceof NextResponse) return adminCheck
 
     const { id } = await params
+    const delCountry = await getAdminCountry()
+    const delSeeAll = isSuperadminSession(adminCheck.session) && _request.nextUrl.searchParams.get('all') === '1'
     const safeId = id.replace(/'/g, "''")
+    const delCountryCond = delSeeAll ? '' : ` AND country = '${delCountry.replace(/'/g, "''")}'`
 
-    await db.execute(sql.raw(`DELETE FROM route_images WHERE route_id = '${safeId}'`))
-    await db.execute(sql.raw(`DELETE FROM routes WHERE id = '${safeId}'`))
+    // Only delete images if the parent route belongs to the admin's country.
+    await db.execute(sql.raw(`
+      DELETE FROM route_images
+      WHERE route_id IN (SELECT id FROM routes WHERE id = '${safeId}' ${delCountryCond})
+    `))
+    await db.execute(sql.raw(`DELETE FROM routes WHERE id = '${safeId}' ${delCountryCond}`))
 
     return NextResponse.json({ success: true })
   } catch (err) {

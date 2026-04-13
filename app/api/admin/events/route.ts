@@ -3,6 +3,8 @@ import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { checkAdminApi } from '@/lib/admin'
 import { sendEmail } from '@/lib/email'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
+import { ACTIVE_COUNTRIES } from '@/lib/country'
 
 export async function GET(request: NextRequest) {
   const check = await checkAdminApi()
@@ -10,14 +12,24 @@ export async function GET(request: NextRequest) {
 
   const status  = request.nextUrl.searchParams.get('status') || 'pending'
   const search  = request.nextUrl.searchParams.get('search') || ''
+  const all     = request.nextUrl.searchParams.get('all') === '1'
   const page    = Math.max(1, parseInt(request.nextUrl.searchParams.get('page') || '1'))
   const limit   = 50
   const offset  = (page - 1) * limit
 
+  // ?all=1 is superadmin-only — returns events across every active country.
+  const seeAll = all && isSuperadminSession((check as any).session)
+
   try {
+    const country = await getAdminCountry()
+    // Whitelist country to prevent injection since we're using sql.raw style.
+    const safeCountry = (ACTIVE_COUNTRIES as readonly string[]).includes(country) ? country : 'za'
+
+    const countryClause = seeAll ? '' : ` AND country = '${safeCountry}'`
+
     const whereClause = status === 'all'
-      ? `WHERE 1=1`
-      : `WHERE status = '${status}'`
+      ? `WHERE 1=1${countryClause}`
+      : `WHERE status = '${status}'${countryClause}`
 
     const searchClause = search
       ? ` AND (title ILIKE '%${search.replace(/'/g, "''")}%' OR city ILIKE '%${search.replace(/'/g, "''")}%' OR organiser_name ILIKE '%${search.replace(/'/g, "''")}%')`

@@ -3,6 +3,7 @@ import { db } from '@/db'
 import { businesses } from '@/db/schema'
 import { eq, and, isNotNull, count, sql } from 'drizzle-orm'
 import { checkAdminApi } from '@/lib/admin'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 const PAGE_SIZE = 20
 
@@ -15,6 +16,11 @@ export async function GET(req: NextRequest) {
   const type     = searchParams.get('type') ?? 'all'
   const pageNum  = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
   const offset   = (pageNum - 1) * PAGE_SIZE
+  const all      = searchParams.get('all') === '1'
+
+  const seeAll = all && isSuperadminSession((check as any).session)
+  const country = await getAdminCountry()
+  const countryCond = seeAll ? undefined : eq(businesses.country, country)
 
   // Map tab key -> DB status filter
   const statusMap: Record<string, string | string[]> = {
@@ -27,6 +33,7 @@ export async function GET(req: NextRequest) {
   const dbStatus = statusMap[status] ?? 'pending'
 
   const conditions = []
+  if (countryCond) conditions.push(countryCond)
 
   if (status === 'outreach') {
     conditions.push(eq(businesses.status, 'pending'), isNotNull(businesses.outreachSentAt))
@@ -43,6 +50,9 @@ export async function GET(req: NextRequest) {
   }
 
   const where = conditions.length > 0 ? and(...conditions) : undefined
+
+  // Tab counts honour the same country scope
+  const countryBase = countryCond ? [countryCond] : []
 
   const [rows, [{ total }]] = await Promise.all([
     db.select({
@@ -67,12 +77,12 @@ export async function GET(req: NextRequest) {
     db.select({ total: count() }).from(businesses).where(where),
   ])
 
-  // Tab counts
+  // Tab counts (country-scoped unless superadmin with ?all=1)
   const [pendingCount, outreachCount, claimedCount, suspendedCount] = await Promise.all([
-    db.select({ c: count() }).from(businesses).where(and(eq(businesses.status, 'pending'), sql`${businesses.outreachSentAt} IS NULL`)),
-    db.select({ c: count() }).from(businesses).where(and(eq(businesses.status, 'pending'), isNotNull(businesses.outreachSentAt))),
-    db.select({ c: count() }).from(businesses).where(eq(businesses.status, 'claimed')),
-    db.select({ c: count() }).from(businesses).where(eq(businesses.status, 'suspended')),
+    db.select({ c: count() }).from(businesses).where(and(...countryBase, eq(businesses.status, 'pending'), sql`${businesses.outreachSentAt} IS NULL`)),
+    db.select({ c: count() }).from(businesses).where(and(...countryBase, eq(businesses.status, 'pending'), isNotNull(businesses.outreachSentAt))),
+    db.select({ c: count() }).from(businesses).where(and(...countryBase, eq(businesses.status, 'claimed'))),
+    db.select({ c: count() }).from(businesses).where(and(...countryBase, eq(businesses.status, 'suspended'))),
   ])
 
   return NextResponse.json({

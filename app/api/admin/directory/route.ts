@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,43 +14,37 @@ export async function GET(request: NextRequest) {
     const limit = 20
     const offset = (page - 1) * limit
 
-    const result = await db.execute(
-      typeFilter !== 'all'
-        ? sql`
-            SELECT
-              id, name, logo_url, cover_url, business_type, province, city, is_verified,
-              is_premium, views_count, created_at
-            FROM businesses
-            WHERE business_type = ${typeFilter}
-            ORDER BY created_at DESC
-            LIMIT ${limit} OFFSET ${offset}
-          `
-        : sql`
-            SELECT
-              id, name, logo_url, cover_url, business_type, province, city, is_verified,
-              is_premium, views_count, created_at
-            FROM businesses
-            ORDER BY created_at DESC
-            LIMIT ${limit} OFFSET ${offset}
-          `,
-    )
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(adminCheck.session) && searchParams.get('all') === '1'
+    const countryCond = seeAll ? sql`` : sql` AND country = ${country}`
+    const typeCond = typeFilter !== 'all' ? sql` AND business_type = ${typeFilter}` : sql``
+
+    const result = await db.execute(sql`
+      SELECT
+        id, name, logo_url, cover_url, business_type, province, city, is_verified,
+        is_premium, views_count, created_at
+      FROM businesses
+      WHERE 1=1 ${countryCond} ${typeCond}
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `)
 
     const businesses = result.rows.map((row: any) => ({
       ...row,
       cover: row.cover_url || null,
     })) || []
 
-    const countResult = await db.execute(
-      typeFilter !== 'all'
-        ? sql`SELECT COUNT(*) as count FROM businesses WHERE business_type = ${typeFilter}`
-        : sql`SELECT COUNT(*) as count FROM businesses`,
-    )
+    const countResult = await db.execute(sql`
+      SELECT COUNT(*) as count FROM businesses WHERE 1=1 ${countryCond} ${typeCond}
+    `)
     const totalCount = parseInt((countResult.rows?.[0] as any)?.count || '0')
     const totalPages = Math.ceil(totalCount / limit)
 
-    // Type counts for tab badges
+    // Type counts for tab badges (country-scoped)
     const typeCounts = await db.execute(sql`
-      SELECT business_type, COUNT(*) as count FROM businesses GROUP BY business_type
+      SELECT business_type, COUNT(*) as count FROM businesses
+      WHERE 1=1 ${countryCond}
+      GROUP BY business_type
     `)
     const counts: Record<string, number> = { all: totalCount }
     ;(typeCounts.rows as any[]).forEach((r: any) => { counts[r.business_type] = parseInt(r.count) })

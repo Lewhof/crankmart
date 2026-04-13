@@ -3,6 +3,7 @@ import {
   pgEnum,
   uuid,
   varchar,
+  char,
   text,
   integer,
   boolean,
@@ -11,6 +12,8 @@ import {
   serial,
   jsonb,
   customType,
+  uniqueIndex,
+  index,
 } from 'drizzle-orm/pg-core'
 
 // Custom type for PostgreSQL tsvector
@@ -105,6 +108,7 @@ export const users = pgTable('users', {
   role: userRoleEnum('role').default('buyer'),
   kycStatus: kycStatusEnum('kyc_status').default('not_submitted'),
   kycDocumentUrl: varchar('kyc_document_url', { length: 500 }),
+  country: char('country', { length: 2 }).notNull().default('za'),
   province: varchar('province', { length: 100 }),
   city: varchar('city', { length: 100 }),
   bio: text('bio'),
@@ -160,6 +164,7 @@ export const listings = pgTable('listings', {
   locationLat: numeric('location_lat', { precision: 10, scale: 7 }),
   locationLng: numeric('location_lng', { precision: 10, scale: 7 }),
   locationAddress: varchar('location_address', { length: 255 }),
+  country: char('country', { length: 2 }).notNull().default('za'),
   province: varchar('province', { length: 100 }),
   city: varchar('city', { length: 100 }),
   shippingAvailable: boolean('shipping_available').default(false),
@@ -295,6 +300,7 @@ export const routes = pgTable('routes', {
   distanceKm:      numeric('distance_km', { precision: 6, scale: 1 }),
   elevationM:      integer('elevation_m'),
   estTimeMin:      integer('est_time_min'),
+  country:         char('country', { length: 2 }).notNull().default('za'),
   province:        varchar('province', { length: 100 }),
   region:          varchar('region', { length: 100 }),
   town:            varchar('town', { length: 100 }),
@@ -404,6 +410,7 @@ export const events = pgTable('events', {
   status: eventStatusEnum('status').default('draft'),
   startDate: timestamp('start_date').notNull(),
   endDate: timestamp('end_date'),
+  country: char('country', { length: 2 }).notNull().default('za'),
   province: varchar('province', { length: 100 }),
   city: varchar('city', { length: 100 }),
   venue: varchar('venue', { length: 255 }),
@@ -456,6 +463,7 @@ export const businesses = pgTable('businesses', {
   slug: varchar('slug', { length: 255 }).unique().notNull(),
   businessType: businessTypeEnum('business_type').default('shop').notNull(),
   description: text('description'),
+  country: char('country', { length: 2 }).notNull().default('za'),
   province: varchar('province', { length: 100 }),
   city: varchar('city', { length: 100 }),
   suburb: varchar('suburb', { length: 100 }),
@@ -553,6 +561,7 @@ export const newsArticles = pgTable('news_articles', {
   excerpt: text('excerpt'),
   body: text('body').notNull(),
   coverImageUrl: text('cover_image_url'),
+  country: char('country', { length: 2 }).notNull().default('za'),
   category: varchar('category', { length: 100 }).default('general'),
   tags: text('tags').array(),
   authorName: varchar('author_name', { length: 150 }),
@@ -574,3 +583,21 @@ export const newsArticlesRelations = relations(newsArticles, ({ one }) => ({
   submitter: one(users, { fields: [newsArticles.submittedBy], references: [users.id] }),
   approver: one(users, { fields: [newsArticles.approvedBy], references: [users.id] }),
 }))
+
+// ─── Regions (country-scoped provinces / states) ────────────────────────────
+export const regions = pgTable(
+  'regions',
+  {
+    id: serial('id').primaryKey(),
+    country: char('country', { length: 2 }).notNull(),
+    code: varchar('code', { length: 16 }).notNull(),
+    name: varchar('name', { length: 100 }).notNull(),
+    type: varchar('type', { length: 32 }).notNull(), // 'province' | 'state' | 'county'
+    displayOrder: integer('display_order').default(0),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (t) => ({
+    countryCodeUniq: uniqueIndex('regions_country_code_uniq').on(t.country, t.code),
+    countryIdx: index('regions_country_idx').on(t.country),
+  }),
+)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 interface ActionRequest {
   action: string;
@@ -17,24 +18,24 @@ export async function PATCH(
     const { action } = (await request.json()) as ActionRequest
     const { id } = await params
 
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(adminCheck.session) && request.nextUrl.searchParams.get('all') === '1'
+    const countryGuard = seeAll ? sql`` : sql` AND country = ${country}`
+
     if (action === 'approve') {
-      await db.execute(
-        sql.raw(`UPDATE events SET moderation_status = 'approved' WHERE id = '${id}'`),
-      )
+      await db.execute(sql`UPDATE events SET moderation_status = 'approved' WHERE id = ${id}::uuid ${countryGuard}`)
       return NextResponse.json({ success: true, action: 'approved' })
     } else if (action === 'reject') {
-      await db.execute(
-        sql.raw(`UPDATE events SET moderation_status = 'rejected' WHERE id = '${id}'`),
-      )
+      await db.execute(sql`UPDATE events SET moderation_status = 'rejected' WHERE id = ${id}::uuid ${countryGuard}`)
       return NextResponse.json({ success: true, action: 'rejected' })
     } else if (action === 'feature') {
-      await db.execute(sql.raw(`UPDATE events SET is_featured = true WHERE id = '${id}'`))
+      await db.execute(sql`UPDATE events SET is_featured = true WHERE id = ${id}::uuid ${countryGuard}`)
       return NextResponse.json({ success: true, action: 'featured' })
     } else if (action === 'unfeature') {
-      await db.execute(sql.raw(`UPDATE events SET is_featured = false WHERE id = '${id}'`))
+      await db.execute(sql`UPDATE events SET is_featured = false WHERE id = ${id}::uuid ${countryGuard}`)
       return NextResponse.json({ success: true, action: 'unfeatured' })
     } else if (action === 'delete') {
-      await db.execute(sql.raw(`UPDATE events SET status = 'cancelled' WHERE id = '${id}'`))
+      await db.execute(sql`UPDATE events SET status = 'cancelled' WHERE id = ${id}::uuid ${countryGuard}`)
       return NextResponse.json({ success: true, action: 'deleted' })
     }
 

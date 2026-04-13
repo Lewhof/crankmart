@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { db } from '@/db'
 import { listings } from '@/db/schema'
 import { eq, and } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function POST(
   request: NextRequest,
@@ -17,11 +18,13 @@ export async function POST(
 
   
 
-    // Verify ownership and update
+    const country = await getCountry()
+
+    // Verify ownership and update (country-scoped)
     const listing = await db
       .select({ sellerId: listings.sellerId })
       .from(listings)
-      .where(eq(listings.id, listingId))
+      .where(and(eq(listings.id, listingId), eq(listings.country, country)))
       .limit(1)
 
     if (!listing.length) {
@@ -39,7 +42,7 @@ export async function POST(
         soldAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(listings.id, listingId))
+      .where(and(eq(listings.id, listingId), eq(listings.country, country)))
 
     return NextResponse.json({ success: true })
   } catch (error) {

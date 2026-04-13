@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql, SQL } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,8 +22,10 @@ export async function GET(request: NextRequest) {
     const nearbyKm = parseInt(searchParams.get('nearbyKm') || '0')
     const hasProximity = !isNaN(userLat) && !isNaN(userLng) && nearbyKm > 0
 
+    const country = await getCountry()
+
     // Build parameterized WHERE fragments
-    const filters: SQL[] = []
+    const filters: SQL[] = [sql`r.country = ${country}`]
 
     if (discipline && discipline !== 'all') {
       filters.push(sql`r.discipline = ${discipline}`)
@@ -47,9 +50,7 @@ export async function GET(request: NextRequest) {
       filters.push(sql`(r.name ILIKE ${term} OR r.town ILIKE ${term} OR r.province ILIKE ${term} OR r.region ILIKE ${term})`)
     }
 
-    const extraFilters = filters.length > 0
-      ? filters.reduce((acc, f) => sql`${acc} AND ${f}`)
-      : sql``
+    const extraFilters = filters.reduce((acc, f) => sql`${acc} AND ${f}`)
 
     // Proximity formula (uses r. alias)
     const distFormulaSql = hasProximity
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
       : sql``
 
     // Count query
-    const filterClause = filters.length > 0 ? sql` AND ${extraFilters}` : sql``
+    const filterClause = sql` AND ${extraFilters}`
     const countResult = await db.execute(
       sql`SELECT COUNT(*) as total FROM routes r WHERE r.status = 'approved'${filterClause}${proximityFilter}`
     )

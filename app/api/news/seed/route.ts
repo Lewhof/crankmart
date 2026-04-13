@@ -144,7 +144,7 @@ export async function GET() {
         : `ARRAY[]::text[]`
 
       await db.execute(sql.raw(`
-        INSERT INTO news_articles (title, slug, excerpt, body, cover_image_url, category, tags, author_name, status, is_featured, views_count, published_at)
+        INSERT INTO news_articles (title, slug, excerpt, body, cover_image_url, category, tags, author_name, status, is_featured, views_count, published_at, country)
         VALUES (
           '${a.title.replace(/'/g, "''")}',
           '${a.slug}',
@@ -157,7 +157,8 @@ export async function GET() {
           'approved',
           ${a.featured},
           ${a.views},
-          '${publishedAt.toISOString()}'
+          '${publishedAt.toISOString()}',
+          'za'
         )
         ON CONFLICT (slug) DO UPDATE SET
           title = EXCLUDED.title,

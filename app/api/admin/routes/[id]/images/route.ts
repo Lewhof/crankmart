@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+/* admin-country-allow: route_images is a global child table; country scope
+   enforced via parent routes table in /api/admin/routes/[id] */
 
 export async function GET(
   _request: NextRequest,

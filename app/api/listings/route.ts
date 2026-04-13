@@ -3,6 +3,7 @@ import { db } from '@/db'
 import { listings, listingCategories } from '@/db/schema'
 import { eq, desc, and, gte, lte, ilike, sql, SQL } from 'drizzle-orm'
 import { auth } from '@/auth'
+import { getCountry } from '@/lib/country'
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,6 +27,8 @@ export async function GET(request: NextRequest) {
     // Attribute filters (category-specific)
     const attrFilters  = p.get('attrs') // JSON string: {"suspension":"Full Sus","frameSize":"M"}
 
+    const country = await getCountry()
+
     // Autocomplete suggestions mode
     if (suggest) {
       try {
@@ -33,6 +36,7 @@ export async function GET(request: NextRequest) {
           SELECT DISTINCT title FROM listings
           WHERE search_vector @@ plainto_tsquery('english', ${suggest})
             AND status = 'active'
+            AND country = ${country}
           LIMIT 5
         `)
         return NextResponse.json(results.rows?.map((r: any) => r.title) || [])
@@ -43,6 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     const conditions: SQL[] = [
+      eq(listings.country, country),
       eq(listings.status, 'active'),
       sql`(${listings.expiresAt} IS NULL OR ${listings.expiresAt} > NOW())`,
     ]

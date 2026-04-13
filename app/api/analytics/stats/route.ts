@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { auth } from '@/auth'
+import { getCountry } from '@/lib/country'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,6 +10,7 @@ export async function GET(request: NextRequest) {
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const days = parseInt(request.nextUrl.searchParams.get('days') || '30')
+    const country = await getCountry()
 
     const [
       totalViews, uniqueVisitors, uniqueSessions,
@@ -33,18 +35,18 @@ export async function GET(request: NextRequest) {
       db.execute(sql.raw(`SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - INTERVAL '${days * 2} days' AND created_at <= NOW() - INTERVAL '${days} days'`)),
       db.execute(sql.raw(`SELECT COUNT(DISTINCT COALESCE(session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - INTERVAL '${days * 2} days' AND created_at <= NOW() - INTERVAL '${days} days'`)),
 
-      // Entity stats
-      db.execute(sql.raw(`SELECT COUNT(*) as total, SUM(views_count) as total_views FROM listings WHERE status = 'active'`)),
-      db.execute(sql.raw(`SELECT COUNT(*) as total, COUNT(CASE WHEN created_at > NOW() - INTERVAL '${days} days' THEN 1 END) as new_users FROM users`)),
-      db.execute(sql.raw(`SELECT COUNT(*) as total FROM businesses`)),
+      // Entity stats (country-scoped)
+      db.execute(sql`SELECT COUNT(*) as total, SUM(views_count) as total_views FROM listings WHERE status = 'active' AND country = ${country}`),
+      db.execute(sql.raw(`SELECT COUNT(*) as total, COUNT(CASE WHEN created_at > NOW() - INTERVAL '${days} days' THEN 1 END) as new_users FROM users WHERE country = '${country}'`)),
+      db.execute(sql`SELECT COUNT(*) as total FROM businesses WHERE country = ${country}`),
 
-      // Category performance
-      db.execute(sql.raw(`
+      // Category performance (country-scoped)
+      db.execute(sql`
         SELECT lc.name as category, COUNT(l.id) as listing_count,
                SUM(l.views_count) as total_views, ROUND(AVG(l.views_count)::numeric, 1) as avg_views
         FROM listings l LEFT JOIN listing_categories lc ON l.category_id = lc.id
-        WHERE l.status = 'active' GROUP BY lc.name ORDER BY total_views DESC LIMIT 10
-      `)),
+        WHERE l.status = 'active' AND l.country = ${country} GROUP BY lc.name ORDER BY total_views DESC LIMIT 10
+      `),
 
       // Sell funnel
       db.execute(sql.raw(`

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
 import { ArrowLeft, Calendar, MapPin, ExternalLink, Heart, Share2, Clock } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 
@@ -39,43 +38,18 @@ function gradientFor(type: string) {
   return g[type] || 'linear-gradient(135deg, #374151, #6B7280)'
 }
 
-export default function EventDetailPage() {
-  const params = useParams()
-  const slug = params?.slug as string
-  const [event, setEvent] = useState<Event | null>(null)
-  const [loading, setLoading] = useState(true)
+export default function EventDetail({ event }: { event: Event }) {
+  const slug = event.slug
   const [saved, setSaved] = useState(false)
   const [related, setRelated] = useState<Event[]>([])
 
   useEffect(() => {
-    if (!slug) return
-    fetch(`/api/events/${slug}`)
+    if (!event.event_type) return
+    fetch(`/api/events?type=${event.event_type}&limit=3`)
       .then(r => r.json())
-      .then(d => {
-        setEvent(d)
-        // Fetch related
-        if (d.event_type) {
-          fetch(`/api/events?type=${d.event_type}&limit=3`)
-            .then(r => r.json())
-            .then(rel => setRelated(Array.isArray(rel) ? rel.filter((e: Event) => e.slug !== slug).slice(0, 3) : []))
-        }
-      })
-      .finally(() => setLoading(false))
-  }, [slug])
-
-  if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 32, height: 32, border: '3px solid #ebebeb', borderTopColor: '#0D1B2A', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </div>
-  )
-
-  if (!event) return (
-    <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-      <p style={{ fontWeight: 700 }}>Event not found</p>
-      <Link href="/events" style={{ color: 'var(--color-primary)' }}>← Back to events</Link>
-    </div>
-  )
+      .then(rel => setRelated(Array.isArray(rel) ? rel.filter((e: Event) => e.slug !== slug).slice(0, 3) : []))
+      .catch(() => {})
+  }, [event.event_type, slug])
 
   const typeColor = TYPE_COLORS[event.event_type] || '#6B7280'
   const typeLabel = TYPE_LABELS[event.event_type] || event.event_type

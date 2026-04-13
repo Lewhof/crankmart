@@ -1,26 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { sql } from 'drizzle-orm'
+import { sql, SQL } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const province = searchParams.get('province')
+    const country = await getCountry()
 
-    let query = `
+    const provinceFilter: SQL = province
+      ? sql` AND province ILIKE ${'%' + province + '%'}`
+      : sql``
+
+    const result = await db.execute(sql`
       SELECT DISTINCT town
       FROM routes
       WHERE status = 'approved'
+        AND country = ${country}
         AND town IS NOT NULL
         AND town != ''
-    `
-    if (province) {
-      const p = province.replace(/'/g, "''")
-      query += ` AND province ILIKE '%${p}%'`
-    }
-    query += ` ORDER BY town ASC`
-
-    const result = await db.execute(sql.raw(query))
+        ${provinceFilter}
+      ORDER BY town ASC
+    `)
     const rows = result.rows ?? result
     const cities = (rows as { town: string }[]).map(r => r.town).filter(Boolean)
 

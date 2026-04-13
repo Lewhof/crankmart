@@ -5,6 +5,7 @@ import { auth } from '@/auth'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { sendEmail } from '@/lib/email'
+import { getCountry } from '@/lib/country'
 
 const EventSubmitSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -56,14 +57,17 @@ export async function POST(request: NextRequest) {
     } = validation.data
 
     const slug = slugify(title)
+    const country = await getCountry()
 
     await db.execute(sql`
       INSERT INTO events (
+        country,
         title, slug, description, event_type, city, province, venue_name,
         event_date_start, event_date_end, entry_url, entry_status, entry_fee,
         distance, discipline, organiser_name, organiser_email, organiser_website,
         cover_image_url, status, is_featured, is_verified
       ) VALUES (
+        ${country},
         ${title},
         ${slug},
         ${description ?? null},

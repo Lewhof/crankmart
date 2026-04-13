@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { z } from 'zod'
 import { sql, eq, and } from 'drizzle-orm'
 import { sendEmail, newMessageEmail } from '@/lib/email'
+import { getCountry } from '@/lib/country'
 
 const StartMessageSchema = z.object({
   listingId: z.string().uuid('Invalid listing ID'),
@@ -38,9 +39,11 @@ export async function POST(request: NextRequest) {
   const { listingId, body } = parsed.data
   
   try {
-    // Get listing + seller (using parameterised query)
+    const country = await getCountry()
+
+    // Get listing + seller (country-scoped)
     const listingResult = await db.execute(
-      sql`SELECT id, seller_id, title, slug FROM listings WHERE id = ${listingId}`
+      sql`SELECT id, seller_id, title, slug FROM listings WHERE id = ${listingId} AND country = ${country}`
     )
     const listing = (listingResult.rows ?? listingResult)[0] as unknown as ListingRow | undefined
     if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })

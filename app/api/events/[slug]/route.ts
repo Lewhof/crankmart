@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const { slug } = await params
-    const result = await db.execute(sql`SELECT * FROM events WHERE slug = ${slug}`)
+    const country = await getCountry()
+    const result = await db.execute(sql`
+      SELECT * FROM events WHERE slug = ${slug} AND country = ${country} LIMIT 1
+    `)
     const rows = (result.rows ?? result) as any[]
     if (!rows.length) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json(rows[0])

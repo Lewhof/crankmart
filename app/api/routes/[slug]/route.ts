@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function GET(
   _request: NextRequest,
@@ -8,9 +9,9 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
-    const s = slug.replace(/'/g, "''")
+    const country = await getCountry()
 
-    const result = await db.execute(sql.raw(`
+    const result = await db.execute(sql`
       SELECT r.*,
              COALESCE(
                (SELECT ROUND(AVG(rating)::numeric, 1) FROM route_reviews WHERE route_id = r.id),
@@ -21,9 +22,9 @@ export async function GET(
                0
              ) as review_count
       FROM routes r
-      WHERE r.slug = '${s}'
+      WHERE r.slug = ${slug} AND r.country = ${country}
       LIMIT 1
-    `))
+    `)
 
     const rows = result.rows ?? result
     if (!rows || (rows as any[]).length === 0) {
@@ -61,14 +62,14 @@ export async function GET(
     `))
     const images = imagesResult.rows ?? imagesResult
 
-    // Fetch nearby routes (same province, different slug)
-    const nearbyResult = await db.execute(sql.raw(`
+    // Fetch nearby routes (same province, different slug, same country)
+    const nearbyResult = await db.execute(sql`
       SELECT id, slug, name, discipline, difficulty, distance_km, elevation_m, town, hero_image_url
       FROM routes
-      WHERE province = '${(route.province as string).replace(/'/g, "''")}' AND slug != '${s}' AND status = 'approved'
+      WHERE province = ${route.province} AND slug != ${slug} AND status = 'approved' AND country = ${country}
       ORDER BY is_featured DESC, created_at DESC
       LIMIT 3
-    `))
+    `)
     const nearby = nearbyResult.rows ?? nearbyResult
 
     return NextResponse.json({ route, images, loops, reviews, nearby })

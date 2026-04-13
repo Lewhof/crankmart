@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function GET() {
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const userId = session.user.id
+  const country = await getCountry()
 
   const result = await db.execute(sql`
     SELECT
@@ -21,6 +23,7 @@ export async function GET() {
       organiser_name, organiser_user_id
     FROM events
     WHERE organiser_user_id = ${userId}
+      AND country = ${country}
     ORDER BY event_date_start DESC
     LIMIT 20
   `)

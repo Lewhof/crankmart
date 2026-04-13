@@ -1,16 +1,22 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 interface CountResult {
   count: number | string;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const adminCheck = await checkAdminApi()
     if (adminCheck instanceof NextResponse) return adminCheck
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(adminCheck.session) && request.nextUrl.searchParams.get('all') === '1'
+    const c = seeAll ? sql`` : sql` AND country = ${country}`
+    const cu = seeAll ? sql`` : sql` AND u.country = ${country}`
+
     // Get all stats in parallel
     const [
       totalListingsResult,
@@ -22,28 +28,20 @@ export async function GET() {
       totalMessagesResult,
       pendingListingsResult,
     ] = await Promise.all([
-      // Total listings (all statuses)
-      db.execute(sql.raw(`SELECT COUNT(*) as count FROM listings`)),
-      // Active listings
-      db.execute(sql.raw(`SELECT COUNT(*) as count FROM listings WHERE status = 'active'`)),
-      // Total users
-      db.execute(sql.raw(`SELECT COUNT(*) as count FROM users`)),
-      // New users this week
-      db.execute(
-        sql.raw(`SELECT COUNT(*) as count FROM users WHERE created_at >= NOW() - INTERVAL '7 days'`),
-      ),
-      // Total events
-      db.execute(sql.raw(`SELECT COUNT(*) as count FROM events`)),
-      // Total businesses
-      db.execute(sql.raw(`SELECT COUNT(*) as count FROM businesses`)),
-      // Total messages
-      db.execute(sql.raw(`SELECT COUNT(*) as count FROM messages`)),
-      // Pending moderation listings
-      db.execute(
-        sql.raw(
-          `SELECT COUNT(*) as count FROM listings WHERE moderation_status = 'pending'`,
-        ),
-      ),
+      db.execute(sql`SELECT COUNT(*) as count FROM listings WHERE 1=1 ${c}`),
+      db.execute(sql`SELECT COUNT(*) as count FROM listings WHERE status = 'active' ${c}`),
+      db.execute(sql`SELECT COUNT(*) as count FROM users WHERE 1=1 ${c}`),
+      db.execute(sql`SELECT COUNT(*) as count FROM users WHERE created_at >= NOW() - INTERVAL '7 days' ${c}`),
+      db.execute(sql`SELECT COUNT(*) as count FROM events WHERE 1=1 ${c}`),
+      db.execute(sql`SELECT COUNT(*) as count FROM businesses WHERE 1=1 ${c}`),
+      // messages — joined to listings for country scope
+      db.execute(sql`
+        SELECT COUNT(m.*) as count FROM messages m
+        JOIN conversations conv ON conv.id = m.conversation_id
+        JOIN listings l ON l.id = conv.listing_id
+        WHERE 1=1 ${seeAll ? sql`` : sql` AND l.country = ${country}`}
+      `),
+      db.execute(sql`SELECT COUNT(*) as count FROM listings WHERE moderation_status = 'pending' ${c}`),
     ])
 
     const stats = {

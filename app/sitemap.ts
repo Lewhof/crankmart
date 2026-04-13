@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getCountry, getRoutingMode, type Country } from '@/lib/country'
 
 const BASE = 'https://crankmart.com'
 
@@ -14,83 +15,85 @@ const CITY_SLUGS = [
   'port-elizabeth',
 ]
 
+const CATEGORY_SLUGS = [
+  'bike-shops',
+  'online-retailers',
+  'brands',
+  'mechanics',
+  'coaches',
+  'event-organisers',
+  'bike-hire',
+]
+
+function prefix(country: Country): string {
+  return getRoutingMode() === 'implicit-za' ? '' : `/${country}`
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Static pages
+  const country = await getCountry()
+  const p = prefix(country)
+
   const staticPages: MetadataRoute.Sitemap = [
-    { url: BASE, changeFrequency: 'daily', priority: 1.0 },
-    { url: `${BASE}/faq`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${BASE}/directory`, changeFrequency: 'daily', priority: 0.8 },
-    { url: `${BASE}/events`, changeFrequency: 'daily', priority: 0.8 },
-    { url: `${BASE}/classifieds`, changeFrequency: 'hourly', priority: 0.8 },
-    { url: `${BASE}/list`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${BASE}/about`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${BASE}/contact`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}${p || '/'}`, changeFrequency: 'daily', priority: 1.0 },
+    { url: `${BASE}${p}/faq`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}${p}/directory`, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${BASE}${p}/events`, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${BASE}${p}/classifieds`, changeFrequency: 'hourly', priority: 0.8 },
+    { url: `${BASE}${p}/list`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}${p}/about`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}${p}/contact`, changeFrequency: 'monthly', priority: 0.5 },
   ]
 
-  // City landing pages
   const cityPages: MetadataRoute.Sitemap = CITY_SLUGS.map(city => ({
-    url: `${BASE}/directory/${city}`,
+    url: `${BASE}${p}/directory/${city}`,
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))
 
-  // Category landing pages
-  const CATEGORY_SLUGS = [
-    'bike-shops',
-    'online-retailers',
-    'brands',
-    'mechanics',
-    'coaches',
-    'event-organisers',
-    'bike-hire',
-  ]
   const categoryPages: MetadataRoute.Sitemap = CATEGORY_SLUGS.map(category => ({
-    url: `${BASE}/directory/category/${category}`,
+    url: `${BASE}${p}/directory/category/${category}`,
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))
 
   try {
-    // Business directory listings (only active)
-    const businesses = await db.execute(sql.raw(`
+    const businesses = await db.execute(sql`
       SELECT slug, updated_at
       FROM businesses
-      WHERE listing_status = 'active'
+      WHERE listing_status = 'active' AND country = ${country}
       ORDER BY updated_at DESC
       LIMIT 2000
-    `))
+    `)
     const businessPages: MetadataRoute.Sitemap = ((businesses.rows ?? businesses) as any[]).map(b => ({
-      url: `${BASE}/directory/${b.slug}`,
+      url: `${BASE}${p}/directory/${b.slug}`,
       changeFrequency: 'weekly' as const,
       lastModified: b.updated_at ? new Date(b.updated_at) : undefined,
       priority: 0.8,
     }))
 
-    // Blog / news articles
-    const articles = await db.execute(sql.raw(`
+    const articles = await db.execute(sql`
       SELECT slug, published_at, updated_at
       FROM news_articles
-      WHERE status = 'approved'
+      WHERE status = 'approved' AND country = ${country}
       ORDER BY published_at DESC
       LIMIT 500
-    `))
+    `)
     const blogPages: MetadataRoute.Sitemap = ((articles.rows ?? articles) as any[]).map(a => ({
-      url: `${BASE}/news/${a.slug}`,
+      url: `${BASE}${p}/news/${a.slug}`,
       changeFrequency: 'monthly' as const,
       lastModified: a.updated_at ? new Date(a.updated_at) : (a.published_at ? new Date(a.published_at) : undefined),
       priority: 0.7,
     }))
 
-    // Events
-    const events = await db.execute(sql.raw(`
+    const events = await db.execute(sql`
       SELECT slug, updated_at
       FROM events
-      WHERE status IN ('verified','pending_review')
+      WHERE status IN ('verified','pending_review') AND country = ${country}
       ORDER BY updated_at DESC
       LIMIT 500
-    `))
+    `)
     const eventPages: MetadataRoute.Sitemap = ((events.rows ?? events) as any[]).map(e => ({
-      url: `${BASE}/events/${e.slug}`,
+      url: `${BASE}${p}/events/${e.slug}`,
       changeFrequency: 'weekly' as const,
       lastModified: e.updated_at ? new Date(e.updated_at) : undefined,
       priority: 0.8,
@@ -106,7 +109,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]
   } catch (error) {
     console.error('Sitemap generation error:', error)
-    // Return static + city + category pages even if DB fails
     return [...staticPages, ...cityPages, ...categoryPages]
   }
 }

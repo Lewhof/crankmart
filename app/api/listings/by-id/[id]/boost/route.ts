@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/db'
 import { listings } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
+import { getCountry } from '@/lib/country'
 
 export async function POST(
   request: NextRequest,
@@ -15,12 +16,13 @@ export async function POST(
     }
 
     const { id: listingId } = await params
+    const country = await getCountry()
 
-    // Verify ownership
+    // Verify ownership (country-scoped)
     const listing = await db
       .select({ sellerId: listings.sellerId })
       .from(listings)
-      .where(eq(listings.id, listingId))
+      .where(and(eq(listings.id, listingId), eq(listings.country, country)))
       .limit(1)
 
     if (!listing.length) {
@@ -42,7 +44,7 @@ export async function POST(
         featuredExpiresAt: featureUntil,
         updatedAt: new Date(),
       })
-      .where(eq(listings.id, listingId))
+      .where(and(eq(listings.id, listingId), eq(listings.country, country)))
 
     return NextResponse.json({ featureUntil })
   } catch (error) {

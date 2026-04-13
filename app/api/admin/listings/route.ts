@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 interface ListingRow {
   id: string;
@@ -32,6 +33,10 @@ export async function GET(request: NextRequest) {
     const limit = 20
     const offset = (page - 1) * limit
 
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(adminCheck.session) && searchParams.get('all') === '1'
+    const countryFilter = seeAll ? sql`` : sql` AND l.country = ${country}`
+
     // Build query using parameterized sql template to prevent injection
     const statusFilter = status !== 'all' ? sql` AND l.status = ${status}` : sql``
     const moderationFilter = moderation !== 'all' ? sql` AND l.moderation_status = ${moderation}` : sql``
@@ -46,6 +51,7 @@ export async function GET(request: NextRequest) {
         FROM listings l
         JOIN users u ON l.seller_id = u.id
         WHERE 1=1
+        ${countryFilter}
         ${statusFilter}
         ${moderationFilter}
         ${searchFilter}
@@ -61,6 +67,7 @@ export async function GET(request: NextRequest) {
         SELECT COUNT(*) as count FROM listings l
         JOIN users u ON l.seller_id = u.id
         WHERE 1=1
+        ${countryFilter}
         ${statusFilter}
         ${moderationFilter}
         ${searchFilter}

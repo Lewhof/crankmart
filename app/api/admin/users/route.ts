@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkAdminApi } from '@/lib/admin'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { getAdminCountry, isSuperadminSession } from '@/lib/admin-country'
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,6 +15,9 @@ export async function GET(request: NextRequest) {
     const limit = 20
     const offset = (page - 1) * limit
 
+    const country = await getAdminCountry()
+    const seeAll = isSuperadminSession(adminCheck.session) && searchParams.get('all') === '1'
+    const countryFilter = seeAll ? sql`` : sql` AND u.country = ${country}`
     const adminFilter = adminOnly ? sql` AND u.is_admin = true` : sql``
     const searchFilter = search ? sql` AND (u.name ILIKE ${'%' + search + '%'} OR u.email ILIKE ${'%' + search + '%'})` : sql``
 
@@ -25,6 +29,7 @@ export async function GET(request: NextRequest) {
         FROM users u
         LEFT JOIN listings l ON u.id = l.seller_id
         WHERE 1=1
+        ${countryFilter}
         ${adminFilter}
         ${searchFilter}
         GROUP BY u.id
@@ -40,6 +45,7 @@ export async function GET(request: NextRequest) {
         SELECT COUNT(DISTINCT u.id) as count
         FROM users u
         WHERE 1=1
+        ${countryFilter}
         ${adminFilter}
         ${searchFilter}
       `,
