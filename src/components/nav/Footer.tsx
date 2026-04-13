@@ -132,7 +132,7 @@ export function Footer() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
               <WheelMark size={22} />
               <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: '0.06em' }}>
-                <span style={{ color: 'white' }}>CYCLE</span><span style={{ color: 'var(--color-primary)' }}>MART</span>
+                <span style={{ color: 'white' }}>CRANK</span><span style={{ color: 'var(--color-primary)' }}>MART</span>
               </span>
             </div>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', lineHeight: 1.75, margin: 0, maxWidth: 220 }}>

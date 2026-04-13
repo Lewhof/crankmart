@@ -92,7 +92,7 @@ export function TopNav() {
               <line x1="12.5" y1="27.5" x2="7.8" y2="32.2" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
             <span style={{ fontWeight:800,fontSize:17,letterSpacing:'0.04em' }}>
-              <span style={{ color:'#ffffff' }}>CYCLE</span><span style={{ color:'var(--color-primary)' }}>MART</span>
+              <span style={{ color:'#ffffff' }}>CRANK</span><span style={{ color:'var(--color-primary)' }}>MART</span>
             </span>
           </Link>
 
@@ -201,7 +201,7 @@ export function TopNav() {
           <div style={{ display:'flex',alignItems:'center',gap:8 }}>
             <svg width="26" height="26" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18.5" stroke="#0D1B2A" strokeWidth="1.5"/><circle cx="20" cy="20" r="11.5" stroke="#0D1B2A" strokeWidth="1" opacity="0.35"/><circle cx="20" cy="20" r="2" fill="#0D1B2A"/><line x1="20" y1="2" x2="20" y2="8.5" stroke="#0D1B2A" strokeWidth="1.5" strokeLinecap="round"/><line x1="20" y1="31.5" x2="20" y2="38" stroke="#0D1B2A" strokeWidth="1.5" strokeLinecap="round"/><line x1="2" y1="20" x2="8.5" y2="20" stroke="#0D1B2A" strokeWidth="1.5" strokeLinecap="round"/><line x1="31.5" y1="20" x2="38" y2="20" stroke="#0D1B2A" strokeWidth="1.5" strokeLinecap="round"/><line x1="7.8" y1="7.8" x2="12.5" y2="12.5" stroke="#0D1B2A" strokeWidth="1.5" strokeLinecap="round"/><line x1="27.5" y1="27.5" x2="32.2" y2="32.2" stroke="#0D1B2A" strokeWidth="1.5" strokeLinecap="round"/><line x1="32.2" y1="7.8" x2="27.5" y2="12.5" stroke="#0D1B2A" strokeWidth="1.5" strokeLinecap="round"/><line x1="12.5" y1="27.5" x2="7.8" y2="32.2" stroke="#0D1B2A" strokeWidth="1.5" strokeLinecap="round"/></svg>
             <span style={{ fontWeight:800,fontSize:16,letterSpacing:'0.04em' }}>
-              <span style={{ color:'#1a1a1a' }}>CYCLE</span><span style={{ color:'var(--color-primary)' }}>MART</span>
+              <span style={{ color:'#1a1a1a' }}>CRANK</span><span style={{ color:'var(--color-primary)' }}>MART</span>
             </span>
           </div>
           <button onClick={() => setDrawerOpen(false)} style={{ background:'none',border:'none',cursor:'pointer',color:'#1a1a1a',padding:4 }}>

@@ -335,7 +335,7 @@ export default function AdminThemePage() {
               <line x1="31.5" y1="20" x2="38" y2="20" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
             <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: '0.04em' }}>
-              <span style={{ color: 'var(--admin-surface)' }}>CYCLE</span>
+              <span style={{ color: 'var(--admin-surface)' }}>CRANK</span>
               <span style={{ color: theme.theme_primary }}>MART</span>
             </span>
             <div style={{ flex: 1, display: 'flex', gap: 4 }}>
@@ -375,7 +375,7 @@ export default function AdminThemePage() {
           {/* Footer preview */}
           <div style={{ background: theme.theme_night_ride, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontWeight: 800, fontSize: 12, letterSpacing: '0.06em' }}>
-              <span style={{ color: 'var(--admin-surface)' }}>CYCLE</span>
+              <span style={{ color: 'var(--admin-surface)' }}>CRANK</span>
               <span style={{ color: theme.theme_primary }}>MART</span>
             </span>
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginLeft: 8 }}>SA&apos;s cycling marketplace</span>
