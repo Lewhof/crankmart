@@ -73,7 +73,8 @@ export function PageHeader({
 }
 
 // ─── StatusPill ───────────────────────────────────────────────────────
-type PillTone = 'neutral' | 'success' | 'warn' | 'danger' | 'accent'
+import { type PillTone, toneForStatus } from './tone'
+export { toneForStatus }
 
 const PILL_STYLES: Record<PillTone, { bg: string; color: string }> = {
   neutral: { bg: 'color-mix(in oklch, var(--admin-text-dim) 15%, transparent)', color: 'var(--admin-text-dim)' },
@@ -108,29 +109,6 @@ export function StatusPill({
       {label}
     </span>
   )
-}
-
-export function toneForStatus(status?: string): PillTone {
-  switch (status) {
-    case 'approved':
-    case 'active':
-    case 'verified':
-    case 'published':
-      return 'success'
-    case 'pending':
-    case 'pending_review':
-    case 'draft':
-      return 'warn'
-    case 'rejected':
-    case 'banned':
-    case 'expired':
-    case 'removed':
-      return 'danger'
-    case 'featured':
-      return 'accent'
-    default:
-      return 'neutral'
-  }
 }
 
 // ─── Table ────────────────────────────────────────────────────────────

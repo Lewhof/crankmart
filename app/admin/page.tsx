@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { getAdminCountry } from '@/lib/admin-country'
-import { Card, PageHeader, StatCard, StatusPill, toneForStatus, Table, Empty } from '@/components/admin/primitives'
+import { Card, PageHeader, StatCard, StatusPill, Table, Empty } from '@/components/admin/primitives'
+import { toneForStatus } from '@/components/admin/tone'
 import { ArrowRight } from 'lucide-react'
 
 interface CountRow { count: number | string }
