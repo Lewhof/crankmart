@@ -5,12 +5,12 @@ import { Palette, RotateCcw, Save, Check, Loader2, Eye } from 'lucide-react'
 
 // ── Preset concepts ───────────────────────────────────────────────────────
 const PRESETS = [
-  { id: 'b', label: 'Signal Orange', primary: '#EA580C', primaryHover: '#C44A0A', accent: '#EA580C', accentHover: '#C44A0A', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
-  { id: 'a', label: 'Precision Red',  primary: '#CC1F2D', primaryHover: '#A8172A', accent: '#CC1F2D', accentHover: '#A8172A', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
-  { id: 'c', label: 'Electric Blue',  primary: '#2563EB', primaryHover: '#1D4FBF', accent: '#2563EB', accentHover: '#1D4FBF', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
-  { id: 'd', label: 'Volt Green',     primary: '#65A30D', primaryHover: '#4D7A09', accent: '#65A30D', accentHover: '#4D7A09', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
-  { id: 'e', label: 'Titanium Gold',  primary: '#D4A017', primaryHover: '#AA8012', accent: '#D4A017', accentHover: '#AA8012', nightRide: '#0D1B2A', background: '#f5f5f5', surface: '#ffffff' },
-  { id: 'baseline', label: 'Night Ride (Classic)', primary: '#273970', primaryHover: '#1E2E5C', accent: '#273970', accentHover: '#1E2E5C', nightRide: '#0D1B2A', background: '#ffffff', surface: '#ffffff' },
+  { id: 'b', label: 'Signal Orange', primary: '#EA580C', primaryHover: '#C44A0A', accent: '#EA580C', accentHover: '#C44A0A', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
+  { id: 'a', label: 'Precision Red',  primary: '#CC1F2D', primaryHover: '#A8172A', accent: '#CC1F2D', accentHover: '#A8172A', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
+  { id: 'c', label: 'Electric Blue',  primary: '#2563EB', primaryHover: '#1D4FBF', accent: '#2563EB', accentHover: '#1D4FBF', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
+  { id: 'd', label: 'Volt Green',     primary: '#65A30D', primaryHover: '#4D7A09', accent: '#65A30D', accentHover: '#4D7A09', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
+  { id: 'e', label: 'Titanium Gold',  primary: '#D4A017', primaryHover: '#AA8012', accent: '#D4A017', accentHover: '#AA8012', nightRide: 'var(--admin-text)', background: 'var(--admin-surface-2)', surface: 'var(--admin-surface)' },
+  { id: 'baseline', label: 'Night Ride (Classic)', primary: '#273970', primaryHover: '#1E2E5C', accent: '#273970', accentHover: '#1E2E5C', nightRide: 'var(--admin-text)', background: 'var(--admin-surface)', surface: 'var(--admin-surface)' },
 ]
 
 interface Theme {
@@ -28,9 +28,9 @@ const DEFAULT_THEME: Theme = {
   theme_primary_hover: '#C44A0A',
   theme_accent:        '#EA580C',
   theme_accent_hover:  '#C44A0A',
-  theme_night_ride:    '#0D1B2A',
-  theme_background:    '#f5f5f5',
-  theme_surface:       '#ffffff',
+  theme_night_ride:    'var(--admin-text)',
+  theme_background:    'var(--admin-surface-2)',
+  theme_surface:       'var(--admin-surface)',
 }
 
 // ── Live CSS preview injector ─────────────────────────────────────────────
@@ -191,10 +191,10 @@ export default function AdminThemePage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
             <Palette size={22} /> Theme &amp; Colours
           </h1>
-          <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>
             Customise the colour scheme. Changes go live instantly site-wide on save.
           </p>
         </div>
@@ -202,8 +202,8 @@ export default function AdminThemePage() {
           <button onClick={togglePreview} style={{
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '8px 14px', borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-            background: previewing ? '#0D1B2A' : 'transparent',
-            color: previewing ? '#fff' : '#0D1B2A',
+            background: previewing ? 'var(--admin-text)' : 'transparent',
+            color: previewing ? 'var(--admin-surface)' : 'var(--admin-text)',
             border: '1.5px solid #0D1B2A',
           }}>
             <Eye size={14} /> {previewing ? 'Preview On' : 'Preview Off'}
@@ -212,7 +212,7 @@ export default function AdminThemePage() {
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '8px 18px', borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
             background: saved ? '#10B981' : 'var(--color-primary)',
-            color: '#fff', border: 'none', opacity: saving ? 0.7 : 1,
+            color: 'var(--admin-surface)', border: 'none', opacity: saving ? 0.7 : 1,
           }}>
             {saving ? <Loader2 size={14} style={{ animation: 'spin .8s linear infinite' }} /> :
              saved  ? <Check size={14} /> : <Save size={14} />}
@@ -229,7 +229,7 @@ export default function AdminThemePage() {
 
       {/* Presets */}
       <div style={{ marginBottom: 32 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: '#9a9a9a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+        <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--admin-text-dim)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
           Quick Presets
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -237,11 +237,11 @@ export default function AdminThemePage() {
             <button key={p.id} onClick={() => applyPreset(p)} style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '7px 12px', borderRadius: 4, fontSize: 12, fontWeight: 600,
-              background: '#fff', border: '1.5px solid #ebebeb', cursor: 'pointer',
+              background: 'var(--admin-surface)', border: '1.5px solid #ebebeb', cursor: 'pointer',
               transition: 'border-color .15s',
             }}
             onMouseEnter={e => (e.currentTarget.style.borderColor = p.primary)}
-            onMouseLeave={e => (e.currentTarget.style.borderColor = '#ebebeb')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--admin-border)')}
             >
               <span style={{ width: 12, height: 12, borderRadius: '50%', background: p.primary, display: 'inline-block' }} />
               <span style={{ width: 12, height: 12, borderRadius: '50%', background: p.nightRide, display: 'inline-block' }} />
@@ -254,16 +254,16 @@ export default function AdminThemePage() {
       {/* Colour groups */}
       {GROUPS.map(group => (
         <div key={group.id} style={{
-          background: '#fff', border: '1px solid #ebebeb', borderRadius: 8,
+          background: 'var(--admin-surface)', border: '1px solid #ebebeb', borderRadius: 8,
           marginBottom: 20, overflow: 'hidden',
         }}>
           {/* Group header */}
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid #f0f0f0', background: '#fafafa', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #f0f0f0', background: 'var(--admin-surface-2)', display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 20 }}>{group.icon}</span>
             <div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                <span style={{ fontSize: 15, fontWeight: 800, color: '#0D1B2A' }}>{group.label}</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#9a9a9a', letterSpacing: '0.04em' }}>{group.subtitle}</span>
+                <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--admin-text)' }}>{group.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--admin-text-dim)', letterSpacing: '0.04em' }}>{group.subtitle}</span>
               </div>
               <p style={{ fontSize: 12, color: '#71717a', margin: 0, marginTop: 1 }}>{group.description}</p>
             </div>
@@ -291,8 +291,8 @@ export default function AdminThemePage() {
 
                   {/* Label + hint */}
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{field.label}</div>
-                    <div style={{ fontSize: 11, color: '#9a9a9a', marginTop: 1 }}>{field.hint}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--admin-text)' }}>{field.label}</div>
+                    <div style={{ fontSize: 11, color: 'var(--admin-text-dim)', marginTop: 1 }}>{field.hint}</div>
                   </div>
 
                   {/* Hex input */}
@@ -306,8 +306,8 @@ export default function AdminThemePage() {
                     maxLength={7}
                     style={{
                       width: 90, padding: '6px 10px', borderRadius: 4, border: '1.5px solid #e4e4e7',
-                      fontSize: 12, fontWeight: 700, fontFamily: 'monospace', color: '#1a1a1a',
-                      background: '#fafafa', textAlign: 'center', letterSpacing: '0.05em',
+                      fontSize: 12, fontWeight: 700, fontFamily: 'monospace', color: 'var(--admin-text)',
+                      background: 'var(--admin-surface-2)', textAlign: 'center', letterSpacing: '0.05em',
                     }}
                   />
                 </div>
@@ -319,7 +319,7 @@ export default function AdminThemePage() {
 
       {/* Live preview nav mockup */}
       <div style={{ marginTop: 32 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: '#9a9a9a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+        <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--admin-text-dim)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
           Live Preview
         </p>
         <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #ebebeb', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
@@ -335,7 +335,7 @@ export default function AdminThemePage() {
               <line x1="31.5" y1="20" x2="38" y2="20" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
             <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: '0.04em' }}>
-              <span style={{ color: '#fff' }}>CYCLE</span>
+              <span style={{ color: 'var(--admin-surface)' }}>CYCLE</span>
               <span style={{ color: theme.theme_primary }}>MART</span>
             </span>
             <div style={{ flex: 1, display: 'flex', gap: 4 }}>
@@ -343,7 +343,7 @@ export default function AdminThemePage() {
                 <span key={l} style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', padding: '4px 10px', borderRadius: 2 }}>{l}</span>
               ))}
             </div>
-            <span style={{ background: theme.theme_primary, color: '#fff', fontSize: 12, fontWeight: 700, padding: '6px 14px', borderRadius: 2 }}>
+            <span style={{ background: theme.theme_primary, color: 'var(--admin-surface)', fontSize: 12, fontWeight: 700, padding: '6px 14px', borderRadius: 2 }}>
               + Sell
             </span>
           </div>
@@ -354,8 +354,8 @@ export default function AdminThemePage() {
                 <span key={cat} style={{
                   padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600,
                   background: i === 0 ? theme.theme_primary : theme.theme_surface,
-                  color: i === 0 ? '#fff' : '#1a1a1a',
-                  border: `1.5px solid ${i === 0 ? theme.theme_primary : '#ebebeb'}`,
+                  color: i === 0 ? 'var(--admin-surface)' : 'var(--admin-text)',
+                  border: `1.5px solid ${i === 0 ? theme.theme_primary : 'var(--admin-border)'}`,
                 }}>{cat}</span>
               ))}
             </div>
@@ -365,8 +365,8 @@ export default function AdminThemePage() {
                   flex: 1, background: theme.theme_surface, borderRadius: 6,
                   border: '1px solid #ebebeb', padding: 12, minWidth: 0,
                 }}>
-                  <div style={{ height: 60, background: '#f0f0f0', borderRadius: 4, marginBottom: 8 }} />
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#1a1a1a' }}>Trek Domane SL 5</div>
+                  <div style={{ height: 60, background: 'var(--admin-border)', borderRadius: 4, marginBottom: 8 }} />
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--admin-text)' }}>Trek Domane SL 5</div>
                   <div style={{ fontSize: 12, color: theme.theme_primary, fontWeight: 800, marginTop: 2 }}>R 28,000</div>
                 </div>
               ))}
@@ -375,7 +375,7 @@ export default function AdminThemePage() {
           {/* Footer preview */}
           <div style={{ background: theme.theme_night_ride, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontWeight: 800, fontSize: 12, letterSpacing: '0.06em' }}>
-              <span style={{ color: '#fff' }}>CYCLE</span>
+              <span style={{ color: 'var(--admin-surface)' }}>CYCLE</span>
               <span style={{ color: theme.theme_primary }}>MART</span>
             </span>
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginLeft: 8 }}>SA&apos;s cycling marketplace</span>

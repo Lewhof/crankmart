@@ -29,7 +29,7 @@ const STATUS_TABS = ['all', 'pending', 'active', 'expired', 'cancelled']
 const STATUS_BADGE: Record<string, { bg: string; color: string }> = {
   pending:   { bg: '#FEF9C3', color: '#854D0E' },
   active:    { bg: '#DCFCE7', color: '#166534' },
-  expired:   { bg: '#F3F4F6', color: '#6B7280' },
+  expired:   { bg: 'var(--admin-surface-2)', color: 'var(--admin-text-dim)' },
   cancelled: { bg: '#FEE2E2', color: '#991B1B' },
   failed:    { bg: '#FEE2E2', color: '#991B1B' },
   refunded:  { bg: '#EDE9FE', color: '#5B21B6' },
@@ -46,7 +46,7 @@ const PACKAGE_TYPES = [
 ]
 
 const TYPE_META: Record<string, { icon: string; color: string; category: string }> = Object.fromEntries(
-  PACKAGE_TYPES.map(t => [t.value, { icon: t.icon, color: '#0D1B2A', category: t.category }])
+  PACKAGE_TYPES.map(t => [t.value, { icon: t.icon, color: 'var(--admin-text)', category: t.category }])
 )
 
 function fmtRand(cents: number) { return `R${(cents / 100).toFixed(2)}` }
@@ -56,7 +56,7 @@ function fmtDate(d: string | null) {
 }
 
 const CELL: React.CSSProperties = { padding: '10px 14px', textAlign: 'left' as const }
-const TH:   React.CSSProperties = { ...CELL, fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase' as const, letterSpacing: '.5px', background: '#f9fafb' }
+const TH:   React.CSSProperties = { ...CELL, fontSize: 11, fontWeight: 700, color: 'var(--admin-text-dim)', textTransform: 'uppercase' as const, letterSpacing: '.5px', background: 'var(--admin-surface-2)' }
 
 // ─── Packages Tab ─────────────────────────────────────────────────────────────
 function PackagesTab() {
@@ -130,10 +130,10 @@ function PackagesTab() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>
-          <div style={{ fontSize: 16, fontWeight: 800, color: '#1a1a1a' }}>Boost Packages</div>
-          <div style={{ fontSize: 12, color: '#9a9a9a', marginTop: 2 }}>{packages.length} packages · manage pricing and availability</div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--admin-text)' }}>Boost Packages</div>
+          <div style={{ fontSize: 12, color: 'var(--admin-text-dim)', marginTop: 2 }}>{packages.length} packages · manage pricing and availability</div>
         </div>
-        <button onClick={openCreate} style={{ height: 36, padding: '0 16px', background: '#0D1B2A', color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <button onClick={openCreate} style={{ height: 36, padding: '0 16px', background: 'var(--admin-text)', color: 'var(--admin-surface)', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
           <Plus size={14} /> New Package
         </button>
       </div>
@@ -141,8 +141,8 @@ function PackagesTab() {
       {/* Form modal */}
       {showForm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: '#fff', borderRadius: 12, padding: 24, width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#1a1a1a', marginBottom: 4 }}>{editing ? 'Edit Package' : 'New Boost Package'}</div>
+          <div style={{ background: 'var(--admin-surface)', borderRadius: 12, padding: 24, width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--admin-text)', marginBottom: 4 }}>{editing ? 'Edit Package' : 'New Boost Package'}</div>
 
             {[
               { label: 'Package Type', key: 'type', type: 'select' },
@@ -153,7 +153,7 @@ function PackagesTab() {
               { label: 'Display Order', key: 'display_order', type: 'number', placeholder: '1 = first' },
             ].map(field => (
               <div key={field.key}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase' as const, letterSpacing: '.04em', display: 'block', marginBottom: 5 }}>{field.label}</label>
+                <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--admin-text)', textTransform: 'uppercase' as const, letterSpacing: '.04em', display: 'block', marginBottom: 5 }}>{field.label}</label>
                 {field.type === 'select' ? (
                   <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
                     style={{ width: '100%', padding: '9px 10px', border: '1.5px solid #e4e4e7', borderRadius: 6, fontSize: 13 }}>
@@ -179,9 +179,9 @@ function PackagesTab() {
             ))}
 
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
-              <button onClick={() => setShowForm(false)} style={{ height: 36, padding: '0 16px', background: '#f5f5f5', border: 'none', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => setShowForm(false)} style={{ height: 36, padding: '0 16px', background: 'var(--admin-surface-2)', border: 'none', borderRadius: 6, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
               <button onClick={handleSave} disabled={saving || !form.name || !form.price_cents}
-                style={{ height: 36, padding: '0 20px', background: '#0D1B2A', color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? .6 : 1 }}>
+                style={{ height: 36, padding: '0 20px', background: 'var(--admin-text)', color: 'var(--admin-surface)', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? .6 : 1 }}>
                 {saving ? 'Saving…' : editing ? 'Save Changes' : 'Create Package'}
               </button>
             </div>
@@ -191,7 +191,7 @@ function PackagesTab() {
 
       {/* Package cards grouped */}
       {loading ? (
-        <div style={{ padding: 40, textAlign: 'center', color: '#9a9a9a' }}>Loading…</div>
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--admin-text-dim)' }}>Loading…</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {PACKAGE_TYPES.map(typeInfo => {
@@ -199,31 +199,31 @@ function PackagesTab() {
             if (!pkgs.length) return null
             return (
               <div key={typeInfo.value}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#9a9a9a', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--admin-text-dim)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
                   {typeInfo.icon} {typeInfo.category} — {typeInfo.label}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {pkgs.map(pkg => (
-                    <div key={pkg.id} style={{ background: '#fff', border: `1.5px solid ${pkg.is_active ? '#e4e4e7' : '#f0f0f0'}`, borderRadius: 8, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, opacity: pkg.is_active ? 1 : .55 }}>
+                    <div key={pkg.id} style={{ background: 'var(--admin-surface)', border: `1.5px solid ${pkg.is_active ? 'var(--admin-border)' : 'var(--admin-border)'}`, borderRadius: 8, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, opacity: pkg.is_active ? 1 : .55 }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a' }}>{pkg.name}</span>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)' }}>{pkg.name}</span>
                           {!pkg.is_active && <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 3, background: '#fee2e2', color: '#991b1b' }}>INACTIVE</span>}
                         </div>
-                        {pkg.description && <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{pkg.description}</div>}
-                        <div style={{ display: 'flex', gap: 12, marginTop: 6, fontSize: 12, color: '#9a9a9a' }}>
-                          <span style={{ fontWeight: 800, fontSize: 15, color: '#0D1B2A' }}>{fmtRand(pkg.price_cents)}</span>
+                        {pkg.description && <div style={{ fontSize: 12, color: 'var(--admin-text-dim)', marginTop: 2 }}>{pkg.description}</div>}
+                        <div style={{ display: 'flex', gap: 12, marginTop: 6, fontSize: 12, color: 'var(--admin-text-dim)' }}>
+                          <span style={{ fontWeight: 800, fontSize: 15, color: 'var(--admin-text)' }}>{fmtRand(pkg.price_cents)}</span>
                           {pkg.duration_days && <span>· {pkg.duration_days} days</span>}
                           <span>· order: {pkg.display_order}</span>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                        <button onClick={() => openEdit(pkg)} style={{ height: 30, width: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', border: '1px solid #e4e4e7', borderRadius: 6, cursor: 'pointer' }}>
-                          <Edit2 size={13} style={{ color: '#374151' }} />
+                        <button onClick={() => openEdit(pkg)} style={{ height: 30, width: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--admin-surface-2)', border: '1px solid #e4e4e7', borderRadius: 6, cursor: 'pointer' }}>
+                          <Edit2 size={13} style={{ color: 'var(--admin-text)' }} />
                         </button>
                         <button onClick={() => toggleActive(pkg)} title={pkg.is_active ? 'Deactivate' : 'Activate'}
-                          style={{ height: 30, width: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', background: pkg.is_active ? '#dcfce7' : '#f3f4f6', border: `1px solid ${pkg.is_active ? '#bbf7d0' : '#e4e4e7'}`, borderRadius: 6, cursor: 'pointer' }}>
-                          {pkg.is_active ? <ToggleRight size={15} style={{ color: '#166534' }} /> : <ToggleLeft size={15} style={{ color: '#9ca3af' }} />}
+                          style={{ height: 30, width: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', background: pkg.is_active ? '#dcfce7' : 'var(--admin-surface-2)', border: `1px solid ${pkg.is_active ? '#bbf7d0' : 'var(--admin-border)'}`, borderRadius: 6, cursor: 'pointer' }}>
+                          {pkg.is_active ? <ToggleRight size={15} style={{ color: '#166534' }} /> : <ToggleLeft size={15} style={{ color: 'var(--admin-text-dim)' }} />}
                         </button>
                       </div>
                     </div>
@@ -258,13 +258,13 @@ function BoostsTab() {
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 14, marginBottom: 24 }}>
         {[
-          { label: 'Total Revenue',  value: data ? fmtRand(data.totalRevenueCents)  : '—', color: '#0D1B2A' },
+          { label: 'Total Revenue',  value: data ? fmtRand(data.totalRevenueCents)  : '—', color: 'var(--admin-text)' },
           { label: 'This Month',     value: data ? fmtRand(data.monthlyRevenueCents): '—', color: '#059669' },
           { label: 'Active Boosts',  value: data ? String(data.activeCount)         : '—', color: '#2563EB' },
           { label: 'Pending',        value: data ? String(data.pendingCount)         : '—', color: '#D97706' },
         ].map(k => (
-          <div key={k.label} style={{ background: '#fff', borderRadius: 10, border: '1px solid #ebebeb', padding: '16px 20px' }}>
-            <div style={{ fontSize: 11, color: '#6B7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6 }}>{k.label}</div>
+          <div key={k.label} style={{ background: 'var(--admin-surface)', borderRadius: 10, border: '1px solid #ebebeb', padding: '16px 20px' }}>
+            <div style={{ fontSize: 11, color: 'var(--admin-text-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6 }}>{k.label}</div>
             <div style={{ fontSize: 24, fontWeight: 800, color: k.color }}>{k.value}</div>
           </div>
         ))}
@@ -273,18 +273,18 @@ function BoostsTab() {
       {/* Status tabs */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #ebebeb', marginBottom: 20 }}>
         {STATUS_TABS.map(tab => (
-          <button key={tab} onClick={() => handleTab(tab)} style={{ padding: '8px 16px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 14, fontWeight: status === tab ? 700 : 500, color: status === tab ? '#0D1B2A' : '#6B7280', borderBottom: status === tab ? '2px solid #0D1B2A' : '2px solid transparent', marginBottom: -1, textTransform: 'capitalize' }}>
+          <button key={tab} onClick={() => handleTab(tab)} style={{ padding: '8px 16px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 14, fontWeight: status === tab ? 700 : 500, color: status === tab ? 'var(--admin-text)' : 'var(--admin-text-dim)', borderBottom: status === tab ? '2px solid #0D1B2A' : '2px solid transparent', marginBottom: -1, textTransform: 'capitalize' }}>
             {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
       </div>
 
       {/* Table */}
-      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #ebebeb', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--admin-surface)', borderRadius: 10, border: '1px solid #ebebeb', overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ padding: 40, textAlign: 'center', color: '#9a9a9a' }}>Loading…</div>
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--admin-text-dim)' }}>Loading…</div>
         ) : !data?.boosts?.length ? (
-          <div style={{ padding: 40, textAlign: 'center', color: '#9a9a9a' }}>No boosts found.</div>
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--admin-text-dim)' }}>No boosts found.</div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -297,25 +297,25 @@ function BoostsTab() {
               </thead>
               <tbody>
                 {data.boosts.map((b, i) => {
-                  const badge  = STATUS_BADGE[b.status] ?? { bg: '#F3F4F6', color: '#6B7280' }
+                  const badge  = STATUS_BADGE[b.status] ?? { bg: 'var(--admin-surface-2)', color: 'var(--admin-text-dim)' }
                   const meta   = TYPE_META[b.package_type]
                   const bAny = b as unknown as Record<string,unknown>
                   const target = b.listing_title || b.business_name || bAny.event_title as string || bAny.route_name as string || '—'
                   return (
                     <tr key={b.id} style={{ borderBottom: i < data.boosts.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
-                      <td style={CELL}><span style={{ fontFamily: 'monospace', fontSize: 11, color: '#9a9a9a' }}>{b.id.slice(0, 8)}</span></td>
+                      <td style={CELL}><span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--admin-text-dim)' }}>{b.id.slice(0, 8)}</span></td>
                       <td style={CELL}>
-                        <div style={{ fontWeight: 600, color: '#1a1a1a' }}>{b.user_email}</div>
-                        {b.user_name && <div style={{ fontSize: 11, color: '#9a9a9a' }}>{b.user_name}</div>}
+                        <div style={{ fontWeight: 600, color: 'var(--admin-text)' }}>{b.user_email}</div>
+                        {b.user_name && <div style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>{b.user_name}</div>}
                       </td>
                       <td style={CELL}>
                         <div style={{ fontWeight: 600 }}>{b.package_name}</div>
-                        <div style={{ fontSize: 11, color: '#9a9a9a' }}>{meta?.icon} {meta?.category ?? b.package_type}</div>
+                        <div style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>{meta?.icon} {meta?.category ?? b.package_type}</div>
                       </td>
                       <td style={{ ...CELL, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(target)}</td>
                       <td style={CELL}><span style={{ padding: '3px 10px', borderRadius: 20, background: badge.bg, color: badge.color, fontSize: 11, fontWeight: 700 }}>{b.status}</span></td>
                       <td style={{ ...CELL, fontWeight: 700 }}>{fmtRand(b.amount_cents)}</td>
-                      <td style={{ ...CELL, color: '#6B7280' }}>{fmtDate(b.expires_at)}</td>
+                      <td style={{ ...CELL, color: 'var(--admin-text-dim)' }}>{fmtDate(b.expires_at)}</td>
                     </tr>
                   )
                 })}
@@ -329,12 +329,12 @@ function BoostsTab() {
       {data && data.totalPages > 1 && (
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-            style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid #ebebeb', background: page === 1 ? '#f5f5f5' : '#fff', cursor: page === 1 ? 'default' : 'pointer', fontSize: 13 }}>
+            style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid #ebebeb', background: page === 1 ? 'var(--admin-surface-2)' : 'var(--admin-surface)', cursor: page === 1 ? 'default' : 'pointer', fontSize: 13 }}>
             ← Prev
           </button>
-          <span style={{ padding: '6px 14px', fontSize: 13, color: '#6B7280' }}>Page {page} of {data.totalPages}</span>
+          <span style={{ padding: '6px 14px', fontSize: 13, color: 'var(--admin-text-dim)' }}>Page {page} of {data.totalPages}</span>
           <button onClick={() => setPage(p => Math.min(data.totalPages, p + 1))} disabled={page === data.totalPages}
-            style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid #ebebeb', background: page === data.totalPages ? '#f5f5f5' : '#fff', cursor: page === data.totalPages ? 'default' : 'pointer', fontSize: 13 }}>
+            style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid #ebebeb', background: page === data.totalPages ? 'var(--admin-surface-2)' : 'var(--admin-surface)', cursor: page === data.totalPages ? 'default' : 'pointer', fontSize: 13 }}>
             Next →
           </button>
         </div>
@@ -352,16 +352,16 @@ export default function BoostsPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: 8 }}>
             <Zap size={20} style={{ color: '#F59E0B' }} /> Boosts
           </h1>
-          <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>Manage boost transactions and pricing packages</p>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>Manage boost transactions and pricing packages</p>
         </div>
         {/* View switcher */}
-        <div style={{ display: 'flex', background: '#f5f5f5', borderRadius: 8, padding: 3 }}>
+        <div style={{ display: 'flex', background: 'var(--admin-surface-2)', borderRadius: 8, padding: 3 }}>
           {[{ id: 'boosts', label: 'Transactions' }, { id: 'packages', label: 'Packages' }].map(v => (
             <button key={v.id} onClick={() => setView(v.id as 'boosts' | 'packages')}
-              style={{ padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: view === v.id ? '#fff' : 'transparent', color: view === v.id ? '#0D1B2A' : '#9a9a9a', boxShadow: view === v.id ? '0 1px 3px rgba(0,0,0,.1)' : 'none', transition: 'all .12s' }}>
+              style={{ padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: view === v.id ? 'var(--admin-surface)' : 'transparent', color: view === v.id ? 'var(--admin-text)' : 'var(--admin-text-dim)', boxShadow: view === v.id ? '0 1px 3px rgba(0,0,0,.1)' : 'none', transition: 'all .12s' }}>
               {v.label}
             </button>
           ))}

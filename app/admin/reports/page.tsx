@@ -34,8 +34,8 @@ const MODERATION_COLORS: Record<string, string> = {
   flagged: '#8B5CF6',
 }
 
-function SparkLine({ data, color = '#0D1B2A' }: { data: Array<{ date: string; count: string }>; color?: string }) {
-  if (!data.length) return <div style={{ padding: '20px 0', color: '#999', fontSize: 13 }}>No data for this period</div>
+function SparkLine({ data, color = '#60A5FA' }: { data: Array<{ date: string; count: string }>; color?: string }) {
+  if (!data.length) return <div style={{ padding: '20px 0', color: 'var(--admin-text-dim)', fontSize: 13 }}>No data for this period</div>
   const values = data.map(d => Number(d.count))
   const max = Math.max(...values, 1)
   const w = 500, h = 80, padX = 8, padY = 8
@@ -69,7 +69,7 @@ function SparkLine({ data, color = '#0D1B2A' }: { data: Array<{ date: string; co
 
 function DonutChart({ data, colors }: { data: Array<{ label: string; value: number }>; colors: Record<string, string> }) {
   const total = data.reduce((s, d) => s + d.value, 0)
-  if (!total) return <div style={{ color: '#999', fontSize: 13 }}>No data</div>
+  if (!total) return <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No data</div>
   let offset = 0
   const r = 40, cx = 60, cy = 60, stroke = 18
   const circ = 2 * Math.PI * r
@@ -95,10 +95,10 @@ function DonutChart({ data, colors }: { data: Array<{ label: string; value: numb
           offset += pct
           return el
         })}
-        <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fontSize="14" fontWeight="700" fill="#1a1a1a">
+        <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fontSize="14" fontWeight="700" fill="currentColor">
           {total}
         </text>
-        <text x={cx} y={cy + 14} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill="#9a9a9a">
+        <text x={cx} y={cy + 14} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill="currentColor" opacity="0.6">
           total
         </text>
       </svg>
@@ -106,9 +106,9 @@ function DonutChart({ data, colors }: { data: Array<{ label: string; value: numb
         {data.map(d => (
           <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
             <div style={{ width: 10, height: 10, borderRadius: 2, background: colors[d.label] || '#CBD5E1', flexShrink: 0 }} />
-            <span style={{ color: '#374151', textTransform: 'capitalize' }}>{d.label.replace(/_/g, ' ')}</span>
-            <span style={{ fontWeight: 700, color: '#1a1a1a', marginLeft: 'auto', paddingLeft: 12 }}>{d.value}</span>
-            <span style={{ color: '#9a9a9a', fontSize: 11 }}>({Math.round((d.value / total) * 100)}%)</span>
+            <span style={{ color: 'var(--admin-text)', textTransform: 'capitalize' }}>{d.label.replace(/_/g, ' ')}</span>
+            <span style={{ fontWeight: 700, color: 'var(--admin-text)', marginLeft: 'auto', paddingLeft: 12 }}>{d.value}</span>
+            <span style={{ color: 'var(--admin-text-dim)', fontSize: 11 }}>({Math.round((d.value / total) * 100)}%)</span>
           </div>
         ))}
       </div>
@@ -116,16 +116,16 @@ function DonutChart({ data, colors }: { data: Array<{ label: string; value: numb
   )
 }
 
-function HBar({ label, value, max, color = '#0D1B2A', suffix = '' }: {
+function HBar({ label, value, max, color = '#60A5FA', suffix = '' }: {
   label: string; value: number; max: number; color?: string; suffix?: string
 }) {
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
-        <span style={{ color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{label || '—'}</span>
-        <span style={{ fontWeight: 700, color: '#1a1a1a', flexShrink: 0 }}>{value.toLocaleString()}{suffix}</span>
+        <span style={{ color: 'var(--admin-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>{label || '—'}</span>
+        <span style={{ fontWeight: 700, color: 'var(--admin-text)', flexShrink: 0 }}>{value.toLocaleString()}{suffix}</span>
       </div>
-      <div style={{ height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ height: 6, background: 'var(--admin-surface-2)', borderRadius: 3, overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${Math.min((value / max) * 100, 100)}%`, background: color, borderRadius: 3, transition: 'width .4s' }} />
       </div>
     </div>
@@ -134,8 +134,8 @@ function HBar({ label, value, max, color = '#0D1B2A', suffix = '' }: {
 
 function Card({ title, children, style }: { title: string; children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 8, padding: 20, ...style }}>
-      <h3 style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: '0 0 16px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</h3>
+    <div style={{ background: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 10, padding: 20, ...style }}>
+      <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', margin: '0 0 16px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</h3>
       {children}
     </div>
   )
@@ -143,8 +143,8 @@ function Card({ title, children, style }: { title: string; children: React.React
 
 function StatPill({ label, value, color }: { label: string; value: string | number; color: string }) {
   return (
-    <div style={{ background: '#f9f9f9', border: '1px solid #ebebeb', borderRadius: 8, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <span style={{ fontSize: 11, fontWeight: 600, color: '#9a9a9a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
+    <div style={{ background: 'var(--admin-surface-2)', border: '1px solid var(--admin-border)', borderRadius: 10, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--admin-text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
       <span style={{ fontSize: 24, fontWeight: 800, color }}>{value}</span>
     </div>
   )
@@ -166,13 +166,13 @@ export default function ReportsPage() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
-      <div style={{ width: 32, height: 32, border: '3px solid #ebebeb', borderTopColor: '#0D1B2A', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+      <div style={{ width: 32, height: 32, border: '3px solid var(--admin-border)', borderTopColor: 'var(--admin-accent)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
       <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
     </div>
   )
 
   if (error) return (
-    <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: 20, color: '#DC2626' }}>
+    <div style={{ background: 'color-mix(in oklch, var(--admin-danger) 15%, transparent)', border: '1px solid color-mix(in oklch, var(--admin-danger) 40%, transparent)', borderRadius: 10, padding: 20, color: 'var(--admin-danger)' }}>
       Failed to load reports: {error}
     </div>
   )
@@ -198,17 +198,18 @@ export default function ReportsPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>Reports</h1>
-          <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>Business intelligence and marketplace trends</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--admin-text)', margin: '0 0 4px' }}>Reports</h1>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--admin-text-dim)' }}>Business intelligence and marketplace trends</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 6 }}>
           {[7, 30, 90].map(d => (
             <button key={d} onClick={() => setDays(d)}
               style={{
-                padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                border: days === d ? '1.5px solid #0D1B2A' : '1.5px solid #ebebeb',
-                background: days === d ? '#0D1B2A' : '#fff',
-                color: days === d ? '#fff' : '#374151',
+                padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                border: '1px solid',
+                borderColor: days === d ? 'var(--admin-accent)' : 'var(--admin-border)',
+                background: days === d ? 'color-mix(in oklch, var(--admin-accent) 20%, transparent)' : 'var(--admin-surface-2)',
+                color: days === d ? 'var(--admin-accent)' : 'var(--admin-text)',
               }}>
               {d}d
             </button>
@@ -218,7 +219,7 @@ export default function ReportsPage() {
 
       {/* Summary pills */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-        <StatPill label="Total Listings" value={totalListings.toLocaleString()} color="#0D1B2A" />
+        <StatPill label="Total Listings" value={totalListings.toLocaleString()} color="#60A5FA" />
         <StatPill label="Active" value={activeListings.toLocaleString()} color="#10B981" />
         <StatPill label="Sold" value={soldListingsTotal.toLocaleString()} color="#3B82F6" />
         <StatPill label={`New Users (${days}d)`} value={totalUsers.toLocaleString()} color="#8B5CF6" />
@@ -244,9 +245,9 @@ export default function ReportsPage() {
 
       {/* Row 2: Listings trend */}
       <Card title={`Listings Created — Last ${days} Days`}>
-        <SparkLine data={data.listingsTrend} color="#0D1B2A" />
+        <SparkLine data={data.listingsTrend} color="#60A5FA" />
         {data.listingsTrend.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 11, color: '#9a9a9a' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 11, color: 'var(--admin-text-dim)' }}>
             <span>{data.listingsTrend[0]?.date}</span>
             <span>{data.listingsTrend[data.listingsTrend.length - 1]?.date}</span>
           </div>
@@ -267,14 +268,14 @@ export default function ReportsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
         <Card title="Listings by Category">
           {data.listingsByCategory.map(r => (
-            <HBar key={r.category} label={r.category || 'Uncategorised'} value={Number(r.count)} max={catMax} color="#0D1B2A" />
+            <HBar key={r.category} label={r.category || 'Uncategorised'} value={Number(r.count)} max={catMax} color="#60A5FA" />
           ))}
         </Card>
         <Card title="Avg Active Listing Price by Category">
           {data.avgPriceByCategory.map(r => (
             <HBar key={r.category} label={r.category || 'Uncategorised'} value={Number(r.avg_price)} max={priceMax} color="#10B981" suffix="" />
           ))}
-          {data.avgPriceByCategory.length === 0 && <div style={{ color: '#999', fontSize: 13 }}>No active listings with prices</div>}
+          {data.avgPriceByCategory.length === 0 && <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No active listings with prices</div>}
         </Card>
       </div>
 
@@ -284,7 +285,7 @@ export default function ReportsPage() {
           {data.usersByProvince.map(r => (
             <HBar key={r.province} label={r.province} value={Number(r.count)} max={provMax} color="#8B5CF6" />
           ))}
-          {data.usersByProvince.length === 0 && <div style={{ color: '#999', fontSize: 13 }}>No province data</div>}
+          {data.usersByProvince.length === 0 && <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No province data</div>}
         </div>
       </Card>
 
@@ -293,25 +294,25 @@ export default function ReportsPage() {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #f0f0f0' }}>
+              <tr style={{ borderBottom: '1px solid var(--admin-border)' }}>
                 {['#', 'Name', 'Email', 'Total Listings', 'Active', 'Sold'].map(h => (
-                  <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, color: '#6b7280', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
+                  <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, color: 'var(--admin-text-dim)', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {data.topSellers.map((r, i) => (
-                <tr key={r.email} style={{ borderBottom: '1px solid #f9f9f9' }}>
-                  <td style={{ padding: '10px 12px', color: '#9a9a9a', fontWeight: 600 }}>{i + 1}</td>
-                  <td style={{ padding: '10px 12px', fontWeight: 600, color: '#1a1a1a' }}>{r.name || '—'}</td>
-                  <td style={{ padding: '10px 12px', color: '#6b7280' }}>{r.email}</td>
-                  <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0D1B2A' }}>{r.listing_count}</td>
+                <tr key={r.email} style={{ borderBottom: '1px solid var(--admin-border)' }}>
+                  <td style={{ padding: '10px 12px', color: 'var(--admin-text-dim)', fontWeight: 600 }}>{i + 1}</td>
+                  <td style={{ padding: '10px 12px', fontWeight: 600, color: 'var(--admin-text)' }}>{r.name || '—'}</td>
+                  <td style={{ padding: '10px 12px', color: 'var(--admin-text-dim)' }}>{r.email}</td>
+                  <td style={{ padding: '10px 12px', fontWeight: 700, color: 'var(--admin-text)' }}>{r.listing_count}</td>
                   <td style={{ padding: '10px 12px', color: '#10B981', fontWeight: 600 }}>{r.active_count}</td>
                   <td style={{ padding: '10px 12px', color: '#3B82F6', fontWeight: 600 }}>{r.sold_count}</td>
                 </tr>
               ))}
               {data.topSellers.length === 0 && (
-                <tr><td colSpan={6} style={{ padding: '20px 12px', color: '#999', textAlign: 'center' }}>No seller data</td></tr>
+                <tr><td colSpan={6} style={{ padding: '20px 12px', color: 'var(--admin-text-dim)', textAlign: 'center' }}>No seller data</td></tr>
               )}
             </tbody>
           </table>
@@ -323,19 +324,19 @@ export default function ReportsPage() {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #f0f0f0' }}>
+              <tr style={{ borderBottom: '1px solid var(--admin-border)' }}>
                 {['#', 'Title', 'Price', 'Views', 'Status'].map(h => (
-                  <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, color: '#6b7280', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
+                  <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, color: 'var(--admin-text-dim)', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {data.topListingsByViews.map((r, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #f9f9f9' }}>
-                  <td style={{ padding: '10px 12px', color: '#9a9a9a', fontWeight: 600 }}>{i + 1}</td>
-                  <td style={{ padding: '10px 12px', fontWeight: 600, color: '#1a1a1a', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</td>
+                <tr key={i} style={{ borderBottom: '1px solid var(--admin-border)' }}>
+                  <td style={{ padding: '10px 12px', color: 'var(--admin-text-dim)', fontWeight: 600 }}>{i + 1}</td>
+                  <td style={{ padding: '10px 12px', fontWeight: 600, color: 'var(--admin-text)', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</td>
                   <td style={{ padding: '10px 12px', color: '#10B981', fontWeight: 700 }}>R{Number(r.price || 0).toLocaleString()}</td>
-                  <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0D1B2A' }}>{Number(r.views || 0).toLocaleString()}</td>
+                  <td style={{ padding: '10px 12px', fontWeight: 700, color: 'var(--admin-text)' }}>{Number(r.views || 0).toLocaleString()}</td>
                   <td style={{ padding: '10px 12px' }}>
                     <span style={{ padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, background: `${STATUS_COLORS[r.status] || '#9CA3AF'}20`, color: STATUS_COLORS[r.status] || '#9CA3AF', textTransform: 'capitalize' }}>
                       {r.status}
@@ -344,7 +345,7 @@ export default function ReportsPage() {
                 </tr>
               ))}
               {data.topListingsByViews.length === 0 && (
-                <tr><td colSpan={5} style={{ padding: '20px 12px', color: '#999', textAlign: 'center' }}>No listings</td></tr>
+                <tr><td colSpan={5} style={{ padding: '20px 12px', color: 'var(--admin-text-dim)', textAlign: 'center' }}>No listings</td></tr>
               )}
             </tbody>
           </table>
@@ -356,9 +357,9 @@ export default function ReportsPage() {
         <Card title={`Boost Packages — Last ${days} Days`}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
             {data.boostStats.map(r => (
-              <div key={r.package_name} style={{ background: '#f9f9f9', border: '1px solid #ebebeb', borderRadius: 8, padding: '14px 16px' }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#9a9a9a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{r.package_name}</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: '#0D1B2A' }}>{r.total} <span style={{ fontSize: 13, fontWeight: 500, color: '#9a9a9a' }}>sold</span></div>
+              <div key={r.package_name} style={{ background: 'var(--admin-surface-2)', border: '1px solid #ebebeb', borderRadius: 8, padding: '14px 16px' }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--admin-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{r.package_name}</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--admin-text)' }}>{r.total} <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--admin-text-dim)' }}>sold</span></div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: '#10B981', marginTop: 4 }}>R{Number(r.revenue || 0).toLocaleString()} revenue</div>
               </div>
             ))}

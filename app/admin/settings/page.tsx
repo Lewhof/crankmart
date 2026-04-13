@@ -104,7 +104,7 @@ export default function AdminSettingsPage() {
   if (loading) {
     return (
       <div style={{ padding: '20px' }}>
-        <div style={{ fontSize: '18px', color: '#999' }}>Loading settings...</div>
+        <div style={{ fontSize: '18px', color: 'var(--admin-text-dim)' }}>Loading settings...</div>
       </div>
     )
   }
@@ -112,14 +112,14 @@ export default function AdminSettingsPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>Settings</h1>
-        <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>Configure email notifications and SMTP settings for CrankMart</p>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px' }}>Settings</h1>
+        <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>Configure email notifications and SMTP settings for CrankMart</p>
       </div>
 
       {/* Settings Card */}
       <div
         style={{
-          backgroundColor: 'white',
+          backgroundColor: 'var(--admin-surface)',
           border: '1px solid #ebebeb',
           borderRadius: '12px',
           padding: '32px',
@@ -149,7 +149,7 @@ export default function AdminSettingsPage() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '600',
-                color: '#1a1a1a',
+                color: 'var(--admin-text)',
                 marginBottom: '8px',
               }}
             >
@@ -171,7 +171,7 @@ export default function AdminSettingsPage() {
                 }
                 style={{ cursor: 'pointer', width: '16px', height: '16px' }}
               />
-              <span style={{ fontSize: '14px', color: '#6b7280' }}>Send transactional emails</span>
+              <span style={{ fontSize: '14px', color: 'var(--admin-text-dim)' }}>Send transactional emails</span>
             </label>
           </div>
 
@@ -181,7 +181,7 @@ export default function AdminSettingsPage() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '600',
-                color: '#1a1a1a',
+                color: 'var(--admin-text)',
                 marginBottom: '8px',
               }}
             >
@@ -211,7 +211,7 @@ export default function AdminSettingsPage() {
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#1a1a1a',
+                  color: 'var(--admin-text)',
                   marginBottom: '8px',
                 }}
               >
@@ -239,7 +239,7 @@ export default function AdminSettingsPage() {
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#1a1a1a',
+                  color: 'var(--admin-text)',
                   marginBottom: '8px',
                 }}
               >
@@ -284,7 +284,7 @@ export default function AdminSettingsPage() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '600',
-                color: '#1a1a1a',
+                color: 'var(--admin-text)',
                 marginBottom: '8px',
               }}
             >
@@ -313,7 +313,7 @@ export default function AdminSettingsPage() {
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '600',
-                color: '#1a1a1a',
+                color: 'var(--admin-text)',
                 marginBottom: '8px',
               }}
             >
@@ -340,13 +340,13 @@ export default function AdminSettingsPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
                   padding: '10px 12px',
-                  backgroundColor: '#f3f4f6',
+                  backgroundColor: 'var(--admin-surface-2)',
                   border: '1px solid #d1d5db',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   fontSize: '12px',
                   fontWeight: '600',
-                  color: '#6b7280',
+                  color: 'var(--admin-text-dim)',
                 }}
               >
                 {showPassword ? 'Hide' : 'Show'}
@@ -361,7 +361,7 @@ export default function AdminSettingsPage() {
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#1a1a1a',
+                  color: 'var(--admin-text)',
                   marginBottom: '8px',
                 }}
               >
@@ -390,7 +390,7 @@ export default function AdminSettingsPage() {
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '600',
-                  color: '#1a1a1a',
+                  color: 'var(--admin-text)',
                   marginBottom: '8px',
                 }}
               >
@@ -420,8 +420,8 @@ export default function AdminSettingsPage() {
             style={{
               width: '100%',
               padding: '12px 16px',
-              backgroundColor: saving ? '#d1d5db' : '#0D1B2A',
-              color: 'white',
+              backgroundColor: saving ? '#d1d5db' : 'var(--admin-text)',
+              color: 'var(--admin-surface)',
               border: 'none',
               borderRadius: '6px',
               fontSize: '14px',
@@ -433,7 +433,7 @@ export default function AdminSettingsPage() {
               if (!saving) (e.target as HTMLButtonElement).style.backgroundColor = '#1e2849'
             }}
             onMouseLeave={(e) => {
-              if (!saving) (e.target as HTMLButtonElement).style.backgroundColor = '#0D1B2A'
+              if (!saving) (e.target as HTMLButtonElement).style.backgroundColor = 'var(--admin-text)'
             }}
           >
             {saving ? 'Saving...' : 'Save Settings'}
@@ -444,14 +444,14 @@ export default function AdminSettingsPage() {
       {/* Test Email Card */}
       <div
         style={{
-          backgroundColor: 'white',
+          backgroundColor: 'var(--admin-surface)',
           border: '1px solid #ebebeb',
           borderRadius: '12px',
           padding: '32px',
         }}
       >
-        <h2 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', color: '#1a1a1a' }}>Send Test Email</h2>
-        <p style={{ color: '#6b7280', margin: '0 0 20px', fontSize: '14px' }}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', color: 'var(--admin-text)' }}>Send Test Email</h2>
+        <p style={{ color: 'var(--admin-text-dim)', margin: '0 0 20px', fontSize: '14px' }}>
           Verify your SMTP configuration by sending a test email
         </p>
 
@@ -493,8 +493,8 @@ export default function AdminSettingsPage() {
             disabled={testLoading}
             style={{
               padding: '10px 16px',
-              backgroundColor: testLoading ? '#d1d5db' : '#0D1B2A',
-              color: 'white',
+              backgroundColor: testLoading ? '#d1d5db' : 'var(--admin-text)',
+              color: 'var(--admin-surface)',
               border: 'none',
               borderRadius: '6px',
               fontSize: '14px',
@@ -506,7 +506,7 @@ export default function AdminSettingsPage() {
               if (!testLoading) (e.target as HTMLButtonElement).style.backgroundColor = '#1e2849'
             }}
             onMouseLeave={(e) => {
-              if (!testLoading) (e.target as HTMLButtonElement).style.backgroundColor = '#0D1B2A'
+              if (!testLoading) (e.target as HTMLButtonElement).style.backgroundColor = 'var(--admin-text)'
             }}
           >
             {testLoading ? 'Sending...' : 'Send Test'}

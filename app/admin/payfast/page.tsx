@@ -31,7 +31,7 @@ const LABEL_STYLE: React.CSSProperties = {
   display: 'block',
   fontSize: 12,
   fontWeight: 700,
-  color: '#374151',
+  color: 'var(--admin-text)',
   marginBottom: 6,
   letterSpacing: '0.03em',
 }
@@ -121,15 +121,15 @@ export default function PayfastAdminPage() {
   const liveHost    = 'https://www.payfast.co.za'
   const host        = config.sandbox ? sandboxHost : liveHost
 
-  if (loading) return <div style={{ padding: 32, color: '#9a9a9a' }}>Loading…</div>
+  if (loading) return <div style={{ padding: 32, color: 'var(--admin-text-dim)' }}>Loading…</div>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 720 }}>
 
       {/* Header */}
       <div>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>PayFast</h1>
-        <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px' }}>PayFast</h1>
+        <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>
           Manage your PayFast merchant credentials and verify your integration.
         </p>
       </div>
@@ -145,18 +145,18 @@ export default function PayfastAdminPage() {
           </div>
         </div>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Sandbox</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--admin-text)' }}>Sandbox</span>
           <div
             onClick={() => setConfig(c => ({ ...c, sandbox: !c.sandbox }))}
             style={{
               width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
-              background: config.sandbox ? '#F59E0B' : '#e4e4e7',
+              background: config.sandbox ? '#F59E0B' : 'var(--admin-border)',
               position: 'relative', transition: 'background 0.2s',
             }}
           >
             <div style={{
               position: 'absolute', top: 3, left: config.sandbox ? 23 : 3,
-              width: 18, height: 18, borderRadius: 9, background: '#fff',
+              width: 18, height: 18, borderRadius: 9, background: 'var(--admin-surface)',
               transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)',
             }} />
           </div>
@@ -164,8 +164,8 @@ export default function PayfastAdminPage() {
       </div>
 
       {/* Credentials */}
-      <div style={{ background: '#fff', border: '1.5px solid #ebebeb', borderRadius: 12, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: '#1a1a1a' }}>Merchant Credentials</div>
+      <div style={{ background: 'var(--admin-surface)', border: '1.5px solid #ebebeb', borderRadius: 12, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--admin-text)' }}>Merchant Credentials</div>
 
         {/* Merchant ID */}
         <div>
@@ -176,7 +176,7 @@ export default function PayfastAdminPage() {
             value={config.merchant_id}
             onChange={e => setConfig(c => ({ ...c, merchant_id: e.target.value }))}
           />
-          <div style={{ fontSize: 11, color: '#9a9a9a', marginTop: 4 }}>
+          <div style={{ fontSize: 11, color: 'var(--admin-text-dim)', marginTop: 4 }}>
             Found in your PayFast merchant account → Settings → Merchant Details
           </div>
         </div>
@@ -192,7 +192,7 @@ export default function PayfastAdminPage() {
               value={config.merchant_key}
               onChange={e => setConfig(c => ({ ...c, merchant_key: e.target.value }))}
             />
-            <button onClick={() => setShowKey(v => !v)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9a9a9a', padding: 4 }}>
+            <button onClick={() => setShowKey(v => !v)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-dim)', padding: 4 }}>
               {showKey ? <EyeOff size={16}/> : <Eye size={16}/>}
             </button>
           </div>
@@ -200,7 +200,7 @@ export default function PayfastAdminPage() {
 
         {/* Passphrase */}
         <div>
-          <label style={LABEL_STYLE}>Passphrase <span style={{ fontWeight: 400, color: '#9a9a9a' }}>(optional — required for signature validation)</span></label>
+          <label style={LABEL_STYLE}>Passphrase <span style={{ fontWeight: 400, color: 'var(--admin-text-dim)' }}>(optional — required for signature validation)</span></label>
           <div style={{ position: 'relative' }}>
             <input
               style={{ ...FIELD_STYLE, paddingRight: 40 }}
@@ -209,7 +209,7 @@ export default function PayfastAdminPage() {
               value={config.passphrase}
               onChange={e => setConfig(c => ({ ...c, passphrase: e.target.value }))}
             />
-            <button onClick={() => setShowPass(v => !v)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9a9a9a', padding: 4 }}>
+            <button onClick={() => setShowPass(v => !v)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--admin-text-dim)', padding: 4 }}>
               {showPass ? <EyeOff size={16}/> : <Eye size={16}/>}
             </button>
           </div>
@@ -217,7 +217,7 @@ export default function PayfastAdminPage() {
 
         {/* Save */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 4 }}>
-          <button onClick={handleSave} disabled={saving} style={{ ...BTN, background: '#0D1B2A', color: '#fff', opacity: saving ? 0.6 : 1 }}>
+          <button onClick={handleSave} disabled={saving} style={{ ...BTN, background: 'var(--admin-text)', color: 'var(--admin-surface)', opacity: saving ? 0.6 : 1 }}>
             {saving ? <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }}/> : null}
             {saving ? 'Saving…' : 'Save Credentials'}
           </button>
@@ -230,16 +230,16 @@ export default function PayfastAdminPage() {
       </div>
 
       {/* Verify */}
-      <div style={{ background: '#fff', border: '1.5px solid #ebebeb', borderRadius: 12, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ background: 'var(--admin-surface)', border: '1.5px solid #ebebeb', borderRadius: 12, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 800, color: '#1a1a1a', marginBottom: 4 }}>Merchant Verification</div>
-          <div style={{ fontSize: 12, color: '#6b7280' }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--admin-text)', marginBottom: 4 }}>Merchant Verification</div>
+          <div style={{ fontSize: 12, color: 'var(--admin-text-dim)' }}>
             Calls the PayFast API to confirm your merchant ID + key are valid and your account is active.
           </div>
         </div>
 
         <button onClick={handleVerify} disabled={check.status === 'loading' || !config.merchant_id || !config.merchant_key}
-          style={{ ...BTN, background: '#f0f0f0', color: '#0D1B2A', alignSelf: 'flex-start', opacity: (!config.merchant_id || !config.merchant_key) ? 0.5 : 1 }}>
+          style={{ ...BTN, background: 'var(--admin-border)', color: 'var(--admin-text)', alignSelf: 'flex-start', opacity: (!config.merchant_id || !config.merchant_key) ? 0.5 : 1 }}>
           {check.status === 'loading'
             ? <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }}/> Verifying…</>
             : <><RefreshCw size={14}/> Verify with PayFast</>
@@ -261,7 +261,7 @@ export default function PayfastAdminPage() {
                 {check.message}
               </div>
               {check.details && (
-                <pre style={{ fontSize: 11, color: '#6b7280', margin: '6px 0 0', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+                <pre style={{ fontSize: 11, color: 'var(--admin-text-dim)', margin: '6px 0 0', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
                   {JSON.stringify(check.details, null, 2)}
                 </pre>
               )}
@@ -271,17 +271,17 @@ export default function PayfastAdminPage() {
       </div>
 
       {/* ITN Endpoint */}
-      <div style={{ background: '#fff', border: '1.5px solid #ebebeb', borderRadius: 12, padding: '20px 22px' }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: '#1a1a1a', marginBottom: 8 }}>ITN Webhook</div>
-        <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>
+      <div style={{ background: 'var(--admin-surface)', border: '1.5px solid #ebebeb', borderRadius: 12, padding: '20px 22px' }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--admin-text)', marginBottom: 8 }}>ITN Webhook</div>
+        <div style={{ fontSize: 12, color: 'var(--admin-text-dim)', marginBottom: 10 }}>
           This URL must be set in your PayFast merchant account → Settings → Instant Transaction Notification.
         </div>
-        <div style={{ background: '#f5f5f5', borderRadius: 7, padding: '10px 14px', fontSize: 13, fontFamily: 'monospace', color: '#1a1a1a', wordBreak: 'break-all' }}>
+        <div style={{ background: 'var(--admin-surface-2)', borderRadius: 7, padding: '10px 14px', fontSize: 13, fontFamily: 'monospace', color: 'var(--admin-text)', wordBreak: 'break-all' }}>
           https://crankmart.com/api/payments/payfast/itn
         </div>
         <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
           <a href={`${host}/eng/account/login`} target="_blank" rel="noreferrer"
-            style={{ ...BTN, background: '#f0f0f0', color: '#0D1B2A', textDecoration: 'none', fontSize: 12 }}>
+            style={{ ...BTN, background: 'var(--admin-border)', color: 'var(--admin-text)', textDecoration: 'none', fontSize: 12 }}>
             <ExternalLink size={13}/> Open PayFast{config.sandbox ? ' Sandbox' : ''}
           </a>
         </div>

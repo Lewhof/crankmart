@@ -32,12 +32,12 @@ function delta(change: number | null) {
   )
 }
 
-function SparkLine({ data, color = '#0D1B2A', field = 'views' }: {
+function SparkLine({ data, color = 'var(--admin-text)', field = 'views' }: {
   data: Array<Record<string, any>>
   color?: string
   field?: string
 }) {
-  if (!data.length) return <div style={{ padding: '20px 0', color: '#999', fontSize: 13 }}>No data</div>
+  if (!data.length) return <div style={{ padding: '20px 0', color: 'var(--admin-text-dim)', fontSize: 13 }}>No data</div>
   const values = data.map(d => Number(d[field]))
   const max = Math.max(...values, 1)
   const w = 600, h = 100, px = 8, py = 10
@@ -66,42 +66,42 @@ function SparkLine({ data, color = '#0D1B2A', field = 'views' }: {
   )
 }
 
-function HBar({ label, value, max, color = '#0D1B2A' }: { label: string; value: number; max: number; color?: string }) {
+function HBar({ label, value, max, color = 'var(--admin-text)' }: { label: string; value: number; max: number; color?: string }) {
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
-        <span style={{ color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>{label || '—'}</span>
-        <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{value.toLocaleString()}</span>
+        <span style={{ color: 'var(--admin-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>{label || '—'}</span>
+        <span style={{ fontWeight: 700, color: 'var(--admin-text)' }}>{value.toLocaleString()}</span>
       </div>
-      <div style={{ height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ height: 6, background: 'var(--admin-border)', borderRadius: 3, overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${Math.min((value / max) * 100, 100)}%`, background: color, borderRadius: 3, transition: 'width .4s' }} />
       </div>
     </div>
   )
 }
 
-function KPICard({ label, value, prev, change, color = '#0D1B2A', sub }: {
+function KPICard({ label, value, prev, change, color = 'var(--admin-text)', sub }: {
   label: string; value: string | number; prev?: number; change?: number | null; color?: string; sub?: string
 }) {
   return (
-    <div style={{ background: '#fff', padding: '20px 22px', borderRadius: 8, border: '1px solid #ebebeb' }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: '#9a9a9a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{label}</div>
+    <div style={{ background: 'var(--admin-surface)', padding: '20px 22px', borderRadius: 8, border: '1px solid #ebebeb' }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--admin-text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
         <span style={{ fontSize: 30, fontWeight: 800, color }}>{typeof value === 'number' ? value.toLocaleString() : value}</span>
         {change !== undefined && delta(change ?? null)}
       </div>
       {prev !== undefined && prev > 0 && (
-        <div style={{ fontSize: 11, color: '#9a9a9a', marginTop: 4 }}>vs {prev.toLocaleString()} prev period</div>
+        <div style={{ fontSize: 11, color: 'var(--admin-text-dim)', marginTop: 4 }}>vs {prev.toLocaleString()} prev period</div>
       )}
-      {sub && <div style={{ fontSize: 11, color: '#9a9a9a', marginTop: 4 }}>{sub}</div>}
+      {sub && <div style={{ fontSize: 11, color: 'var(--admin-text-dim)', marginTop: 4 }}>{sub}</div>}
     </div>
   )
 }
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 8, padding: 20 }}>
-      <h3 style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', margin: '0 0 16px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</h3>
+    <div style={{ background: 'var(--admin-surface)', border: '1px solid #ebebeb', borderRadius: 8, padding: 20 }}>
+      <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--admin-text)', margin: '0 0 16px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{title}</h3>
       {children}
     </div>
   )
@@ -131,12 +131,12 @@ export default function AnalyticsPage() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}>
-      <div style={{ width: 32, height: 32, border: '3px solid #ebebeb', borderTopColor: '#0D1B2A', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+      <div style={{ width: 32, height: 32, border: '3px solid #ebebeb', borderTopColor: 'var(--admin-text)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
       <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
     </div>
   )
 
-  if (!stats) return <div style={{ padding: 20, color: '#999' }}>Failed to load analytics</div>
+  if (!stats) return <div style={{ padding: 20, color: 'var(--admin-text-dim)' }}>Failed to load analytics</div>
 
   const maxDevice  = Math.max(...stats.byDevice.map(d => Number(d.count)), 1)
   const maxBrowser = Math.max(...stats.byBrowser.map(d => Number(d.count)), 1)
@@ -164,16 +164,16 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>Analytics</h1>
-          <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>Traffic, visitor, and listing performance data</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px' }}>Analytics</h1>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>Traffic, visitor, and listing performance data</p>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
           {[7, 30, 90].map(d => (
             <button key={d} onClick={() => setDays(d)} style={{
               padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              border: '1.5px solid', borderColor: days === d ? '#0D1B2A' : '#ebebeb',
-              background: days === d ? '#0D1B2A' : '#fff',
-              color: days === d ? '#fff' : '#374151',
+              border: '1.5px solid', borderColor: days === d ? 'var(--admin-text)' : 'var(--admin-border)',
+              background: days === d ? 'var(--admin-text)' : 'var(--admin-surface)',
+              color: days === d ? 'var(--admin-surface)' : 'var(--admin-text)',
             }}>{d}d</button>
           ))}
         </div>
@@ -195,9 +195,9 @@ export default function AnalyticsPage() {
           {(['views', 'visitors'] as const).map(m => (
             <button key={m} onClick={() => setChartMode(m)} style={{
               padding: '5px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-              border: '1.5px solid', borderColor: chartMode === m ? '#0D1B2A' : '#ebebeb',
-              background: chartMode === m ? '#0D1B2A' : '#fff',
-              color: chartMode === m ? '#fff' : '#374151',
+              border: '1.5px solid', borderColor: chartMode === m ? 'var(--admin-text)' : 'var(--admin-border)',
+              background: chartMode === m ? 'var(--admin-text)' : 'var(--admin-surface)',
+              color: chartMode === m ? 'var(--admin-surface)' : 'var(--admin-text)',
             }}>
               {m === 'views' ? 'Page Views' : 'Unique Visitors'}
             </button>
@@ -206,10 +206,10 @@ export default function AnalyticsPage() {
         <SparkLine
           data={stats.dailyViews}
           field={chartMode === 'views' ? 'views' : 'unique_visitors'}
-          color={chartMode === 'views' ? '#0D1B2A' : '#3B82F6'}
+          color={chartMode === 'views' ? 'var(--admin-text)' : '#3B82F6'}
         />
         {stats.dailyViews.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 11, color: '#9a9a9a' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 11, color: 'var(--admin-text-dim)' }}>
             <span>{stats.dailyViews[0]?.date}</span>
             <span>{stats.dailyViews[stats.dailyViews.length - 1]?.date}</span>
           </div>
@@ -222,15 +222,15 @@ export default function AnalyticsPage() {
           {stats.topPages.map((p, i) => (
             <HBar key={i} label={p.path} value={Number(p.views)} max={maxPage} color="#0D1B2A" />
           ))}
-          {stats.topPages.length === 0 && <div style={{ color: '#999', fontSize: 13 }}>No data</div>}
+          {stats.topPages.length === 0 && <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No data</div>}
         </Card>
         <Card title="Device Breakdown">
           {stats.byDevice.map((d, i) => (
             <HBar key={i} label={d.device} value={Number(d.count)} max={maxDevice}
-              color={d.device === 'mobile' ? '#3B82F6' : d.device === 'tablet' ? '#8B5CF6' : '#0D1B2A'} />
+              color={d.device === 'mobile' ? '#3B82F6' : d.device === 'tablet' ? '#8B5CF6' : 'var(--admin-text)'} />
           ))}
           <div style={{ marginTop: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#9a9a9a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Browser</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--admin-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Browser</div>
             {stats.byBrowser.map((b, i) => (
               <HBar key={i} label={b.browser} value={Number(b.count)} max={maxBrowser} color="#F59E0B" />
             ))}
@@ -243,9 +243,9 @@ export default function AnalyticsPage() {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #f0f0f0', background: '#fafafa' }}>
+              <tr style={{ borderBottom: '2px solid #f0f0f0', background: 'var(--admin-surface-2)' }}>
                 {['Category', 'Active Listings', 'Total Views', 'Avg Views / Listing', 'View Share'].map(h => (
-                  <th key={h} style={{ padding: '8px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
+                  <th key={h} style={{ padding: '8px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--admin-text-dim)', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -254,23 +254,23 @@ export default function AnalyticsPage() {
                 const pct = Math.round((Number(c.total_views) / maxCatViews) * 100)
                 return (
                   <tr key={i} style={{ borderBottom: '1px solid #f5f5f5' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 600, color: '#1a1a1a' }}>{c.category || 'Uncategorised'}</td>
-                    <td style={{ padding: '10px 14px', color: '#374151' }}>{Number(c.listing_count).toLocaleString()}</td>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#0D1B2A' }}>{Number(c.total_views || 0).toLocaleString()}</td>
-                    <td style={{ padding: '10px 14px', color: '#6b7280' }}>{Number(c.avg_views || 0).toLocaleString()}</td>
+                    <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--admin-text)' }}>{c.category || 'Uncategorised'}</td>
+                    <td style={{ padding: '10px 14px', color: 'var(--admin-text)' }}>{Number(c.listing_count).toLocaleString()}</td>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--admin-text)' }}>{Number(c.total_views || 0).toLocaleString()}</td>
+                    <td style={{ padding: '10px 14px', color: 'var(--admin-text-dim)' }}>{Number(c.avg_views || 0).toLocaleString()}</td>
                     <td style={{ padding: '10px 14px', minWidth: 120 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ flex: 1, height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ flex: 1, height: 6, background: 'var(--admin-border)', borderRadius: 3, overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: `${pct}%`, background: '#10B981', borderRadius: 3 }} />
                         </div>
-                        <span style={{ fontSize: 11, color: '#9a9a9a', width: 32, textAlign: 'right' }}>{pct}%</span>
+                        <span style={{ fontSize: 11, color: 'var(--admin-text-dim)', width: 32, textAlign: 'right' }}>{pct}%</span>
                       </div>
                     </td>
                   </tr>
                 )
               })}
               {stats.categoryPerformance.length === 0 && (
-                <tr><td colSpan={5} style={{ padding: 20, color: '#999', textAlign: 'center' }}>No listing data</td></tr>
+                <tr><td colSpan={5} style={{ padding: 20, color: 'var(--admin-text-dim)', textAlign: 'center' }}>No listing data</td></tr>
               )}
             </tbody>
           </table>
@@ -287,17 +287,17 @@ export default function AnalyticsPage() {
                 {stats.byCountry.map((c, i) => (
                   <div key={i} style={{ marginBottom: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
-                      <span style={{ color: '#374151', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ color: 'var(--admin-text)', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 18, lineHeight: 1 }}>{countryFlag(c.country_code)}</span>
                         <span>{c.country || c.country_code || 'Unknown'}</span>
-                        <span style={{ fontSize: 11, color: '#9a9a9a' }}>({c.country_code})</span>
+                        <span style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>({c.country_code})</span>
                       </span>
                       <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                        <span style={{ fontSize: 11, color: '#9a9a9a' }}>{Number(c.visitors).toLocaleString()} visitors</span>
-                        <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{Number(c.views).toLocaleString()}</span>
+                        <span style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>{Number(c.visitors).toLocaleString()} visitors</span>
+                        <span style={{ fontWeight: 700, color: 'var(--admin-text)' }}>{Number(c.views).toLocaleString()}</span>
                       </div>
                     </div>
-                    <div style={{ height: 6, background: '#f0f0f0', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ height: 6, background: 'var(--admin-border)', borderRadius: 3, overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${Math.min((Number(c.views) / maxV) * 100, 100)}%`, background: '#3B82F6', borderRadius: 3, transition: 'width .4s' }} />
                     </div>
                   </div>
@@ -305,7 +305,7 @@ export default function AnalyticsPage() {
               </div>
             )
           })() : (
-            <div style={{ color: '#999', fontSize: 13 }}>No location data yet — accumulates as visitors arrive</div>
+            <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No location data yet — accumulates as visitors arrive</div>
           )}
         </Card>
 
@@ -315,27 +315,27 @@ export default function AnalyticsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
-                    <th style={{ padding: '6px 0', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#6b7280' }}>City</th>
-                    <th style={{ padding: '6px 8px', textAlign: 'right', fontSize: 11, fontWeight: 700, color: '#6b7280' }}>Visitors</th>
-                    <th style={{ padding: '6px 0', textAlign: 'right', fontSize: 11, fontWeight: 700, color: '#6b7280' }}>Views</th>
+                    <th style={{ padding: '6px 0', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--admin-text-dim)' }}>City</th>
+                    <th style={{ padding: '6px 8px', textAlign: 'right', fontSize: 11, fontWeight: 700, color: 'var(--admin-text-dim)' }}>Visitors</th>
+                    <th style={{ padding: '6px 0', textAlign: 'right', fontSize: 11, fontWeight: 700, color: 'var(--admin-text-dim)' }}>Views</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stats.byCity.map((c, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid #f9f9f9' }}>
-                      <td style={{ padding: '8px 0', color: '#374151', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <td style={{ padding: '8px 0', color: 'var(--admin-text)', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 16 }}>{countryFlag(c.country_code)}</span>
                         {c.city}
                       </td>
-                      <td style={{ padding: '8px 8px', textAlign: 'right', color: '#6b7280' }}>{Number(c.visitors).toLocaleString()}</td>
-                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 700, color: '#0D1B2A' }}>{Number(c.views).toLocaleString()}</td>
+                      <td style={{ padding: '8px 8px', textAlign: 'right', color: 'var(--admin-text-dim)' }}>{Number(c.visitors).toLocaleString()}</td>
+                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 700, color: 'var(--admin-text)' }}>{Number(c.views).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <div style={{ color: '#999', fontSize: 13 }}>No city data yet</div>
+            <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No city data yet</div>
           )}
         </Card>
       </div>
@@ -350,26 +350,26 @@ export default function AnalyticsPage() {
             return (
               <div key={f.path} style={{ marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
-                  <span style={{ color: '#374151' }}>{funnelLabels[f.path]}</span>
+                  <span style={{ color: 'var(--admin-text)' }}>{funnelLabels[f.path]}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {dropPct !== null && dropPct > 0 && (
                       <span style={{ fontSize: 11, color: '#EF4444', fontWeight: 600 }}>−{dropPct}%</span>
                     )}
-                    <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{f.count.toLocaleString()}</span>
+                    <span style={{ fontWeight: 700, color: 'var(--admin-text)' }}>{f.count.toLocaleString()}</span>
                   </div>
                 </div>
-                <div style={{ height: 8, background: '#f0f0f0', borderRadius: 4, overflow: 'hidden' }}>
+                <div style={{ height: 8, background: 'var(--admin-border)', borderRadius: 4, overflow: 'hidden' }}>
                   <div style={{
                     height: '100%',
                     width: `${Math.min((f.count / funnelMax) * 100, 100)}%`,
-                    background: f.path === '/sell/success' ? '#10B981' : '#0D1B2A',
+                    background: f.path === '/sell/success' ? '#10B981' : 'var(--admin-text)',
                     borderRadius: 4, transition: 'width .4s',
                   }} />
                 </div>
               </div>
             )
           })}
-          {funnelMax === 0 && <div style={{ color: '#999', fontSize: 13 }}>No sell flow traffic yet</div>}
+          {funnelMax === 0 && <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No sell flow traffic yet</div>}
         </Card>
 
         <Card title="Top Referrers">
@@ -378,22 +378,22 @@ export default function AnalyticsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid #f0f0f0' }}>
-                    <th style={{ padding: '6px 0', textAlign: 'left', fontWeight: 600, color: '#6b7280', fontSize: 11 }}>Source</th>
-                    <th style={{ padding: '6px 0', textAlign: 'right', fontWeight: 600, color: '#6b7280', fontSize: 11 }}>Visits</th>
+                    <th style={{ padding: '6px 0', textAlign: 'left', fontWeight: 600, color: 'var(--admin-text-dim)', fontSize: 11 }}>Source</th>
+                    <th style={{ padding: '6px 0', textAlign: 'right', fontWeight: 600, color: 'var(--admin-text-dim)', fontSize: 11 }}>Visits</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stats.topReferrers.map((r, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid #f9f9f9' }}>
-                      <td style={{ padding: '8px 0', color: '#374151', wordBreak: 'break-all', maxWidth: 220, fontSize: 12 }}>{r.referrer}</td>
-                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 700, color: '#0D1B2A' }}>{Number(r.count).toLocaleString()}</td>
+                      <td style={{ padding: '8px 0', color: 'var(--admin-text)', wordBreak: 'break-all', maxWidth: 220, fontSize: 12 }}>{r.referrer}</td>
+                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 700, color: 'var(--admin-text)' }}>{Number(r.count).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <div style={{ color: '#999', fontSize: 13 }}>No referrer data yet</div>
+            <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No referrer data yet</div>
           )}
         </Card>
       </div>

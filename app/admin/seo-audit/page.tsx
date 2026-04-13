@@ -25,8 +25,8 @@ const STATUS_CONFIG: Record<CheckStatus, { icon: string; color: string; bg: stri
   pass:    { icon: '✅', color: '#16a34a', bg: '#f0fdf4', label: 'PASS' },
   fail:    { icon: '✗',  color: '#dc2626', bg: '#fef2f2', label: 'FAIL' },
   warn:    { icon: '⚠',  color: '#d97706', bg: '#fffbeb', label: 'WARN' },
-  manual:  { icon: '○',  color: '#6b7280', bg: '#f9fafb', label: 'MANUAL' },
-  pending: { icon: '⏳', color: '#6b7280', bg: '#f9fafb', label: 'PENDING' },
+  manual:  { icon: '○',  color: 'var(--admin-text-dim)', bg: 'var(--admin-surface-2)', label: 'MANUAL' },
+  pending: { icon: '⏳', color: 'var(--admin-text-dim)', bg: 'var(--admin-surface-2)', label: 'PENDING' },
 }
 
 const CATEGORY_LABELS: Record<CheckCategory | 'all', string> = {
@@ -117,15 +117,15 @@ export default function SeoAuditPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px' }}>SEO &amp; GEO Audit</h1>
-          <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>{ranAt ? `Last run: ${formatTime(ranAt)}` : 'Audit has not been run yet'}</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px' }}>SEO &amp; GEO Audit</h1>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>{ranAt ? `Last run: ${formatTime(ranAt)}` : 'Audit has not been run yet'}</p>
         </div>
         <button
           onClick={() => fetchAudit(true)}
           disabled={deepLoading}
           style={{
             background: deepLoading ? '#aaa' : '#CC1F2D',
-            color: '#fff',
+            color: 'var(--admin-surface)',
             border: 'none',
             borderRadius: 8,
             padding: '10px 20px',
@@ -139,7 +139,7 @@ export default function SeoAuditPage() {
         >
           {deepLoading ? (
             <>
-              <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'spin .8s linear infinite' }} />
+              <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'var(--admin-surface)', borderRadius: '50%', display: 'inline-block', animation: 'spin .8s linear infinite' }} />
               Running…
             </>
           ) : '▶ Run Full Audit'}
@@ -154,12 +154,12 @@ export default function SeoAuditPage() {
 
       {/* Progress bar */}
       {total > 0 && (
-        <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 10, padding: 20, marginBottom: 20 }}>
+        <div style={{ background: 'var(--admin-surface)', border: '1px solid #ebebeb', borderRadius: 10, padding: 20, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#0D1B2A' }}>Overall Progress</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--admin-text)' }}>Overall Progress</span>
             <span style={{ fontSize: 14, color: '#666' }}>{counts.pass} / {total} checks passing</span>
           </div>
-          <div style={{ background: '#f0f0f0', borderRadius: 99, height: 10, overflow: 'hidden' }}>
+          <div style={{ background: 'var(--admin-border)', borderRadius: 99, height: 10, overflow: 'hidden' }}>
             <div style={{ width: `${progress}%`, background: progress >= 80 ? '#16a34a' : progress >= 50 ? '#d97706' : '#CC1F2D', height: '100%', borderRadius: 99, transition: 'width 0.4s ease' }} />
           </div>
           <div style={{ display: 'flex', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
@@ -167,7 +167,7 @@ export default function SeoAuditPage() {
               <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
                 <span>{STATUS_CONFIG[s].icon}</span>
                 <span style={{ color: STATUS_CONFIG[s].color, fontWeight: 600 }}>{counts[s]}</span>
-                <span style={{ color: '#999' }}>{STATUS_CONFIG[s].label}</span>
+                <span style={{ color: 'var(--admin-text-dim)' }}>{STATUS_CONFIG[s].label}</span>
               </div>
             ))}
           </div>
@@ -187,9 +187,9 @@ export default function SeoAuditPage() {
                 padding: '7px 14px',
                 borderRadius: 8,
                 border: '1px solid',
-                borderColor: activeTab === tab ? '#CC1F2D' : '#ebebeb',
-                background: activeTab === tab ? '#CC1F2D' : '#fff',
-                color: activeTab === tab ? '#fff' : '#444',
+                borderColor: activeTab === tab ? '#CC1F2D' : 'var(--admin-border)',
+                background: activeTab === tab ? '#CC1F2D' : 'var(--admin-surface)',
+                color: activeTab === tab ? 'var(--admin-surface)' : '#444',
                 fontSize: 13,
                 fontWeight: activeTab === tab ? 600 : 400,
                 cursor: 'pointer',
@@ -200,8 +200,8 @@ export default function SeoAuditPage() {
             >
               {CATEGORY_LABELS[tab]}
               <span style={{
-                background: activeTab === tab ? 'rgba(255,255,255,0.25)' : tabFail > 0 ? '#fee2e2' : '#f0f0f0',
-                color: activeTab === tab ? '#fff' : tabFail > 0 ? '#dc2626' : '#666',
+                background: activeTab === tab ? 'rgba(255,255,255,0.25)' : tabFail > 0 ? '#fee2e2' : 'var(--admin-border)',
+                color: activeTab === tab ? 'var(--admin-surface)' : tabFail > 0 ? '#dc2626' : '#666',
                 borderRadius: 99,
                 padding: '1px 7px',
                 fontSize: 11,
@@ -217,7 +217,7 @@ export default function SeoAuditPage() {
       {/* Check list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {filtered.length === 0 && (
-          <div style={{ padding: 32, textAlign: 'center', color: '#999', fontSize: 14 }}>No checks in this category</div>
+          <div style={{ padding: 32, textAlign: 'center', color: 'var(--admin-text-dim)', fontSize: 14 }}>No checks in this category</div>
         )}
         {filtered.map(check => {
           const cfg = STATUS_CONFIG[check.status]
@@ -226,9 +226,9 @@ export default function SeoAuditPage() {
             <div
               key={check.id}
               style={{
-                background: '#fff',
+                background: 'var(--admin-surface)',
                 border: '1px solid',
-                borderColor: check.status === 'fail' ? '#fca5a5' : check.status === 'warn' ? '#fde68a' : '#ebebeb',
+                borderColor: check.status === 'fail' ? '#fca5a5' : check.status === 'warn' ? '#fde68a' : 'var(--admin-border)',
                 borderRadius: 8,
                 padding: '12px 16px',
                 display: 'flex',
@@ -257,7 +257,7 @@ export default function SeoAuditPage() {
               {/* Content */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: '#0D1B2A' }}>{check.label}</span>
+                  <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--admin-text)' }}>{check.label}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                     <span style={{
                       fontSize: 10,
@@ -271,7 +271,7 @@ export default function SeoAuditPage() {
                     }}>
                       {cfg.label}
                     </span>
-                    <span style={{ fontSize: 10, color: '#bbb', background: '#f5f5f5', borderRadius: 4, padding: '1px 6px' }}>
+                    <span style={{ fontSize: 10, color: '#bbb', background: 'var(--admin-surface-2)', borderRadius: 4, padding: '1px 6px' }}>
                       {check.check_type.toUpperCase()}
                     </span>
                   </div>
@@ -309,7 +309,7 @@ export default function SeoAuditPage() {
                     borderRadius: 6,
                     padding: '5px 12px',
                     fontSize: 12,
-                    color: '#999',
+                    color: 'var(--admin-text-dim)',
                     cursor: 'pointer',
                     flexShrink: 0,
                     whiteSpace: 'nowrap',
