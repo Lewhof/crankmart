@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database backups — belong in cold storage, not git
+backups/
+*.sql.bak
+*.dump
+
+# archive logs
+_archive/*.log
+_archive/**/.env*
