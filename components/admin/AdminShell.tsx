@@ -6,30 +6,59 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Package, Users, Calendar, Building2, MessageSquare,
   Flag, Menu, X, Settings, Newspaper, BarChart2, Navigation, Palette,
-  BookOpen, Zap, SearchCheck, ShieldCheck, Mail, CreditCard, Keyboard,
+  Zap, SearchCheck, ShieldCheck, Mail, CreditCard, Keyboard, Megaphone,
 } from 'lucide-react'
 import { CommandPalette } from './CommandPalette'
 import { CountrySwitcher } from './CountrySwitcher'
 
-const NAV = [
+type NavItem = {
+  href: string
+  label: string
+  icon: React.ComponentType<{ size?: number }>
+  short?: string
+}
+type NavEntry = NavItem | { label: string; items: NavItem[] }
+
+const NAV: NavEntry[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, short: 'd' },
-  { href: '/admin/listings', label: 'Listings', icon: Package, short: 'l' },
-  { href: '/admin/users', label: 'Users', icon: Users, short: 'u' },
-  { href: '/admin/events', label: 'Events', icon: Calendar, short: 'e' },
-  { href: '/admin/news', label: 'News', icon: Newspaper, short: 'n' },
-  { href: '/admin/routes', label: 'Routes', icon: Navigation },
-  { href: '/admin/directory', label: 'Directory', icon: Building2, short: 'r' },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart2 },
-  { href: '/admin/seo-audit', label: 'SEO Audit', icon: SearchCheck },
-  { href: '/admin/boosts', label: 'Boosts', icon: Zap },
-  { href: '/admin/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/admin/reports', label: 'Reports', icon: Flag },
-  { href: '/admin/theme', label: 'Theme', icon: Palette },
-  { href: '/admin/payfast', label: 'PayFast', icon: CreditCard },
-  { href: '/admin/verifications', label: 'Verifications', icon: ShieldCheck },
-  { href: '/admin/email-templates', label: 'Email Templates', icon: Mail },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
+
+  { label: 'Content', items: [
+    { href: '/admin/listings',  label: 'Listings',  icon: Package,    short: 'l' },
+    { href: '/admin/events',    label: 'Events',    icon: Calendar,   short: 'e' },
+    { href: '/admin/directory', label: 'Directory', icon: Building2,  short: 'r' },
+    { href: '/admin/news',      label: 'News',      icon: Newspaper,  short: 'n' },
+    { href: '/admin/routes',    label: 'Routes',    icon: Navigation },
+  ] },
+
+  { label: 'People', items: [
+    { href: '/admin/users',         label: 'Users',         icon: Users,         short: 'u' },
+    { href: '/admin/verifications', label: 'Verifications', icon: ShieldCheck,   short: 'v' },
+    { href: '/admin/messages',      label: 'Messages',      icon: MessageSquare, short: 'i' },
+  ] },
+
+  { label: 'Commerce', items: [
+    { href: '/admin/marketing', label: 'Marketing', icon: Megaphone,   short: 'm' },
+    { href: '/admin/boosts',    label: 'Boosts',    icon: Zap },
+    { href: '/admin/payfast',   label: 'PayFast',   icon: CreditCard },
+  ] },
+
+  { label: 'Insights', items: [
+    { href: '/admin/analytics', label: 'Analytics', icon: BarChart2 },
+    { href: '/admin/reports',   label: 'Reports',   icon: Flag },
+    { href: '/admin/seo-audit', label: 'SEO Audit', icon: SearchCheck },
+  ] },
+
+  { label: 'System', items: [
+    { href: '/admin/theme',           label: 'Theme',           icon: Palette },
+    { href: '/admin/email-templates', label: 'Email Templates', icon: Mail },
+    { href: '/admin/settings',        label: 'Settings',        icon: Settings },
+  ] },
 ]
+
+// Flatten for keyboard shortcut lookup
+const NAV_FLAT: NavItem[] = NAV.flatMap(entry =>
+  'items' in entry ? entry.items : [entry]
+)
 
 export function AdminShell({
   children,
@@ -72,7 +101,7 @@ export function AdminShell({
         return
       }
       if (awaitingG) {
-        const item = NAV.find(n => n.short === e.key.toLowerCase())
+        const item = NAV_FLAT.find(n => n.short === e.key.toLowerCase())
         if (item) {
           e.preventDefault()
           router.push(item.href)
@@ -87,6 +116,21 @@ export function AdminShell({
     }
   }, [router])
 
+  function renderLink(item: NavItem) {
+    const active = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={() => setDrawerOpen(false)}
+        className={`admin-nav-link ${active ? 'active' : ''}`}
+      >
+        <item.icon size={15} />
+        {item.label}
+      </Link>
+    )
+  }
+
   return (
     <div data-theme="admin" style={{ minHeight: '100vh', display: 'flex' }}>
       <style>{`
@@ -94,6 +138,8 @@ export function AdminShell({
         .admin-nav-link { display: flex; align-items: center; gap: 10px; padding: 8px 14px; margin: 1px 6px; text-decoration: none; color: var(--admin-text-dim); font-size: 13px; border-radius: 6px; font-weight: 500; }
         .admin-nav-link:hover { background: var(--admin-surface-2); color: var(--admin-text); }
         .admin-nav-link.active { background: color-mix(in oklch, var(--admin-accent) 18%, transparent); color: var(--admin-accent); font-weight: 600; }
+        .admin-nav-group-label { padding: 14px 14px 6px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--admin-text-dim); }
+        .admin-nav-group:first-of-type .admin-nav-group-label { padding-top: 10px; }
         .admin-topbar { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid var(--admin-border); background: var(--admin-surface); position: sticky; top: 0; z-index: 20; }
         .admin-content { flex: 1; min-width: 0; background: var(--admin-bg); }
         .admin-page { padding: 24px 28px; max-width: 1400px; }
@@ -122,19 +168,16 @@ export function AdminShell({
           </button>
         </div>
         <div style={{ padding: '6px 0', flex: 1, overflowY: 'auto' }}>
-          {NAV.map(item => {
-            const active = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setDrawerOpen(false)}
-                className={`admin-nav-link ${active ? 'active' : ''}`}
-              >
-                <item.icon size={15} />
-                {item.label}
-              </Link>
-            )
+          {NAV.map(entry => {
+            if ('items' in entry) {
+              return (
+                <div key={entry.label} className="admin-nav-group" role="presentation">
+                  <div className="admin-nav-group-label">{entry.label}</div>
+                  {entry.items.map(renderLink)}
+                </div>
+              )
+            }
+            return renderLink(entry)
           })}
         </div>
         <div style={{ padding: '10px 14px', borderTop: '1px solid var(--admin-border)', fontSize: 11, color: 'var(--admin-text-dim)' }}>
@@ -217,18 +260,22 @@ export function AdminShell({
         >
           <div
             onClick={e => e.stopPropagation()}
-            style={{ background: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 12, padding: 24, minWidth: 320, maxWidth: 420 }}
+            style={{ background: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 12, padding: 24, minWidth: 340, maxWidth: 440 }}
           >
             <h3 style={{ margin: '0 0 16px', color: 'var(--admin-text)', fontSize: 15, fontWeight: 700 }}>Keyboard shortcuts</h3>
             <div style={{ display: 'grid', gap: 8, fontSize: 13, color: 'var(--admin-text)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Command palette</span><kbd>⌘K</kbd></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Go to Dashboard</span><span><kbd>g</kbd> <kbd>d</kbd></span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Go to Listings</span><span><kbd>g</kbd> <kbd>l</kbd></span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Go to Users</span><span><kbd>g</kbd> <kbd>u</kbd></span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Go to Events</span><span><kbd>g</kbd> <kbd>e</kbd></span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Go to News</span><span><kbd>g</kbd> <kbd>n</kbd></span></div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Go to Directory</span><span><kbd>g</kbd> <kbd>r</kbd></span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Toggle this help</span><kbd>?</kbd></div>
+              <div style={{ height: 1, background: 'var(--admin-border)', margin: '4px 0' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Dashboard</span><span><kbd>g</kbd> <kbd>d</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Listings</span><span><kbd>g</kbd> <kbd>l</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Events</span><span><kbd>g</kbd> <kbd>e</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Directory</span><span><kbd>g</kbd> <kbd>r</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>News</span><span><kbd>g</kbd> <kbd>n</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Users</span><span><kbd>g</kbd> <kbd>u</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Verifications</span><span><kbd>g</kbd> <kbd>v</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Messages (inbox)</span><span><kbd>g</kbd> <kbd>i</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Marketing</span><span><kbd>g</kbd> <kbd>m</kbd></span></div>
             </div>
           </div>
         </div>

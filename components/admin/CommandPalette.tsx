@@ -2,28 +2,34 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, ArrowRight, Clock, AlertCircle } from 'lucide-react'
+import { Search, ArrowRight, AlertCircle } from 'lucide-react'
 
-type NavItem = { label: string; href: string; keywords?: string[] }
+type NavItem = { label: string; href: string; group: string; keywords?: string[] }
 
 const NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/admin' },
-  { label: 'Listings', href: '/admin/listings', keywords: ['classifieds'] },
-  { label: 'Users', href: '/admin/users' },
-  { label: 'Events', href: '/admin/events' },
-  { label: 'News', href: '/admin/news', keywords: ['articles', 'blog'] },
-  { label: 'Routes', href: '/admin/routes' },
-  { label: 'Directory', href: '/admin/directory', keywords: ['businesses', 'shops'] },
-  { label: 'Analytics', href: '/admin/analytics' },
-  { label: 'SEO Audit', href: '/admin/seo-audit' },
-  { label: 'Boosts', href: '/admin/boosts' },
-  { label: 'Messages', href: '/admin/messages' },
-  { label: 'Reports', href: '/admin/reports' },
-  { label: 'Theme', href: '/admin/theme' },
-  { label: 'PayFast', href: '/admin/payfast' },
-  { label: 'Verifications', href: '/admin/verifications' },
-  { label: 'Email Templates', href: '/admin/email-templates' },
-  { label: 'Settings', href: '/admin/settings' },
+  { label: 'Dashboard',       href: '/admin',                  group: '' },
+
+  { label: 'Listings',        href: '/admin/listings',         group: 'Content', keywords: ['classifieds'] },
+  { label: 'Events',          href: '/admin/events',           group: 'Content' },
+  { label: 'Directory',       href: '/admin/directory',        group: 'Content', keywords: ['businesses', 'shops'] },
+  { label: 'News',            href: '/admin/news',             group: 'Content', keywords: ['articles', 'blog'] },
+  { label: 'Routes',          href: '/admin/routes',           group: 'Content' },
+
+  { label: 'Users',           href: '/admin/users',            group: 'People' },
+  { label: 'Verifications',   href: '/admin/verifications',    group: 'People' },
+  { label: 'Messages',        href: '/admin/messages',         group: 'People', keywords: ['inbox', 'conversations'] },
+
+  { label: 'Marketing',       href: '/admin/marketing',        group: 'Commerce' },
+  { label: 'Boosts',          href: '/admin/boosts',           group: 'Commerce' },
+  { label: 'PayFast',         href: '/admin/payfast',          group: 'Commerce', keywords: ['payments'] },
+
+  { label: 'Analytics',       href: '/admin/analytics',        group: 'Insights' },
+  { label: 'Reports',         href: '/admin/reports',          group: 'Insights' },
+  { label: 'SEO Audit',       href: '/admin/seo-audit',        group: 'Insights' },
+
+  { label: 'Theme',           href: '/admin/theme',            group: 'System' },
+  { label: 'Email Templates', href: '/admin/email-templates',  group: 'System' },
+  { label: 'Settings',        href: '/admin/settings',         group: 'System' },
 ]
 
 type Pending = { label: string; count: number; href: string }
@@ -90,10 +96,31 @@ export function CommandPalette() {
     return NAV.filter(n => fuzzy(q, n.label) || (n.keywords ?? []).some(k => fuzzy(q, k)))
   }, [query])
 
-  const combined: Array<{ type: 'pending' | 'nav'; label: string; href: string; hint?: string }> = [
-    ...(query ? [] : pending.map(p => ({ type: 'pending' as const, label: p.label, href: p.href }))),
-    ...results.map(n => ({ type: 'nav' as const, label: n.label, href: n.href })),
-  ]
+  type Row =
+    | { type: 'pending'; label: string; href: string }
+    | { type: 'nav'; label: string; href: string; group: string }
+    | { type: 'header'; label: string }
+
+  const combined: Row[] = []
+  if (!query) {
+    for (const p of pending) combined.push({ type: 'pending', label: p.label, href: p.href })
+  }
+  let lastGroup: string | null = null
+  for (const n of results) {
+    if (n.group && n.group !== lastGroup) {
+      combined.push({ type: 'header', label: n.group })
+      lastGroup = n.group
+    } else if (!n.group) {
+      lastGroup = null
+    }
+    combined.push({ type: 'nav', label: n.label, href: n.href, group: n.group })
+  }
+
+  // Keyboard navigation should skip header rows. Type predicate preserves narrowing.
+  type NavigableRow = Exclude<Row, { type: 'header' }>
+  const navigable: NavigableRow[] = combined.filter(
+    (r): r is NavigableRow => r.type !== 'header',
+  )
 
   function go(item: { href: string }) {
     setOpen(false)
@@ -118,9 +145,13 @@ export function CommandPalette() {
       <div
         onClick={e => e.stopPropagation()}
         onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') { e.preventDefault(); setCursor(c => Math.min(c + 1, combined.length - 1)) }
+          if (e.key === 'ArrowDown') { e.preventDefault(); setCursor(c => Math.min(c + 1, navigable.length - 1)) }
           else if (e.key === 'ArrowUp') { e.preventDefault(); setCursor(c => Math.max(c - 1, 0)) }
-          else if (e.key === 'Enter') { e.preventDefault(); combined[cursor] && go(combined[cursor]) }
+          else if (e.key === 'Enter') {
+            e.preventDefault()
+            const target = navigable[cursor]
+            if (target) go(target)
+          }
         }}
         style={{
           width: 'min(640px, 92vw)',
@@ -156,37 +187,58 @@ export function CommandPalette() {
               No matches.
             </div>
           ) : (
-            combined.map((item, i) => (
-              <button
-                key={item.href + i}
-                onClick={() => go(item)}
-                onMouseEnter={() => setCursor(i)}
-                style={{
-                  width: '100%',
-                  textAlign: 'left',
-                  background: i === cursor ? 'var(--admin-surface-2)' : 'transparent',
-                  border: 'none',
-                  color: 'var(--admin-text)',
-                  padding: '10px 12px',
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  cursor: 'pointer',
-                  fontSize: 13,
-                }}
-              >
-                {item.type === 'pending' ? (
-                  <AlertCircle size={14} style={{ color: 'var(--admin-warn)' }} />
-                ) : (
-                  <ArrowRight size={14} style={{ color: 'var(--admin-text-dim)' }} />
-                )}
-                <span style={{ flex: 1 }}>{item.label}</span>
-                {item.type === 'pending' && (
-                  <span style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>Jump →</span>
-                )}
-              </button>
-            ))
+            combined.map((item, i) => {
+              if (item.type === 'header') {
+                return (
+                  <div
+                    key={`h-${item.label}-${i}`}
+                    style={{
+                      padding: '10px 12px 4px',
+                      fontSize: 10.5,
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: 'var(--admin-text-dim)',
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                )
+              }
+              // Compute navigable index for cursor highlight + mouse-enter
+              const navIdx = combined.slice(0, i + 1).filter(r => r.type !== 'header').length - 1
+              return (
+                <button
+                  key={item.href + i}
+                  onClick={() => go(item)}
+                  onMouseEnter={() => setCursor(navIdx)}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    background: navIdx === cursor ? 'var(--admin-surface-2)' : 'transparent',
+                    border: 'none',
+                    color: 'var(--admin-text)',
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    cursor: 'pointer',
+                    fontSize: 13,
+                  }}
+                >
+                  {item.type === 'pending' ? (
+                    <AlertCircle size={14} style={{ color: 'var(--admin-warn)' }} />
+                  ) : (
+                    <ArrowRight size={14} style={{ color: 'var(--admin-text-dim)' }} />
+                  )}
+                  <span style={{ flex: 1 }}>{item.label}</span>
+                  {item.type === 'pending' && (
+                    <span style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>Jump →</span>
+                  )}
+                </button>
+              )
+            })
           )}
         </div>
         <div
