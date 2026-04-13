@@ -420,20 +420,21 @@ export default function AdminSettingsPage() {
             style={{
               width: '100%',
               padding: '12px 16px',
-              backgroundColor: saving ? '#d1d5db' : 'var(--admin-text)',
-              color: 'var(--admin-surface)',
-              border: 'none',
+              backgroundColor: saving ? 'var(--admin-surface-2)' : 'var(--admin-accent)',
+              color: '#fff',
+              border: '1px solid var(--admin-accent)',
               borderRadius: '6px',
               fontSize: '14px',
               fontWeight: '600',
               cursor: saving ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.2s',
+              transition: 'filter 0.15s',
+              opacity: saving ? 0.6 : 1,
             }}
             onMouseEnter={(e) => {
-              if (!saving) (e.target as HTMLButtonElement).style.backgroundColor = '#1e2849'
+              if (!saving) (e.target as HTMLButtonElement).style.filter = 'brightness(1.1)'
             }}
             onMouseLeave={(e) => {
-              if (!saving) (e.target as HTMLButtonElement).style.backgroundColor = 'var(--admin-text)'
+              (e.target as HTMLButtonElement).style.filter = 'none'
             }}
           >
             {saving ? 'Saving...' : 'Save Settings'}
@@ -493,20 +494,22 @@ export default function AdminSettingsPage() {
             disabled={testLoading}
             style={{
               padding: '10px 16px',
-              backgroundColor: testLoading ? '#d1d5db' : 'var(--admin-text)',
-              color: 'var(--admin-surface)',
-              border: 'none',
+              backgroundColor: testLoading ? 'var(--admin-surface-2)' : 'var(--admin-accent)',
+              color: '#fff',
+              border: '1px solid var(--admin-accent)',
               borderRadius: '6px',
               fontSize: '14px',
               fontWeight: '600',
               cursor: testLoading ? 'not-allowed' : 'pointer',
               whiteSpace: 'nowrap',
+              transition: 'filter 0.15s',
+              opacity: testLoading ? 0.6 : 1,
             }}
             onMouseEnter={(e) => {
-              if (!testLoading) (e.target as HTMLButtonElement).style.backgroundColor = '#1e2849'
+              if (!testLoading) (e.target as HTMLButtonElement).style.filter = 'brightness(1.1)'
             }}
             onMouseLeave={(e) => {
-              if (!testLoading) (e.target as HTMLButtonElement).style.backgroundColor = 'var(--admin-text)'
+              (e.target as HTMLButtonElement).style.filter = 'none'
             }}
           >
             {testLoading ? 'Sending...' : 'Send Test'}
