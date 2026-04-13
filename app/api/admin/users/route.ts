@@ -18,13 +18,13 @@ export async function GET(request: NextRequest) {
     const country = await getAdminCountry()
     const seeAll = isSuperadminSession(adminCheck.session) && searchParams.get('all') === '1'
     const countryFilter = seeAll ? sql`` : sql` AND u.country = ${country}`
-    const adminFilter = adminOnly ? sql` AND u.is_admin = true` : sql``
+    const adminFilter = adminOnly ? sql` AND u.role IN ('admin','superadmin')` : sql``
     const searchFilter = search ? sql` AND (u.name ILIKE ${'%' + search + '%'} OR u.email ILIKE ${'%' + search + '%'})` : sql``
 
     const result = await db.execute(
       sql`
         SELECT
-          u.id, u.name, u.email, u.avatar_url, u.created_at, u.is_admin, u.status,
+          u.id, u.name, u.email, u.avatar_url, u.created_at, u.role, u.status,
           COUNT(DISTINCT l.id) as listing_count
         FROM users u
         LEFT JOIN listings l ON u.id = l.seller_id

@@ -19,10 +19,10 @@ export async function PATCH(
     const g = seeAll ? sql`` : sql` AND country = ${country}`
 
     if (action === 'make_admin') {
-      await db.execute(sql`UPDATE users SET is_admin = true WHERE id = ${id} ${g}`)
+      await db.execute(sql`UPDATE users SET role = 'admin' WHERE id = ${id} ${g}`)
       return NextResponse.json({ success: true, action: 'made_admin' })
     } else if (action === 'remove_admin') {
-      await db.execute(sql`UPDATE users SET is_admin = false WHERE id = ${id} ${g}`)
+      await db.execute(sql`UPDATE users SET role = NULL WHERE id = ${id} ${g}`)
       return NextResponse.json({ success: true, action: 'removed_admin' })
     } else if (action === 'ban') {
       await db.execute(sql`UPDATE users SET status = 'banned', banned_at = NOW() WHERE id = ${id} ${g}`)

@@ -12,7 +12,7 @@ interface User {
   email: string
   avatar_url: string
   created_at: string
-  is_admin: boolean
+  role: string | null
   status: string
   listing_count: number
 }
@@ -96,7 +96,7 @@ export default function UsersPage() {
         }}>{initials(u.name || '?')}</div>
         <div>
           <div style={{ fontWeight: 600 }}>{u.name}</div>
-          {u.is_admin && <StatusPill label="Admin" tone="accent" />}
+          {(u.role === 'admin' || u.role === 'superadmin') && <StatusPill label={u.role} tone="accent" />}
         </div>
       </div>,
       <span key="e" style={{ color: 'var(--admin-text-dim)' }}>{u.email}</span>,
@@ -104,7 +104,7 @@ export default function UsersPage() {
       <span key="l">{u.listing_count}</span>,
       <StatusPill key="s" label={u.status === 'banned' ? 'Banned' : 'Active'} tone={toneForStatus(u.status === 'banned' ? 'banned' : 'active')} />,
       <div key="a" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {u.is_admin ? (
+        {(u.role === 'admin' || u.role === 'superadmin') ? (
           <Button variant="danger" size="sm" onClick={() => handleAction(u.id, 'remove_admin')} disabled={!!actionLoading}>
             <ShieldOff size={12} /> Demote
           </Button>
