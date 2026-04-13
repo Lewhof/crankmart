@@ -46,7 +46,7 @@ export default async function AdminDashboard() {
     ORDER BY l.created_at DESC LIMIT 5
   `)
   const recentUsers = await db.execute(sql`
-    SELECT id, name, email, created_at, is_admin
+    SELECT id, name, email, created_at, role
     FROM users WHERE country = ${country}
     ORDER BY created_at DESC LIMIT 5
   `)
@@ -56,7 +56,7 @@ export default async function AdminDashboard() {
     moderation_status: string; created_at: string; seller_name: string
   }>
   const userRows = (recentUsers.rows ?? recentUsers) as Array<{
-    id: string; name: string; email: string; created_at: string; is_admin: boolean
+    id: string; name: string; email: string; created_at: string; role: string | null
   }>
 
   const actionable = [
@@ -150,7 +150,7 @@ export default async function AdminDashboard() {
                 cells: [
                   <span key="n" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {u.name}
-                    {u.is_admin && <StatusPill label="admin" tone="accent" />}
+                    {(u.role === 'admin' || u.role === 'superadmin') && <StatusPill label={u.role} tone="accent" />}
                   </span>,
                   <span key="e" style={{ color: 'var(--admin-text-dim)' }}>{u.email}</span>,
                   <span key="d" style={{ color: 'var(--admin-text-dim)', fontSize: 12 }}>

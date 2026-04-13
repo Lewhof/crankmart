@@ -11,10 +11,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!session?.user?.id) redirect('/login?callbackUrl=/admin')
 
   const roleResult = await db.execute(
-    sql`SELECT is_admin, role FROM users WHERE id = ${session.user.id}`,
+    sql`SELECT role FROM users WHERE id = ${session.user.id}`,
   )
-  const row = (roleResult.rows ?? roleResult)[0] as { is_admin?: boolean; role?: string } | undefined
-  const isAdmin = row?.is_admin === true || row?.role === 'admin' || row?.role === 'superadmin'
+  const row = (roleResult.rows ?? roleResult)[0] as { role?: string } | undefined
+  const isAdmin = row?.role === 'admin' || row?.role === 'superadmin'
   if (!isAdmin) redirect('/')
 
   const isSuperadmin = row?.role === 'superadmin'
