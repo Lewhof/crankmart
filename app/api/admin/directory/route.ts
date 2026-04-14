@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     const result = await db.execute(sql`
       SELECT
-        id, name, logo_url, cover_url, business_type, province, city,
+        id, name, logo_url, banner_url AS cover_url, business_type, province, city,
         verified AS is_verified, is_premium, views_count, created_at
       FROM businesses
       WHERE 1=1 ${countryCond} ${typeCond}
