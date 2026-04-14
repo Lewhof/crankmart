@@ -39,7 +39,9 @@ export async function sendEmail({
   const transporter = nodemailer.createTransport({
     host: config.smtp_host,
     port: parseInt(config.smtp_port || '587'),
-    secure: config.smtp_secure === 'true',
+    // 'tls' / legacy 'true' = implicit TLS (port 465). 'starttls' and 'none' / legacy 'false' = secure:false
+    // (nodemailer upgrades via STARTTLS automatically on 587 when requireTLS not disabled).
+    secure: config.smtp_secure === 'tls' || config.smtp_secure === 'true',
     auth: { user: config.smtp_user, pass: config.smtp_pass },
   })
 

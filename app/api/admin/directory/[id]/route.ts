@@ -32,10 +32,10 @@ export async function PATCH(
     }
 
     if (action === 'verify') {
-      await db.execute(sql`UPDATE businesses SET is_verified = true WHERE id = ${id} ${g}`)
+      await db.execute(sql`UPDATE businesses SET verified = true WHERE id = ${id} ${g}`)
       return NextResponse.json({ success: true, action: 'verified' })
     } else if (action === 'unverify') {
-      await db.execute(sql`UPDATE businesses SET is_verified = false WHERE id = ${id} ${g}`)
+      await db.execute(sql`UPDATE businesses SET verified = false WHERE id = ${id} ${g}`)
       return NextResponse.json({ success: true, action: 'unverified' })
     } else if (action === 'feature') {
       await db.execute(sql`UPDATE businesses SET is_premium = true WHERE id = ${id} ${g}`)

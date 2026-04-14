@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const country = await getAdminCountry()
     const countryCond = seeAll ? sql`` : sql` AND country = ${country}`
     const modCond     = modStatus ? sql` AND moderation_status = ${modStatus}` : sql``
-    const lifecycleCond = statusParam === 'upcoming' ? sql` AND event_date_start >= NOW()` : sql``
+    const lifecycleCond = statusParam === 'upcoming' ? sql` AND start_date >= NOW()` : sql``
     const searchCond = search
       ? sql` AND (title ILIKE ${'%' + search + '%'} OR city ILIKE ${'%' + search + '%'} OR organiser_name ILIKE ${'%' + search + '%'})`
       : sql``
@@ -40,11 +40,14 @@ export async function GET(request: NextRequest) {
     const total = Number((countRows[0] as { total?: number })?.total ?? 0)
 
     const result = await db.execute(sql`
-      SELECT id, title, slug, event_type, discipline, city, province,
-             event_date_start, event_date_end, entry_fee, distance,
-             organiser_name, organiser_website,
-             moderation_status AS status, is_featured, is_verified,
-             views_count, entry_clicks, created_at
+      SELECT id, title, slug, event_type, city, province,
+             start_date AS event_date_start,
+             end_date   AS event_date_end,
+             entry_fee, distance,
+             organiser_name,
+             website_url AS organiser_website,
+             moderation_status AS status, is_featured,
+             views_count, created_at
       FROM events
       WHERE 1=1 ${countryCond} ${modCond} ${lifecycleCond} ${searchCond}
       ORDER BY created_at DESC

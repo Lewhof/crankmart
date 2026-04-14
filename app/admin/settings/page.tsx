@@ -262,12 +262,12 @@ export default function AdminSettingsPage() {
                       name="security"
                       value={option}
                       checked={
-                        (option === 'none' && settings.smtp_secure === 'false') ||
-                        (option === 'tls' && settings.smtp_secure === 'true') ||
-                        (option === 'starttls' && settings.smtp_secure === 'false')
+                        (option === 'none'     && (settings.smtp_secure === 'none'     || settings.smtp_secure === 'false')) ||
+                        (option === 'tls'      && (settings.smtp_secure === 'tls'      || settings.smtp_secure === 'true'))  ||
+                        (option === 'starttls' &&  settings.smtp_secure === 'starttls')
                       }
                       onChange={(e) => {
-                        handleSettingChange('smtp_secure', e.target.value === 'tls' ? 'true' : 'false')
+                        handleSettingChange('smtp_secure', e.target.value)
                       }}
                       style={{ cursor: 'pointer' }}
                     />

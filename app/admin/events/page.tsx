@@ -11,7 +11,6 @@ interface AdminEvent {
   title: string
   slug: string
   event_type: string
-  discipline: string
   city: string
   province: string
   event_date_start: string
@@ -22,9 +21,7 @@ interface AdminEvent {
   organiser_website: string
   status: string
   is_featured: boolean
-  is_verified: boolean
   views_count: number
-  entry_clicks: number
   created_at: string
 }
 
@@ -112,11 +109,10 @@ export default function AdminEventsPage() {
           {ev.organiser_name ? ` · ${ev.organiser_name}` : ''}
         </div>
       </div>,
-      <StatusPill key="ty" label={ev.discipline || ev.event_type || '—'} tone="neutral" />,
+      <StatusPill key="ty" label={ev.event_type || '—'} tone="neutral" />,
       <span key="d" style={{ color: 'var(--admin-text-dim)' }}>{fmt(ev.event_date_start)}</span>,
-      <StatusPill key="s" label={ev.status} tone={toneForStatus(ev.status === 'upcoming' ? 'active' : ev.status)} />,
+      <StatusPill key="s" label={ev.status} tone={toneForStatus(ev.status === 'approved' ? 'active' : ev.status)} />,
       <span key="v">{ev.views_count ?? 0}</span>,
-      <span key="c">{ev.entry_clicks ?? 0}</span>,
       <div key="a" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <Button variant="ghost" size="sm" href={`/events/${ev.slug}`}><Eye size={12} /> View</Button>
         <Button variant={ev.is_featured ? 'primary' : 'ghost'} size="sm" onClick={() => action(ev.id, 'feature')} disabled={actioning === ev.id}>
@@ -196,7 +192,7 @@ export default function AdminEventsPage() {
         <Empty message={`No ${filter !== 'all' ? filter : ''} events${search ? ` matching "${search}"` : ''}`} />
       ) : (
         <Table
-          head={['Event', 'Type', 'Date', 'Status', 'Views', 'Clicks', 'Actions']}
+          head={['Event', 'Type', 'Date', 'Status', 'Views', 'Actions']}
           rows={rows}
         />
       )}

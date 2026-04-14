@@ -21,8 +21,8 @@ export async function GET(request: NextRequest) {
 
     const result = await db.execute(sql`
       SELECT
-        id, name, logo_url, cover_url, business_type, province, city, is_verified,
-        is_premium, views_count, created_at
+        id, name, logo_url, cover_url, business_type, province, city,
+        verified AS is_verified, is_premium, views_count, created_at
       FROM businesses
       WHERE 1=1 ${countryCond} ${typeCond}
       ORDER BY created_at DESC
