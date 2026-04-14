@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 
@@ -68,8 +68,8 @@ export async function POST(request: NextRequest) {
     const ip = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || ''
     const needsGeoFallback = !countryCode
 
-    // Fire-and-forget: do geo lookup + insert in background so response isn't blocked.
-    ;(async () => {
+    // Defer geo lookup + insert so Vercel flushes the response before running them.
+    after(async () => {
       if (needsGeoFallback) {
         const geo = await geoLookup(ip)
         if (geo) {
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       } catch (err) {
         console.error('page_views insert failed:', err)
       }
-    })()
+    })
 
     const res = NextResponse.json({ ok: true })
 
