@@ -28,7 +28,7 @@ const tsvector = customType<{ data: string; driverData: string }>({
     return value
   },
 })
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 
 // Enums (match live DB)
 export const conditionEnum = pgEnum('listing_condition', [
@@ -599,5 +599,54 @@ export const regions = pgTable(
   (t) => ({
     countryCodeUniq: uniqueIndex('regions_country_code_uniq').on(t.country, t.code),
     countryIdx: index('regions_country_idx').on(t.country),
+  }),
+)
+
+// ─── Marketing launch-readiness checklist ──────────────────────────────────
+export const marketingChecklistItems = pgTable(
+  'marketing_checklist_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    section: varchar('section', { length: 32 }).notNull(),
+    sectionLabel: varchar('section_label', { length: 120 }).notNull(),
+    label: text('label').notNull().unique(),
+    description: text('description'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    isComplete: boolean('is_complete').notNull().default(false),
+    completedBy: uuid('completed_by').references(() => users.id, { onDelete: 'set null' }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    sectionIdx: index('marketing_checklist_section_idx').on(t.section, t.sortOrder),
+  }),
+)
+
+// ─── Whiteboard — strategic backlog for operators ──────────────────────────
+export const whiteboardPriorityEnum = pgEnum('whiteboard_priority', ['urgent','high','medium','low'])
+export const whiteboardStatusEnum   = pgEnum('whiteboard_status',   ['backlog','todo','in_progress','done','archived'])
+export const whiteboardEffortEnum   = pgEnum('whiteboard_effort',   ['s','m','l','xl'])
+
+export const whiteboardItems = pgTable(
+  'whiteboard_items',
+  {
+    id:          uuid('id').primaryKey().defaultRandom(),
+    country:     char('country', { length: 2 }).notNull().default('za'),
+    title:       varchar('title',  { length: 200 }).notNull(),
+    description: text('description'),
+    priority:    whiteboardPriorityEnum('priority').notNull().default('medium'),
+    status:      whiteboardStatusEnum('status').notNull().default('backlog'),
+    effort:      whiteboardEffortEnum('effort'),
+    categories:  text('categories').array().notNull().default(sql`ARRAY[]::text[]`),
+    sourceUrl:   text('source_url'),
+    owner:       varchar('owner', { length: 100 }),
+    createdAt:   timestamp('created_at').notNull().defaultNow(),
+    updatedAt:   timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    countryStatusPriorityIdx: index('whiteboard_country_status_priority_idx').on(t.country, t.status, t.priority),
+    countryTitleUniq:         uniqueIndex('whiteboard_country_title_uniq').on(t.country, t.title),
   }),
 )

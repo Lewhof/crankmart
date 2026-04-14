@@ -333,7 +333,7 @@ export function BulkActionBar({
         display: 'flex',
         alignItems: 'center',
         gap: 12,
-        boxShadow: '0 8px 24px rgba(0,0,0,.35)',
+        boxShadow: '0 8px 24px rgba(0,0,0,.15)',
         zIndex: 30,
       }}
     >

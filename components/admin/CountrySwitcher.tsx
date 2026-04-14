@@ -85,7 +85,7 @@ export function CountrySwitcher({
               borderRadius: 10,
               padding: 4,
               zIndex: 50,
-              boxShadow: '0 12px 32px rgba(0,0,0,.4)',
+              boxShadow: '0 12px 32px rgba(0,0,0,.15)',
             }}
           >
             {activeCountries.map(c => (

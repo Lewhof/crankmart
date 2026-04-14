@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Package, Users, Calendar, Building2, MessageSquare,
   Flag, Menu, X, Settings, Newspaper, BarChart2, Navigation, Palette,
-  Zap, SearchCheck, ShieldCheck, Mail, CreditCard, Keyboard, Megaphone,
+  Zap, SearchCheck, ShieldCheck, Mail, CreditCard, Keyboard, Megaphone, ClipboardList,
 } from 'lucide-react'
 import { CommandPalette } from './CommandPalette'
 import { CountrySwitcher } from './CountrySwitcher'
@@ -43,9 +43,10 @@ const NAV: NavEntry[] = [
   ] },
 
   { label: 'Insights', items: [
-    { href: '/admin/analytics', label: 'Analytics', icon: BarChart2 },
-    { href: '/admin/reports',   label: 'Reports',   icon: Flag },
-    { href: '/admin/seo-audit', label: 'SEO Audit', icon: SearchCheck },
+    { href: '/admin/analytics',  label: 'Analytics',  icon: BarChart2 },
+    { href: '/admin/reports',    label: 'Reports',    icon: Flag },
+    { href: '/admin/whiteboard', label: 'Whiteboard', icon: ClipboardList, short: 'w' },
+    { href: '/admin/seo-audit',  label: 'SEO Audit',  icon: SearchCheck },
   ] },
 
   { label: 'System', items: [
@@ -145,7 +146,7 @@ export function AdminShell({
         .admin-page { padding: 24px 28px; max-width: 1400px; }
         .burger { display: none; }
         @media (max-width: 900px) {
-          .admin-sidebar { position: fixed; left: 0; top: 0; z-index: 60; transform: translateX(-100%); transition: transform .2s; box-shadow: 0 0 40px rgba(0,0,0,.5); }
+          .admin-sidebar { position: fixed; left: 0; top: 0; z-index: 60; transform: translateX(-100%); transition: transform .2s; box-shadow: 0 0 40px rgba(0,0,0,.15); }
           .admin-sidebar.open { transform: translateX(0); }
           .burger { display: inline-flex; }
           .admin-page { padding: 16px; }
@@ -276,6 +277,7 @@ export function AdminShell({
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Verifications</span><span><kbd>g</kbd> <kbd>v</kbd></span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Messages (inbox)</span><span><kbd>g</kbd> <kbd>i</kbd></span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Marketing</span><span><kbd>g</kbd> <kbd>m</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Whiteboard</span><span><kbd>g</kbd> <kbd>w</kbd></span></div>
             </div>
           </div>
         </div>

@@ -25,6 +25,7 @@ const NAV: NavItem[] = [
 
   { label: 'Analytics',       href: '/admin/analytics',        group: 'Insights' },
   { label: 'Reports',         href: '/admin/reports',          group: 'Insights' },
+  { label: 'Whiteboard',      href: '/admin/whiteboard',       group: 'Insights', keywords: ['backlog', 'ideas', 'roadmap'] },
   { label: 'SEO Audit',       href: '/admin/seo-audit',        group: 'Insights' },
 
   { label: 'Theme',           href: '/admin/theme',            group: 'System' },
@@ -159,7 +160,7 @@ export function CommandPalette() {
           border: '1px solid var(--admin-border)',
           borderRadius: 12,
           overflow: 'hidden',
-          boxShadow: '0 24px 60px rgba(0,0,0,.5)',
+          boxShadow: '0 24px 60px rgba(0,0,0,.2)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: '1px solid var(--admin-border)' }}>
