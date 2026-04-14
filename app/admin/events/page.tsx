@@ -64,10 +64,15 @@ export default function AdminEventsPage() {
   async function action(id: string, act: 'approve' | 'reject' | 'feature') {
     setActioning(id)
     try {
-      await fetch('/api/admin/events', {
+      const current = events.find(e => e.id === id)
+      const body =
+        act === 'feature'
+          ? { action: current?.is_featured ? 'unfeature' : 'feature' }
+          : { action: act }
+      await fetch(`/api/admin/events/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, action: act }),
+        body: JSON.stringify(body),
       })
       if (act === 'feature') {
         setEvents(prev => prev.map(e => e.id === id ? { ...e, is_featured: !e.is_featured } : e))

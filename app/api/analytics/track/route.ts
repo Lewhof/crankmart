@@ -63,24 +63,32 @@ export async function POST(request: NextRequest) {
     const cfCountry = request.headers.get('cf-ipcountry')
     if (cfCountry && cfCountry !== 'XX') {
       countryCode = cfCountry
-    } else {
-      // Get real IP (handle proxies)
-      const forwarded = request.headers.get('x-forwarded-for')
-      const ip = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || ''
-      const geo = await geoLookup(ip)
-      if (geo) {
-        country = geo.country
-        countryCode = geo.countryCode
-        city = geo.city
-        region = geo.region
-      }
     }
+    const forwarded = request.headers.get('x-forwarded-for')
+    const ip = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || ''
+    const needsGeoFallback = !countryCode
 
-    await db.execute(sql`
-      INSERT INTO page_views (path, referrer, device, browser, visitor_id, session_id, country, country_code, city, region)
-      VALUES (${path}, ${referrer}, ${device}, ${browser}, ${visitorId}, ${sessionId},
-              ${country || null}, ${countryCode || null}, ${city || null}, ${region || null})
-    `)
+    // Fire-and-forget: do geo lookup + insert in background so response isn't blocked.
+    ;(async () => {
+      if (needsGeoFallback) {
+        const geo = await geoLookup(ip)
+        if (geo) {
+          country = geo.country
+          countryCode = geo.countryCode
+          city = geo.city
+          region = geo.region
+        }
+      }
+      try {
+        await db.execute(sql`
+          INSERT INTO page_views (path, referrer, device, browser, visitor_id, session_id, country, country_code, city, region)
+          VALUES (${path}, ${referrer}, ${device}, ${browser}, ${visitorId}, ${sessionId},
+                  ${country || null}, ${countryCode || null}, ${city || null}, ${region || null})
+        `)
+      } catch (err) {
+        console.error('page_views insert failed:', err)
+      }
+    })()
 
     const res = NextResponse.json({ ok: true })
 
