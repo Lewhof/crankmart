@@ -1,15 +1,19 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { TopNav } from './TopNav'
 import { BottomNav } from './BottomNav'
 import { Footer } from './Footer'
 
 export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const role = (session?.user as { role?: string } | undefined)?.role
+  const isAdmin = role === 'admin' || role === 'superadmin'
 
-  // Hide chrome on admin routes (admin has its own layout)
-  const hideChrome = pathname.startsWith('/admin')
+  // Hide chrome on admin routes (own layout) and on the root Coming Soon page for non-admins.
+  const hideChrome = pathname.startsWith('/admin') || (pathname === '/' && !isAdmin)
 
   if (hideChrome) {
     return <>{children}</>
