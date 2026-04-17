@@ -63,6 +63,9 @@ const GATE_ALLOWLIST = [
   '/verify',
   '/forgot-password',
   '/reset-password',
+  // Always-public info pages — no user data, safe to show while gated.
+  '/safety',
+  '/status',
 ]
 
 export async function proxy(req: NextRequest) {
