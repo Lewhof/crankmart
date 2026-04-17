@@ -62,7 +62,12 @@ function applyCountryHeader(req: NextRequest): NextResponse {
 
   const first = pathname.split('/')[1] || ''
   if (isCountry(first)) {
-    const res = NextResponse.next()
+    // Rewrite /za/x internally to /x so Next.js's file router finds the
+    // route — the app/ tree isn't nested under a [country] segment.
+    // URL bar still shows /za/x; server components still read x-country.
+    const rewritten = req.nextUrl.clone()
+    rewritten.pathname = pathname.slice(`/${first}`.length) || '/'
+    const res = NextResponse.rewrite(rewritten)
     res.headers.set('x-country', first)
     return res
   }
