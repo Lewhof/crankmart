@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { getCountry } from '@/lib/country'
+import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(request: NextRequest) {
+  const rl = await check(limiters.waitlist, clientKey(request))
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: rateLimitHeaders(rl) })
+  }
+
   try {
     const { email } = await request.json()
     const trimmed = typeof email === 'string' ? email.trim().toLowerCase() : ''

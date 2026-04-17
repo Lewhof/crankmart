@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { getCountry } from '@/lib/country'
 import { randomBytes } from 'crypto'
 import { sendEmail, listingPublishedEmail } from '@/lib/email'
+import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
 
 function slugify(text: string): string {
   return text
@@ -29,6 +30,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      )
+    }
+
+    const rl = await check(limiters.listingsWrite, clientKey(request, `publish:${session.user.id}`))
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: "You're publishing listings too fast. Try again in a few minutes." },
+        { status: 429, headers: rateLimitHeaders(rl) }
       )
     }
 

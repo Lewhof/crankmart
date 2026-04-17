@@ -6,12 +6,18 @@ import { eq } from 'drizzle-orm'
 import { sql as drizzleSql } from 'drizzle-orm'
 import { sendEmail } from '@/lib/email'
 import crypto from 'crypto'
+import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
 
 const ForgotPasswordSchema = z.object({
   email: z.string().email('Valid email address required'),
 })
 
 export async function POST(request: NextRequest) {
+  const rl = await check(limiters.authWrite, clientKey(request, 'forgot-password'))
+  if (!rl.ok) {
+    return Response.json({ error: 'Too many requests. Try again in a minute.' }, { status: 429, headers: rateLimitHeaders(rl) })
+  }
+
   try {
     const body = await request.json()
     const validation = ForgotPasswordSchema.safeParse(body)

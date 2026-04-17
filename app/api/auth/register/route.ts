@@ -3,8 +3,14 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
+import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
 
 export async function POST(request: NextRequest) {
+  const rl = await check(limiters.authWrite, clientKey(request, 'register'))
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'Too many registration attempts. Try again in a minute.' }, { status: 429, headers: rateLimitHeaders(rl) })
+  }
+
   try {
     const { name, email, password, province } = await request.json()
 

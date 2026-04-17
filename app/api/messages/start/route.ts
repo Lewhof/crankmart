@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { sql, eq, and } from 'drizzle-orm'
 import { sendEmail, newMessageEmail } from '@/lib/email'
 import { getCountry } from '@/lib/country'
+import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
 
 const StartMessageSchema = z.object({
   listingId: z.string().uuid('Invalid listing ID'),
@@ -30,6 +31,11 @@ interface UserRow {
 export async function POST(request: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const rl = await check(limiters.messagesStart, clientKey(request, `start:${session.user.id}`))
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'Too many messages. Slow down.' }, { status: 429, headers: rateLimitHeaders(rl) })
+  }
   
   const parsed = StartMessageSchema.safeParse(await request.json())
   if (!parsed.success) {
