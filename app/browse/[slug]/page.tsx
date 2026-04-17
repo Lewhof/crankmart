@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
 import ListingDetailClient from './ListingDetail'
+import { buildAlternates } from '@/lib/hreflang'
 
 interface Props {
   params: { slug: string }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const alternates = buildAlternates(`/browse/${params.slug}`)
+
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
     const res = await fetch(`${baseUrl}/api/listings/${params.slug}`, { next: { revalidate: 300 } })
@@ -26,11 +29,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const desc   = `${cond} ${listing.title} for R${price}${where ? ` in ${where}` : ''}. Listed on CrankMart SA.`
 
     const image  = listing.images?.[0]?.imageUrl ?? listing.images?.[0]?.image_url ?? null
-    const url    = `${baseUrl}/browse/${params.slug}`
+    const url    = alternates.canonical
 
     return {
       title,
       description: desc,
+      alternates,
       openGraph: {
         title,
         description: desc,
@@ -50,6 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: 'Listing — CrankMart',
       description: 'Buy and sell bikes, gear, and cycling equipment in South Africa.',
+      alternates,
     }
   }
 }
