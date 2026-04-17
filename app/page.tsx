@@ -7,7 +7,7 @@ import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { Bike, Eye, EyeOff, Loader2, ArrowRight, Lock, Zap, MapPin, Calendar, Store, Shield } from 'lucide-react'
 
-const FullHomePage = dynamic(() => import('./_home/HomePageFull'), { ssr: false })
+const FullHomePage = dynamic(() => import('./_home/HomePageFull'))
 
 export default function RootPage() {
   const { data: session, status } = useSession()
