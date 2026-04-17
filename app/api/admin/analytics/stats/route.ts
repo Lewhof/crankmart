@@ -25,23 +25,23 @@ export async function GET(request: NextRequest) {
       byCountry, byCity,
     ] = await Promise.all([
       // Current period
-      db.execute(sql`SELECT COUNT(*) as count FROM page_views WHERE created_at > NOW() - (${days} || ' days')::interval`),
-      db.execute(sql`SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - (${days} || ' days')::interval`),
-      db.execute(sql`SELECT COUNT(DISTINCT COALESCE(session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - (${days} || ' days')::interval`),
-      db.execute(sql`SELECT path, COUNT(*) as views FROM page_views WHERE created_at > NOW() - (${days} || ' days')::interval GROUP BY path ORDER BY views DESC LIMIT 15`),
-      db.execute(sql`SELECT device, COUNT(*) as count FROM page_views WHERE created_at > NOW() - (${days} || ' days')::interval GROUP BY device ORDER BY count DESC`),
-      db.execute(sql`SELECT browser, COUNT(*) as count FROM page_views WHERE created_at > NOW() - (${days} || ' days')::interval GROUP BY browser ORDER BY count DESC`),
-      db.execute(sql`SELECT DATE(created_at) as date, COUNT(*) as views, COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as unique_visitors FROM page_views WHERE created_at > NOW() - (${days} || ' days')::interval GROUP BY DATE(created_at) ORDER BY date ASC`),
-      db.execute(sql`SELECT referrer, COUNT(*) as count FROM page_views WHERE created_at > NOW() - (${days} || ' days')::interval AND referrer IS NOT NULL AND referrer != '' GROUP BY referrer ORDER BY count DESC LIMIT 10`),
+      db.execute(sql`SELECT COUNT(*) as count FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days}`),
+      db.execute(sql`SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days}`),
+      db.execute(sql`SELECT COUNT(DISTINCT COALESCE(session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days}`),
+      db.execute(sql`SELECT path, COUNT(*) as views FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days} GROUP BY path ORDER BY views DESC LIMIT 15`),
+      db.execute(sql`SELECT device, COUNT(*) as count FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days} GROUP BY device ORDER BY count DESC`),
+      db.execute(sql`SELECT browser, COUNT(*) as count FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days} GROUP BY browser ORDER BY count DESC`),
+      db.execute(sql`SELECT DATE(created_at) as date, COUNT(*) as views, COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as unique_visitors FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days} GROUP BY DATE(created_at) ORDER BY date ASC`),
+      db.execute(sql`SELECT referrer, COUNT(*) as count FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days} AND referrer IS NOT NULL AND referrer != '' GROUP BY referrer ORDER BY count DESC LIMIT 10`),
 
       // Previous period comparisons
-      db.execute(sql`SELECT COUNT(*) as count FROM page_views WHERE created_at > NOW() - (${days * 2} || ' days')::interval AND created_at <= NOW() - (${days} || ' days')::interval`),
-      db.execute(sql`SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - (${days * 2} || ' days')::interval AND created_at <= NOW() - (${days} || ' days')::interval`),
-      db.execute(sql`SELECT COUNT(DISTINCT COALESCE(session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - (${days * 2} || ' days')::interval AND created_at <= NOW() - (${days} || ' days')::interval`),
+      db.execute(sql`SELECT COUNT(*) as count FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days * 2} AND created_at <= NOW() - INTERVAL '1 day' * ${days}`),
+      db.execute(sql`SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days * 2} AND created_at <= NOW() - INTERVAL '1 day' * ${days}`),
+      db.execute(sql`SELECT COUNT(DISTINCT COALESCE(session_id, id::text)) as count FROM page_views WHERE created_at > NOW() - INTERVAL '1 day' * ${days * 2} AND created_at <= NOW() - INTERVAL '1 day' * ${days}`),
 
       // Entity stats (country-scoped)
       db.execute(sql`SELECT COUNT(*) as total, SUM(views_count) as total_views FROM listings WHERE status = 'active' ${cl}`),
-      db.execute(sql`SELECT COUNT(*) as total, COUNT(CASE WHEN created_at > NOW() - (${days} || ' days')::interval THEN 1 END) as new_users FROM users WHERE 1=1 ${cl}`),
+      db.execute(sql`SELECT COUNT(*) as total, COUNT(CASE WHEN created_at > NOW() - INTERVAL '1 day' * ${days} THEN 1 END) as new_users FROM users WHERE 1=1 ${cl}`),
       db.execute(sql`SELECT COUNT(*) as total FROM businesses WHERE 1=1 ${cl}`),
 
       // Category performance (country-scoped listings)
@@ -57,12 +57,12 @@ export async function GET(request: NextRequest) {
       db.execute(sql`
         SELECT path, COUNT(*) as count FROM page_views
         WHERE path IN ('/sell', '/sell/step-1', '/sell/step-2', '/sell/step-3', '/sell/step-4', '/sell/success')
-          AND created_at > NOW() - (${days} || ' days')::interval
+          AND created_at > NOW() - INTERVAL '1 day' * ${days}
         GROUP BY path ORDER BY count DESC
       `),
 
       // Listing page views
-      db.execute(sql`SELECT COUNT(*) as count FROM page_views WHERE path LIKE '/browse/%' AND created_at > NOW() - (${days} || ' days')::interval`),
+      db.execute(sql`SELECT COUNT(*) as count FROM page_views WHERE path LIKE '/browse/%' AND created_at > NOW() - INTERVAL '1 day' * ${days}`),
 
       // Geo: by country
       db.execute(sql`
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
                COUNT(*) as views,
                COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as visitors
         FROM page_views
-        WHERE created_at > NOW() - (${days} || ' days')::interval
+        WHERE created_at > NOW() - INTERVAL '1 day' * ${days}
         GROUP BY country_code, country
         ORDER BY views DESC LIMIT 20
       `),
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
                COUNT(*) as views,
                COUNT(DISTINCT COALESCE(visitor_id, session_id, id::text)) as visitors
         FROM page_views
-        WHERE created_at > NOW() - (${days} || ' days')::interval
+        WHERE created_at > NOW() - INTERVAL '1 day' * ${days}
           AND city IS NOT NULL AND city != ''
         GROUP BY city, country_code
         ORDER BY views DESC LIMIT 15
