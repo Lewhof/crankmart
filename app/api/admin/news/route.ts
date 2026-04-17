@@ -41,14 +41,17 @@ export async function PATCH(request: NextRequest) {
     const { id, action } = await request.json() // action: 'approve' | 'reject' | 'feature'
 
     if (action === 'approve') {
-      await db.execute(sql.raw(`
-        UPDATE news_articles SET status = 'approved', published_at = NOW(), approved_by = '${session.user.id}', approved_at = NOW()
-        WHERE id = '${id}'
-      `))
-      // Notify author
-      const result = await db.execute(sql.raw(`SELECT title, author_email, author_name, slug FROM news_articles WHERE id = '${id}'`))
+      await db.execute(sql`
+        UPDATE news_articles SET
+          status = 'approved',
+          published_at = NOW(),
+          approved_by = ${session.user.id}::uuid,
+          approved_at = NOW()
+        WHERE id = ${id}::uuid
+      `)
+      const result = await db.execute(sql`SELECT title, author_email, author_name, slug FROM news_articles WHERE id = ${id}::uuid`)
       const rows = result.rows ?? result
-      const article = Array.isArray(rows) ? rows[0] : null
+      const article = Array.isArray(rows) ? (rows[0] as { title: string; author_email: string; author_name: string; slug: string } | undefined) : null
       if (article && article.author_email) {
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
         const authorName = String(article.author_name || 'there')
@@ -57,14 +60,13 @@ export async function PATCH(request: NextRequest) {
         sendEmail({
           to: String(article.author_email),
           subject: 'Your article is live on CrankMart',
-          html: emailHtml
+          html: emailHtml,
         })
       }
     } else if (action === 'reject') {
-      await db.execute(sql.raw(`UPDATE news_articles SET status = 'rejected' WHERE id = '${id}'`))
+      await db.execute(sql`UPDATE news_articles SET status = 'rejected' WHERE id = ${id}::uuid`)
     } else if (action === 'feature') {
-      // Toggle featured
-      await db.execute(sql.raw(`UPDATE news_articles SET is_featured = NOT is_featured WHERE id = '${id}'`))
+      await db.execute(sql`UPDATE news_articles SET is_featured = NOT is_featured WHERE id = ${id}::uuid`)
     }
 
     return NextResponse.json({ success: true })

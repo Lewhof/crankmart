@@ -20,7 +20,7 @@ export async function GET(
       WHERE rs.user_id = ${userId} AND r.slug = ${slug} AND r.country = ${country}
       LIMIT 1
     `)
-    return NextResponse.json({ saved: (result.rows as any[]).length > 0 })
+    return NextResponse.json({ saved: (result.rows as unknown[]).length > 0 })
   } catch {
     return NextResponse.json({ saved: false })
   }
@@ -36,25 +36,23 @@ export async function POST(
   const userId = session.user.id
   const country = await getCountry()
   try {
-    // Get route id (country-scoped)
     const routeResult = await db.execute(sql`SELECT id FROM routes WHERE slug = ${slug} AND country = ${country} LIMIT 1`)
-    const routeId = (routeResult.rows as any[])[0]?.id
+    const routeId = (routeResult.rows as Array<{ id: string }>)[0]?.id
     if (!routeId) return NextResponse.json({ error: 'Route not found' }, { status: 404 })
 
-    // Check if already saved
-    const existing = await db.execute(sql.raw(`SELECT id FROM route_saves WHERE route_id = '${routeId}' AND user_id = '${userId}'`))
+    const existing = await db.execute(sql`SELECT id FROM route_saves WHERE route_id = ${routeId} AND user_id = ${userId}`)
     let saved: boolean
-    if ((existing.rows as any[]).length > 0) {
-      await db.execute(sql.raw(`DELETE FROM route_saves WHERE route_id = '${routeId}' AND user_id = '${userId}'`))
+    if ((existing.rows as unknown[]).length > 0) {
+      await db.execute(sql`DELETE FROM route_saves WHERE route_id = ${routeId} AND user_id = ${userId}`)
       saved = false
     } else {
-      await db.execute(sql.raw(`INSERT INTO route_saves (id, route_id, user_id) VALUES (gen_random_uuid(), '${routeId}', '${userId}')`))
+      await db.execute(sql`INSERT INTO route_saves (id, route_id, user_id) VALUES (gen_random_uuid(), ${routeId}, ${userId})`)
       saved = true
     }
-    // Update saves_count
-    await db.execute(sql.raw(`UPDATE routes SET saves_count = (SELECT COUNT(*) FROM route_saves WHERE route_id = '${routeId}') WHERE id = '${routeId}'`))
+    await db.execute(sql`UPDATE routes SET saves_count = (SELECT COUNT(*) FROM route_saves WHERE route_id = ${routeId}) WHERE id = ${routeId}`)
     return NextResponse.json({ saved })
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

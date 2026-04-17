@@ -112,15 +112,14 @@ export async function DELETE(
     const { id } = await params
     const delCountry = await getAdminCountry()
     const delSeeAll = isSuperadminSession(adminCheck.session) && _request.nextUrl.searchParams.get('all') === '1'
-    const safeId = id.replace(/'/g, "''")
-    const delCountryCond = delSeeAll ? '' : ` AND country = '${delCountry.replace(/'/g, "''")}'`
+    const delCountryCond = delSeeAll ? sql`` : sql` AND country = ${delCountry}`
 
     // Only delete images if the parent route belongs to the admin's country.
-    await db.execute(sql.raw(`
+    await db.execute(sql`
       DELETE FROM route_images
-      WHERE route_id IN (SELECT id FROM routes WHERE id = '${safeId}' ${delCountryCond})
-    `))
-    await db.execute(sql.raw(`DELETE FROM routes WHERE id = '${safeId}' ${delCountryCond}`))
+      WHERE route_id IN (SELECT id FROM routes WHERE id = ${id}::uuid ${delCountryCond})
+    `)
+    await db.execute(sql`DELETE FROM routes WHERE id = ${id}::uuid ${delCountryCond}`)
 
     return NextResponse.json({ success: true })
   } catch (err) {

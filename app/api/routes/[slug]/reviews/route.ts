@@ -21,8 +21,9 @@ export async function GET(
       LIMIT 50
     `)
     return NextResponse.json({ reviews: result.rows ?? [] })
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
 
@@ -38,58 +39,53 @@ export async function POST(
   const rating = parseInt(body.rating)
   if (!rating || rating < 1 || rating > 5) return NextResponse.json({ error: 'Rating must be 1–5' }, { status: 400 })
 
-  const reviewBody = (body.body ?? '').trim().slice(0, 2000)
-  const conditionsNote = (body.conditions_note ?? '').trim().slice(0, 500)
-  const riddenAt = body.ridden_at || null
+  const reviewBody = (body.body ?? '').toString().trim().slice(0, 2000)
+  const conditionsNote = (body.conditions_note ?? '').toString().trim().slice(0, 500)
+  const riddenAt: string | null = body.ridden_at || null
   const userId = session.user.id
   const country = await getCountry()
 
   try {
-    // Get route id from slug (country-scoped)
     const routeResult = await db.execute(sql`SELECT id FROM routes WHERE slug = ${slug} AND country = ${country} LIMIT 1`)
-    const routeId = (routeResult.rows as any[])[0]?.id
+    const routeId = (routeResult.rows as Array<{ id: string }>)[0]?.id
     if (!routeId) return NextResponse.json({ error: 'Route not found' }, { status: 404 })
 
-    // Check if user already reviewed
-    const existing = await db.execute(sql.raw(`SELECT id FROM route_reviews WHERE route_id = '${routeId}' AND user_id = '${userId}'`))
-    if ((existing.rows as any[]).length > 0) {
-      // Update existing review
-      await db.execute(sql.raw(`
-        UPDATE route_reviews SET rating = ${rating}, body = '${reviewBody.replace(/'/g, "''")}',
-          conditions_note = '${conditionsNote.replace(/'/g, "''")}',
-          ${riddenAt ? `ridden_at = '${riddenAt}',` : ''}
+    const existing = await db.execute(sql`SELECT id FROM route_reviews WHERE route_id = ${routeId} AND user_id = ${userId}`)
+    if ((existing.rows as unknown[]).length > 0) {
+      await db.execute(sql`
+        UPDATE route_reviews SET
+          rating = ${rating},
+          body = ${reviewBody},
+          conditions_note = ${conditionsNote},
+          ridden_at = COALESCE(${riddenAt}::timestamp, ridden_at),
           created_at = NOW()
-        WHERE route_id = '${routeId}' AND user_id = '${userId}'
-      `))
+        WHERE route_id = ${routeId} AND user_id = ${userId}
+      `)
     } else {
-      await db.execute(sql.raw(`
-        INSERT INTO route_reviews (id, route_id, user_id, rating, body, conditions_note${riddenAt ? ', ridden_at' : ''})
-        VALUES (gen_random_uuid(), '${routeId}', '${userId}', ${rating},
-          '${reviewBody.replace(/'/g, "''")}',
-          '${conditionsNote.replace(/'/g, "''")}'
-          ${riddenAt ? `, '${riddenAt}'` : ''})
-      `))
+      await db.execute(sql`
+        INSERT INTO route_reviews (id, route_id, user_id, rating, body, conditions_note, ridden_at)
+        VALUES (gen_random_uuid(), ${routeId}, ${userId}, ${rating}, ${reviewBody}, ${conditionsNote}, ${riddenAt}::timestamp)
+      `)
     }
 
-    // Update avg_rating + review_count on route
-    await db.execute(sql.raw(`
+    await db.execute(sql`
       UPDATE routes SET
-        avg_rating   = (SELECT ROUND(AVG(rating)::numeric, 2) FROM route_reviews WHERE route_id = '${routeId}'),
-        review_count = (SELECT COUNT(*) FROM route_reviews WHERE route_id = '${routeId}')
-      WHERE id = '${routeId}'
-    `))
+        avg_rating   = (SELECT ROUND(AVG(rating)::numeric, 2) FROM route_reviews WHERE route_id = ${routeId}),
+        review_count = (SELECT COUNT(*) FROM route_reviews WHERE route_id = ${routeId})
+      WHERE id = ${routeId}
+    `)
 
-    // Return the review with user info
-    const newReview = await db.execute(sql.raw(`
+    const newReview = await db.execute(sql`
       SELECT rr.id, rr.rating, rr.body, rr.conditions_note, rr.ridden_at, rr.created_at,
              u.name as user_name, u.avatar_url
       FROM route_reviews rr JOIN users u ON u.id = rr.user_id
-      WHERE rr.route_id = '${routeId}' AND rr.user_id = '${userId}'
+      WHERE rr.route_id = ${routeId} AND rr.user_id = ${userId}
       LIMIT 1
-    `))
-    return NextResponse.json({ review: (newReview.rows as any[])[0] })
-  } catch (e: any) {
-    console.error('Review POST error:', e.message)
+    `)
+    return NextResponse.json({ review: (newReview.rows as unknown[])[0] })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    console.error('Review POST error:', msg)
     return NextResponse.json({ error: 'Failed to save review' }, { status: 500 })
   }
 }
