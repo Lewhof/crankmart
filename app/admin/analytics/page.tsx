@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { PageHeader } from '@/components/admin/primitives'
 
 interface Stats {
   pageViews: { total: number; prev: number; change: number | null }
@@ -161,23 +162,22 @@ export default function AnalyticsPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px' }}>Analytics</h1>
-          <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>Traffic, visitor, and listing performance data</p>
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {[7, 30, 90].map(d => (
-            <button key={d} onClick={() => setDays(d)} style={{
-              padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              border: '1.5px solid', borderColor: days === d ? 'var(--admin-text)' : 'var(--admin-border)',
-              background: days === d ? 'var(--admin-text)' : 'var(--admin-surface)',
-              color: days === d ? 'var(--admin-surface)' : 'var(--admin-text)',
-            }}>{d}d</button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Analytics"
+        subtitle="Traffic, visitor, and listing performance data"
+        actions={
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[7, 30, 90].map(d => (
+              <button key={d} onClick={() => setDays(d)} style={{
+                padding: '7px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                border: '1.5px solid', borderColor: days === d ? 'var(--admin-text)' : 'var(--admin-border)',
+                background: days === d ? 'var(--admin-text)' : 'var(--admin-surface)',
+                color: days === d ? 'var(--admin-surface)' : 'var(--admin-text)',
+              }}>{d}d</button>
+            ))}
+          </div>
+        }
+      />
 
       {/* KPI row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>

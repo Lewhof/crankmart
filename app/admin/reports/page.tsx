@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { PageHeader } from '@/components/admin/primitives'
 
 interface ReportData {
   listingsByStatus: Array<{ status: string; count: string }>
@@ -195,27 +196,26 @@ export default function ReportsPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--admin-text)', margin: '0 0 4px' }}>Reports</h1>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--admin-text-dim)' }}>Business intelligence and marketplace trends</p>
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {[7, 30, 90].map(d => (
-            <button key={d} onClick={() => setDays(d)}
-              style={{
-                padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                border: '1px solid',
-                borderColor: days === d ? 'var(--admin-accent)' : 'var(--admin-border)',
-                background: days === d ? 'color-mix(in oklch, var(--admin-accent) 20%, transparent)' : 'var(--admin-surface-2)',
-                color: days === d ? 'var(--admin-accent)' : 'var(--admin-text)',
-              }}>
-              {d}d
-            </button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Reports"
+        subtitle="Business intelligence and marketplace trends"
+        actions={
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[7, 30, 90].map(d => (
+              <button key={d} onClick={() => setDays(d)}
+                style={{
+                  padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  border: '1px solid',
+                  borderColor: days === d ? 'var(--admin-accent)' : 'var(--admin-border)',
+                  background: days === d ? 'color-mix(in oklch, var(--admin-accent) 20%, transparent)' : 'var(--admin-surface-2)',
+                  color: days === d ? 'var(--admin-accent)' : 'var(--admin-text)',
+                }}>
+                {d}d
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {/* Summary pills */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>

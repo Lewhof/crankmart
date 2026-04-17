@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { PageHeader, Card } from '@/components/admin/primitives'
 
 interface Settings {
   [key: string]: string
@@ -110,22 +111,14 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px' }}>Settings</h1>
-        <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>Configure email notifications and SMTP settings for CrankMart</p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <PageHeader
+        title="Settings"
+        subtitle="Configure email notifications and SMTP settings for CrankMart"
+      />
 
-      {/* Settings Card */}
-      <div
-        style={{
-          backgroundColor: 'var(--admin-surface)',
-          border: '1px solid #ebebeb',
-          borderRadius: '12px',
-          padding: '32px',
-          marginBottom: '24px',
-        }}
-      >
+      <Card padded={false}>
+        <div style={{ padding: 32 }}>
         {message && (
           <div
             style={{
@@ -515,7 +508,8 @@ export default function AdminSettingsPage() {
             {testLoading ? 'Sending...' : 'Send Test'}
           </button>
         </form>
-      </div>
+        </div>
+      </Card>
     </div>
   )
 }

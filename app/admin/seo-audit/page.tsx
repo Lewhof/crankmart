@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { PageHeader, Button } from '@/components/admin/primitives'
 
 type CheckStatus = 'pass' | 'fail' | 'warn' | 'manual' | 'pending'
 type CheckCategory = 'content' | 'technical_seo' | 'geo' | 'marketing'
@@ -114,37 +115,20 @@ export default function SeoAuditPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px' }}>SEO &amp; GEO Audit</h1>
-          <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>{ranAt ? `Last run: ${formatTime(ranAt)}` : 'Audit has not been run yet'}</p>
-        </div>
-        <button
-          onClick={() => fetchAudit(true)}
-          disabled={deepLoading}
-          style={{
-            background: deepLoading ? '#aaa' : '#CC1F2D',
-            color: 'var(--admin-surface)',
-            border: 'none',
-            borderRadius: 8,
-            padding: '10px 20px',
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: deepLoading ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          {deepLoading ? (
-            <>
-              <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'var(--admin-surface)', borderRadius: '50%', display: 'inline-block', animation: 'spin .8s linear infinite' }} />
-              Running…
-            </>
-          ) : '▶ Run Full Audit'}
-        </button>
-      </div>
+      <PageHeader
+        title="SEO & GEO Audit"
+        subtitle={ranAt ? `Last run: ${formatTime(ranAt)}` : 'Audit has not been run yet'}
+        actions={
+          <Button variant="primary" onClick={() => fetchAudit(true)} disabled={deepLoading}>
+            {deepLoading ? (
+              <>
+                <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'var(--admin-surface)', borderRadius: '50%', display: 'inline-block', animation: 'spin .8s linear infinite' }} />
+                Running…
+              </>
+            ) : '▶ Run Full Audit'}
+          </Button>
+        }
+      />
 
       {error && (
         <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '12px 16px', marginBottom: 16, color: '#dc2626', fontSize: 14 }}>

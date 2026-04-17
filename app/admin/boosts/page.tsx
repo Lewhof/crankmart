@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Plus, Edit2, ToggleLeft, ToggleRight, Zap } from 'lucide-react'
+import { PageHeader } from '@/components/admin/primitives'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Boost {
@@ -349,24 +350,20 @@ export default function BoostsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Zap size={20} style={{ color: '#F59E0B' }} /> Boosts
-          </h1>
-          <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>Manage boost transactions and pricing packages</p>
-        </div>
-        {/* View switcher */}
-        <div style={{ display: 'flex', background: 'var(--admin-surface-2)', borderRadius: 8, padding: 3 }}>
-          {[{ id: 'boosts', label: 'Transactions' }, { id: 'packages', label: 'Packages' }].map(v => (
-            <button key={v.id} onClick={() => setView(v.id as 'boosts' | 'packages')}
-              style={{ padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: view === v.id ? 'var(--admin-surface)' : 'transparent', color: view === v.id ? 'var(--admin-text)' : 'var(--admin-text-dim)', boxShadow: view === v.id ? '0 1px 3px rgba(0,0,0,.1)' : 'none', transition: 'all .12s' }}>
-              {v.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Boosts"
+        subtitle="Manage boost transactions and pricing packages"
+        actions={
+          <div style={{ display: 'flex', background: 'var(--admin-surface-2)', borderRadius: 8, padding: 3 }}>
+            {[{ id: 'boosts', label: 'Transactions' }, { id: 'packages', label: 'Packages' }].map(v => (
+              <button key={v.id} onClick={() => setView(v.id as 'boosts' | 'packages')}
+                style={{ padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: view === v.id ? 'var(--admin-surface)' : 'transparent', color: view === v.id ? 'var(--admin-text)' : 'var(--admin-text-dim)', boxShadow: view === v.id ? '0 1px 3px rgba(0,0,0,.1)' : 'none', transition: 'all .12s' }}>
+                {v.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {view === 'boosts'    && <BoostsTab />}
       {view === 'packages'  && <PackagesTab />}
