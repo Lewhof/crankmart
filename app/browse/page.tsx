@@ -684,7 +684,7 @@ function BrowseContent() {
               : items.map(item => {
                   const cond = COND_MAP[item.condition]
                   return (
-                    <Link key={item.id} href={`/browse/${item.slug}`} prefetch={null} className="lcard">
+                    <Link key={item.id} href={`/browse/${item.slug}`} prefetch={false} className="lcard">
                       <div className={`lcard-img${item.status === 'sold' ? ' sold' : ''}`}>
                         {item.image?.image_url || item.image?.imageUrl
                           ? <Image src={item.image.image_url || item.image.imageUrl!} alt={item.title} fill unoptimized
