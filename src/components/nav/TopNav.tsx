@@ -114,8 +114,8 @@ export function TopNav() {
 
           {/* Right actions — pushed to far right on mobile too */}
           <div style={{ display:'flex',alignItems:'center',gap:6,flexShrink:0,marginLeft:'auto' }}>
-            {/* Admin settings icon */}
-            {session?.user && (session.user as any).role === 'admin' && (
+            {/* Admin settings icon — visible to admin + superadmin */}
+            {session?.user && ['admin', 'superadmin'].includes((session.user as { role?: string }).role ?? '') && (
               <Link href="/admin" title="Admin Settings" style={{
                 display:'flex',alignItems:'center',justifyContent:'center',
                 width:34,height:34,borderRadius:2,
