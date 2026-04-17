@@ -174,13 +174,13 @@ export function TopNav() {
               </div>
             ) : (
               /* Logged-out */
-              <Link href="/login"
+              <Link href="/login" prefetch={false}
                 style={{ fontSize:13,fontWeight:700,color:'#ffffff',textDecoration:'none',padding:'7px 14px',borderRadius:2,border:'1.5px solid rgba(255,255,255,0.25)',background:'transparent',whiteSpace:'nowrap' }}>
                 Login
               </Link>
             )}
 
-            <Link href="/sell/step-1" style={{
+            <Link href="/sell/step-1" prefetch={false} style={{
               background:'var(--color-primary)',color:'white',fontWeight:700,
               padding:'7px 12px',borderRadius:2,textDecoration:'none',
               fontSize:13,whiteSpace:'nowrap',flexShrink:0,

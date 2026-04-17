@@ -2,8 +2,11 @@ import * as Sentry from '@sentry/nextjs'
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  tracesSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
+  // Pre-launch: error capture only — no perf traces, no replay recording.
+  // Replays kept an always-armed DOM recorder that cost hundreds of KB of JS
+  // and 2-3 /monitoring POSTs per pageview. Turn on at launch if needed.
+  tracesSampleRate: 0,
+  replaysOnErrorSampleRate: 0,
   replaysSessionSampleRate: 0,
   sendDefaultPii: false,
   beforeSend(event) {
@@ -17,9 +20,7 @@ Sentry.init({
     }
     return event
   },
-  integrations: [
-    Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
-  ],
+  // No replayIntegration — that SDK stays loaded even at 0 sample rate.
   environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV,
   enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 })

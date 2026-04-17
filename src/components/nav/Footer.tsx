@@ -146,7 +146,7 @@ export function Footer() {
               <div className="cm-footer-col-title">{col.title}</div>
               <nav>
                 {col.links.map(({ href, label }) => (
-                  <Link key={label} href={href} className="cm-footer-link">
+                  <Link key={label} href={href} prefetch={false} className="cm-footer-link">
                     {label}
                   </Link>
                 ))}
@@ -166,7 +166,7 @@ export function Footer() {
               { href: '/terms',   label: 'Terms'   },
               { href: '/privacy', label: 'POPIA'   },
             ].map(({ href, label }) => (
-              <Link key={label} href={href} className="cm-footer-legal-link">
+              <Link key={label} href={href} prefetch={false} className="cm-footer-legal-link">
                 {label}
               </Link>
             ))}
