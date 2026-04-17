@@ -1,28 +1,14 @@
-import * as Sentry from '@sentry/nextjs'
+// Client-side Sentry disabled pre-launch — the @sentry/nextjs SDK
+// forces ~290 KB of tracing code into every page's root bundle even
+// with tracesSampleRate: 0, which was showing up as 2-3 seconds of
+// script-download time on real-world connections.
+//
+// Server-side Sentry via instrumentation.ts still catches route / API
+// errors and unhandled rejections inside server components, so we keep
+// the most valuable half of B7 in place. Re-enable client capture once
+// we have real users and the bandwidth cost is worth the browser-side
+// debugging signal.
 
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  // Pre-launch: error capture only — no perf traces, no replay recording.
-  // Replays kept an always-armed DOM recorder that cost hundreds of KB of JS
-  // and 2-3 /monitoring POSTs per pageview. Turn on at launch if needed.
-  tracesSampleRate: 0,
-  replaysOnErrorSampleRate: 0,
-  replaysSessionSampleRate: 0,
-  sendDefaultPii: false,
-  beforeSend(event) {
-    if (event.user) {
-      delete event.user.email
-      delete event.user.ip_address
-    }
-    if (event.request?.headers) {
-      delete event.request.headers.cookie
-      delete event.request.headers.authorization
-    }
-    return event
-  },
-  // No replayIntegration — that SDK stays loaded even at 0 sample rate.
-  environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV,
-  enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
-})
-
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
+// Stub export so Next.js instrumentation hook signature is preserved
+// but the Sentry SDK is not imported into the client bundle.
+export const onRouterTransitionStart = () => {}
