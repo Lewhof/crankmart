@@ -20,6 +20,7 @@ const NAV: NavItem[] = [
   { label: 'Messages',        href: '/admin/messages',         group: 'People', keywords: ['inbox', 'conversations'] },
 
   { label: 'Marketing',       href: '/admin/marketing',        group: 'Commerce' },
+  { label: 'Waitlist',        href: '/admin/waitlist',         group: 'Commerce', keywords: ['signup', 'notify', 'email', 'launch'] },
   { label: 'Boosts',          href: '/admin/boosts',           group: 'Commerce' },
   { label: 'PayFast',         href: '/admin/payfast',          group: 'Commerce', keywords: ['payments'] },
 

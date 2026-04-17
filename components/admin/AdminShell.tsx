@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Package, Users, Calendar, Building2, MessageSquare,
   Flag, Menu, X, Settings, Newspaper, BarChart2, Navigation, Palette,
-  Zap, SearchCheck, ShieldCheck, Mail, CreditCard, Keyboard, Megaphone, ClipboardList,
+  Zap, SearchCheck, ShieldCheck, Mail, CreditCard, Keyboard, Megaphone, ClipboardList, Send,
 } from 'lucide-react'
 import { CommandPalette } from './CommandPalette'
 import { CountrySwitcher } from './CountrySwitcher'
@@ -38,6 +38,7 @@ const NAV: NavEntry[] = [
 
   { label: 'Commerce', items: [
     { href: '/admin/marketing', label: 'Marketing', icon: Megaphone,   short: 'm' },
+    { href: '/admin/waitlist',  label: 'Waitlist',  icon: Send },
     { href: '/admin/boosts',    label: 'Boosts',    icon: Zap },
     { href: '/admin/payfast',   label: 'PayFast',   icon: CreditCard },
   ] },
