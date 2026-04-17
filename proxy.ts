@@ -46,6 +46,16 @@ function applyCountryHeader(req: NextRequest): NextResponse {
   return NextResponse.redirect(url, 308)
 }
 
+// Auth-flow pages that must stay reachable to non-admins so registration,
+// email-verify click-throughs, and password recovery keep working.
+const GATE_ALLOWLIST = [
+  '/login',
+  '/register',
+  '/verify',
+  '/forgot-password',
+  '/reset-password',
+]
+
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
@@ -54,6 +64,11 @@ export async function proxy(req: NextRequest) {
 
   // Root is the Coming Soon page itself.
   if (pathname === '/') return applyCountryHeader(req)
+
+  // Auth flow pages remain public so register / verify / reset work.
+  if (GATE_ALLOWLIST.some(p => pathname === p || pathname.startsWith(p + '/'))) {
+    return applyCountryHeader(req)
+  }
 
   // Everything else is gated behind admin role.
   const session = await auth()

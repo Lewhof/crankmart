@@ -6,6 +6,7 @@ import { sql, eq, and } from 'drizzle-orm'
 import { sendEmail, newMessageEmail } from '@/lib/email'
 import { getCountry } from '@/lib/country'
 import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
+import { isEmailVerified } from '@/lib/email-verify'
 
 const StartMessageSchema = z.object({
   listingId: z.string().uuid('Invalid listing ID'),
@@ -35,6 +36,13 @@ export async function POST(request: NextRequest) {
   const rl = await check(limiters.messagesStart, clientKey(request, `start:${session.user.id}`))
   if (!rl.ok) {
     return NextResponse.json({ error: 'Too many messages. Slow down.' }, { status: 429, headers: rateLimitHeaders(rl) })
+  }
+
+  if (!(await isEmailVerified(session.user.id))) {
+    return NextResponse.json(
+      { error: 'Please verify your email before messaging sellers.', code: 'email_unverified' },
+      { status: 403 }
+    )
   }
   
   const parsed = StartMessageSchema.safeParse(await request.json())

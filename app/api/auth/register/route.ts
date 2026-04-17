@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
 import { checkPasswordStrength } from '@/lib/password'
+import { issueVerifyToken, sendVerificationEmail } from '@/lib/email-verify'
 
 export async function POST(request: NextRequest) {
   const rl = await check(limiters.authWrite, clientKey(request, 'register'))
@@ -31,15 +32,24 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await bcrypt.hash(password, 12)
 
-    await db.insert(users).values({
+    const [inserted] = await db.insert(users).values({
       name,
       email,
       passwordHash,
       province,
       role: 'buyer',
-    })
+    }).returning({ id: users.id })
 
-    return NextResponse.json({ success: true }, { status: 201 })
+    if (inserted?.id) {
+      try {
+        const token = await issueVerifyToken(inserted.id)
+        await sendVerificationEmail({ to: email, name, token })
+      } catch (mailErr) {
+        console.error('Failed to send verification email (non-fatal):', mailErr)
+      }
+    }
+
+    return NextResponse.json({ success: true, verificationSent: true }, { status: 201 })
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json({ error: 'Registration failed' }, { status: 500 })

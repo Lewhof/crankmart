@@ -8,6 +8,7 @@ import { getCountry } from '@/lib/country'
 import { randomBytes } from 'crypto'
 import { sendEmail, listingPublishedEmail } from '@/lib/email'
 import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
+import { isEmailVerified } from '@/lib/email-verify'
 
 function slugify(text: string): string {
   return text
@@ -38,6 +39,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "You're publishing listings too fast. Try again in a few minutes." },
         { status: 429, headers: rateLimitHeaders(rl) }
+      )
+    }
+
+    if (!(await isEmailVerified(session.user.id))) {
+      return NextResponse.json(
+        { error: 'Please verify your email before publishing a listing.', code: 'email_unverified' },
+        { status: 403 }
       )
     }
 
