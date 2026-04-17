@@ -4,6 +4,7 @@ import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
+import { checkPasswordStrength } from '@/lib/password'
 
 export async function POST(request: NextRequest) {
   const rl = await check(limiters.authWrite, clientKey(request, 'register'))
@@ -18,8 +19,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
     }
 
-    if (password.length < 8) {
-      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
+    const strength = checkPasswordStrength(password, [email, name].filter(Boolean))
+    if (!strength.ok) {
+      return NextResponse.json({ error: strength.message || 'Password too weak.' }, { status: 400 })
     }
 
     const existing = await db.select().from(users).where(eq(users.email, email)).limit(1)
