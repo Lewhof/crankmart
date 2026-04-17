@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { CheckCircle, XCircle, RefreshCw, Eye, EyeOff, ExternalLink, AlertTriangle } from 'lucide-react'
+import { PageHeader, Card, Button } from '@/components/admin/primitives'
 
 interface PayfastConfig {
   merchant_id: string
@@ -124,15 +125,12 @@ export default function PayfastAdminPage() {
   if (loading) return <div style={{ padding: 32, color: 'var(--admin-text-dim)' }}>Loading…</div>
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 720 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720 }}>
 
-      {/* Header */}
-      <div>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px' }}>PayFast</h1>
-        <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>
-          Manage your PayFast merchant credentials and verify your integration.
-        </p>
-      </div>
+      <PageHeader
+        title="PayFast"
+        subtitle="Manage your PayFast merchant credentials and verify your integration."
+      />
 
       {/* Environment toggle */}
       <div style={{ background: config.sandbox ? '#FEF3C7' : '#D1FAE5', border: `1.5px solid ${config.sandbox ? '#F59E0B' : '#34D399'}`, borderRadius: 10, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -163,8 +161,8 @@ export default function PayfastAdminPage() {
         </label>
       </div>
 
-      {/* Credentials */}
-      <div style={{ background: 'var(--admin-surface)', border: '1.5px solid #ebebeb', borderRadius: 12, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <Card>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--admin-text)' }}>Merchant Credentials</div>
 
         {/* Merchant ID */}
@@ -215,22 +213,21 @@ export default function PayfastAdminPage() {
           </div>
         </div>
 
-        {/* Save */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 4 }}>
-          <button onClick={handleSave} disabled={saving} style={{ ...BTN, background: 'var(--admin-text)', color: 'var(--admin-surface)', opacity: saving ? 0.6 : 1 }}>
-            {saving ? <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }}/> : null}
-            {saving ? 'Saving…' : 'Save Credentials'}
-          </button>
+          <Button variant="primary" onClick={handleSave} disabled={saving}>
+            {saving ? <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> Saving…</> : 'Save Credentials'}
+          </Button>
           {saveMsg && (
             <span style={{ fontSize: 13, color: saveMsg.ok ? '#065F46' : '#991B1B', fontWeight: 600 }}>
               {saveMsg.ok ? '✓' : '✗'} {saveMsg.text}
             </span>
           )}
         </div>
-      </div>
+        </div>
+      </Card>
 
-      {/* Verify */}
-      <div style={{ background: 'var(--admin-surface)', border: '1.5px solid #ebebeb', borderRadius: 12, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <Card>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--admin-text)', marginBottom: 4 }}>Merchant Verification</div>
           <div style={{ fontSize: 12, color: 'var(--admin-text-dim)' }}>
@@ -238,13 +235,18 @@ export default function PayfastAdminPage() {
           </div>
         </div>
 
-        <button onClick={handleVerify} disabled={check.status === 'loading' || !config.merchant_id || !config.merchant_key}
-          style={{ ...BTN, background: 'var(--admin-border)', color: 'var(--admin-text)', alignSelf: 'flex-start', opacity: (!config.merchant_id || !config.merchant_key) ? 0.5 : 1 }}>
-          {check.status === 'loading'
-            ? <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }}/> Verifying…</>
-            : <><RefreshCw size={14}/> Verify with PayFast</>
-          }
-        </button>
+        <div style={{ alignSelf: 'flex-start' }}>
+          <Button
+            variant="ghost"
+            onClick={handleVerify}
+            disabled={check.status === 'loading' || !config.merchant_id || !config.merchant_key}
+          >
+            {check.status === 'loading'
+              ? <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> Verifying…</>
+              : <><RefreshCw size={14} /> Verify with PayFast</>
+            }
+          </Button>
+        </div>
 
         {check.status !== 'idle' && check.status !== 'loading' && (
           <div style={{
@@ -268,10 +270,10 @@ export default function PayfastAdminPage() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </Card>
 
-      {/* ITN Endpoint */}
-      <div style={{ background: 'var(--admin-surface)', border: '1.5px solid #ebebeb', borderRadius: 12, padding: '20px 22px' }}>
+      <Card>
         <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--admin-text)', marginBottom: 8 }}>ITN Webhook</div>
         <div style={{ fontSize: 12, color: 'var(--admin-text-dim)', marginBottom: 10 }}>
           This URL must be set in your PayFast merchant account → Settings → Instant Transaction Notification.
@@ -280,12 +282,11 @@ export default function PayfastAdminPage() {
           https://crankmart.com/api/payments/payfast/itn
         </div>
         <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-          <a href={`${host}/eng/account/login`} target="_blank" rel="noreferrer"
-            style={{ ...BTN, background: 'var(--admin-border)', color: 'var(--admin-text)', textDecoration: 'none', fontSize: 12 }}>
-            <ExternalLink size={13}/> Open PayFast{config.sandbox ? ' Sandbox' : ''}
-          </a>
+          <Button variant="ghost" size="sm" href={`${host}/eng/account/login`}>
+            <ExternalLink size={13} /> Open PayFast{config.sandbox ? ' Sandbox' : ''}
+          </Button>
         </div>
-      </div>
+      </Card>
 
       {/* Quick test */}
       <div style={{ background: '#FFFBEB', border: '1.5px solid #FDE68A', borderRadius: 12, padding: '16px 18px' }}>

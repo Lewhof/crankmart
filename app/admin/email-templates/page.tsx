@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Eye, X } from 'lucide-react'
+import { PageHeader, Card, Button } from '@/components/admin/primitives'
 import {
   newMessageEmail,
   listingPublishedEmail,
@@ -181,41 +183,46 @@ export default function EmailTemplatesPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px' }}>Email Templates</h1>
-        <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>{TEMPLATES.length} templates — previewed with sample data</p>
-      </div>
+      <PageHeader
+        title="Email Templates"
+        subtitle={`${TEMPLATES.length} templates — previewed with sample data`}
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
         {TEMPLATES.map(t => (
-          <div key={t.id} style={{ background: 'var(--admin-surface)', border: '1.5px solid #ebebeb', borderRadius: 10, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 4 }}>{t.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--admin-text-dim)', lineHeight: 1.5 }}>{t.trigger}</div>
+          <Card key={t.id}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minHeight: 120 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--admin-text)', marginBottom: 4 }}>{t.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--admin-text-dim)', lineHeight: 1.5 }}>{t.trigger}</div>
+              </div>
+              <div style={{ marginTop: 'auto' }}>
+                <Button variant="ghost" size="sm" onClick={() => setPreview(t)}>
+                  <Eye size={13} /> Preview
+                </Button>
+              </div>
             </div>
-            <button onClick={() => setPreview(t)}
-              style={{ marginTop: 'auto', padding: '8px 14px', background: 'var(--admin-text)', color: 'var(--admin-surface)', border: 'none', borderRadius: 7, cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
-              Preview
-            </button>
-          </div>
+          </Card>
         ))}
       </div>
 
-      {/* Modal */}
       {preview && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}
-          onClick={() => setPreview(null)}>
-          <div style={{ background: 'var(--admin-surface)', borderRadius: 12, width: '100%', maxWidth: 680, maxHeight: '88vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
-            onClick={e => e.stopPropagation()}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #ebebeb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}
+          onClick={() => setPreview(null)}
+        >
+          <div
+            style={{ background: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 12, width: '100%', maxWidth: 680, maxHeight: '88vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--admin-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--admin-text)' }}>{preview.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--admin-text-dim)', marginTop: 2 }}>{preview.trigger}</div>
               </div>
-              <button onClick={() => setPreview(null)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--admin-text-dim)', lineHeight: 1, padding: 4 }}>
-                ×
-              </button>
+              <Button variant="ghost" size="sm" onClick={() => setPreview(null)}>
+                <X size={14} />
+              </Button>
             </div>
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <iframe

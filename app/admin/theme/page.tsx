@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Palette, RotateCcw, Save, Check, Loader2, Eye } from 'lucide-react'
+import { PageHeader, Button } from '@/components/admin/primitives'
 
 // ── Preset concepts ───────────────────────────────────────────────────────
 const PRESETS = [
@@ -188,38 +189,22 @@ export default function AdminThemePage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--admin-text)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Palette size={22} /> Theme &amp; Colours
-          </h1>
-          <p style={{ margin: 0, fontSize: 14, color: 'var(--admin-text-dim)' }}>
-            Customise the colour scheme. Changes go live instantly site-wide on save.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button onClick={togglePreview} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            padding: '8px 14px', borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-            background: previewing ? 'var(--admin-text)' : 'transparent',
-            color: previewing ? 'var(--admin-surface)' : 'var(--admin-text)',
-            border: '1.5px solid #0D1B2A',
-          }}>
-            <Eye size={14} /> {previewing ? 'Preview On' : 'Preview Off'}
-          </button>
-          <button onClick={handleSave} disabled={saving} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            padding: '8px 18px', borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
-            background: saved ? '#10B981' : 'var(--color-primary)',
-            color: 'var(--admin-surface)', border: 'none', opacity: saving ? 0.7 : 1,
-          }}>
-            {saving ? <Loader2 size={14} style={{ animation: 'spin .8s linear infinite' }} /> :
-             saved  ? <Check size={14} /> : <Save size={14} />}
-            {saving ? 'Saving…' : saved ? 'Saved!' : 'Save & Apply'}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Theme & Colours"
+        subtitle="Customise the colour scheme. Changes go live instantly site-wide on save."
+        actions={
+          <>
+            <Button variant={previewing ? 'primary' : 'ghost'} size="sm" onClick={togglePreview}>
+              <Eye size={14} /> {previewing ? 'Preview On' : 'Preview Off'}
+            </Button>
+            <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
+              {saving ? <Loader2 size={14} style={{ animation: 'spin .8s linear infinite' }} /> :
+               saved  ? <Check size={14} /> : <Save size={14} />}
+              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save & Apply'}
+            </Button>
+          </>
+        }
+      />
 
       {error && (
         <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 6, padding: '10px 14px', color: '#DC2626', fontSize: 13, marginBottom: 20 }}>
