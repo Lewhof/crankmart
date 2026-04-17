@@ -223,7 +223,7 @@ export default function DirectoryPage() {
   const totalCount = businesses.length;
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#fafafa", overflowX: "hidden", width: "100%" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "#fafafa", overflowX: "clip", width: "100%" }}>
 
       <style>{`
         * { box-sizing: border-box; }

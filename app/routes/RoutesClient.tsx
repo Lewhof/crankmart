@@ -327,7 +327,7 @@ export default function RoutesClient() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fafafa', overflowX: 'hidden', width: '100%' }}>
+    <div style={{ minHeight: '100vh', background: '#fafafa', overflowX: 'clip', width: '100%' }}>
 
       {/* Hero */}
       <div style={{ background: 'linear-gradient(135deg, #1a2744 0%, #0D1B2A 100%)', padding: '48px 20px 40px', textAlign: 'center' }}>
