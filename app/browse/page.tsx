@@ -388,7 +388,12 @@ function BrowseContent() {
         /* Active chips — only on desktop */
         .chips-row { display:none; }
 
-        .section-hdr { max-width:1280px; margin:0 auto; padding:20px 16px 10px; display:flex; align-items:baseline; justify-content:space-between; }
+        .section-hdr {
+          max-width:1280px; margin:0 auto; padding:16px;
+          display:flex; align-items:center; justify-content:space-between;
+          position:sticky; top:60px; z-index:30;
+          background:#f5f5f5; border-bottom:1px solid #ebebeb;
+        }
         .section-hdr h3 { font-size:18px; font-weight:800; color:#1a1a1a; margin:0; }
         .section-hdr small { font-size:12px; color:#9a9a9a; }
 
@@ -628,36 +633,33 @@ function BrowseContent() {
             <small>Fresh deals from SA cyclists</small>
           </div>
           {hasMore && items.length > 0 && (
-            <div style={{ gridColumn: '1/-1', display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
-              <button
-                onClick={loadMore}
-                disabled={loadingMore}
-                style={{
-                  minWidth: 200,
-                  padding: '12px 28px',
-                  background: loadingMore ? '#e4e4e7' : 'var(--color-primary)',
-                  color: loadingMore ? '#9a9a9a' : '#fff',
-                  border: 'none',
-                  borderRadius: 2,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  cursor: loadingMore ? 'default' : 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                }}
-              >
-                {loadingMore ? (
-                  <>
-                    <div style={{ width: 16, height: 16, border: '2px solid #c4c4c7', borderTopColor: '#0D1B2A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                    Loading…
-                  </>
-                ) : (
-                  <>Show more &nbsp;·&nbsp; {items.length} loaded</>
-                )}
-              </button>
-            </div>
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              style={{
+                padding: '8px 18px',
+                background: loadingMore ? '#e4e4e7' : 'var(--color-primary)',
+                color: loadingMore ? '#9a9a9a' : '#fff',
+                border: 'none',
+                borderRadius: 2,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: loadingMore ? 'default' : 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {loadingMore ? (
+                <>
+                  <div style={{ width: 14, height: 14, border: '2px solid #c4c4c7', borderTopColor: '#0D1B2A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                  Loading…
+                </>
+              ) : (
+                <>Show more · {items.length} loaded</>
+              )}
+            </button>
           )}
           {!hasMore && items.length > 0 && (
             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '24px 0', fontSize: 13, color: '#9a9a9a' }}>
