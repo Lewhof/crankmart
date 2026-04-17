@@ -295,17 +295,9 @@ function BrowseContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingMore, hasMore, category, condition, province, minPrice, maxPrice, attrs, search, allItems])
 
-  // Infinite scroll via IntersectionObserver
-  useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
-    const observer = new IntersectionObserver(
-      entries => { if (entries[0].isIntersecting) loadMore() },
-      { rootMargin: '200px' }
-    )
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [loadMore])
+  // Show-more pattern: user clicks to reveal the next batch instead of
+  // auto-loading on scroll — removes the bouncing-content-below-the-fold
+  // effect as new batches append mid-scroll.
 
   // Back to top FAB — show after scrolling 400px
   useEffect(() => {
@@ -411,12 +403,13 @@ function BrowseContent() {
         .lcard:hover { box-shadow:0 6px 20px rgba(0,0,0,.10); transform:translateY(-1px); }
         .lcard-img { position:relative; width:100%; aspect-ratio:4/3; background:#f0f0f0; overflow:hidden; flex-shrink:0; }
         .lcard-img.sold::after { content:'SOLD'; position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,.75); color:#fff; font-size:14px; font-weight:800; text-align:center; padding:8px 0; }
-        .lcard-body { padding:10px 10px 12px; display:flex; flex-direction:column; flex:1; }
-        .lcard-make { font-size:10px; color:#9a9a9a; font-weight:700; text-transform:uppercase; letter-spacing:.6px; margin-bottom:2px; }
-        .lcard-title { font-size:13px; font-weight:700; color:#1a1a1a; line-height:1.3; margin-bottom:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-        .lcard-meta { display:flex; align-items:center; gap:5px; font-size:11px; color:#9a9a9a; margin-bottom:6px; flex-wrap:wrap; }
+        /* Fixed-height inner slots stop cards from jumping as titles wrap or make/year are absent. */
+        .lcard-body { padding:10px 10px 12px; display:flex; flex-direction:column; flex:1; min-height:130px; }
+        .lcard-make { font-size:10px; color:#9a9a9a; font-weight:700; text-transform:uppercase; letter-spacing:.6px; margin-bottom:2px; min-height:1.2em; }
+        .lcard-title { font-size:13px; font-weight:700; color:#1a1a1a; line-height:1.3; margin-bottom:5px; min-height:2.6em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .lcard-meta { display:flex; align-items:center; gap:5px; font-size:11px; color:#9a9a9a; margin-bottom:6px; flex-wrap:wrap; min-height:1.4em; }
         .lcard-price { font-size:15px; font-weight:800; color:#1a1a1a; margin-top:auto; }
-        .lcard-loc { display:flex; align-items:center; gap:3px; font-size:11px; color:#9a9a9a; margin-top:3px; }
+        .lcard-loc { display:flex; align-items:center; gap:3px; font-size:11px; color:#9a9a9a; margin-top:3px; min-height:1.4em; }
 
         /* Filter drawer */
         .foverlay { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:200; opacity:0; pointer-events:none; transition:opacity .2s; }
@@ -634,15 +627,36 @@ function BrowseContent() {
             <h3>{category === 'all' ? 'Latest Listings' : catLabel}</h3>
             <small>Fresh deals from SA cyclists</small>
           </div>
-          {/* Infinite scroll sentinel */}
-          {hasMore && (
-            <div ref={sentinelRef} style={{ gridColumn: '1/-1', display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
-              {loadingMore && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#9a9a9a' }}>
-                  <div style={{ width: 18, height: 18, border: '2px solid #e4e4e7', borderTopColor: '#0D1B2A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                  Loading more…
-                </div>
-              )}
+          {hasMore && items.length > 0 && (
+            <div style={{ gridColumn: '1/-1', display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                style={{
+                  minWidth: 200,
+                  padding: '12px 28px',
+                  background: loadingMore ? '#e4e4e7' : 'var(--color-primary)',
+                  color: loadingMore ? '#9a9a9a' : '#fff',
+                  border: 'none',
+                  borderRadius: 2,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  cursor: loadingMore ? 'default' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                }}
+              >
+                {loadingMore ? (
+                  <>
+                    <div style={{ width: 16, height: 16, border: '2px solid #c4c4c7', borderTopColor: '#0D1B2A', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                    Loading…
+                  </>
+                ) : (
+                  <>Show more &nbsp;·&nbsp; {items.length} loaded</>
+                )}
+              </button>
             </div>
           )}
           {!hasMore && items.length > 0 && (
@@ -705,7 +719,7 @@ function BrowseContent() {
                         </div>
                       </div>
                       <div className="lcard-body">
-                        {item.bikeMake && <p className="lcard-make">{item.bikeMake}</p>}
+                        <p className="lcard-make">{item.bikeMake || '\u00a0'}</p>
                         <p className="lcard-title">{item.bikeModel ?? item.title}</p>
                         <div className="lcard-meta">
                           {item.bikeYear && <span>{item.bikeYear}</span>}
