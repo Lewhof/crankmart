@@ -27,6 +27,15 @@ function applyCountryHeader(req: NextRequest): NextResponse {
   const mode = (process.env.COUNTRY_ROUTING_MODE || 'implicit-za') as 'implicit-za' | 'prefixed'
   const { pathname, search } = req.nextUrl
 
+  // API routes never get the country prefix — they resolve to DEFAULT_COUNTRY
+  // and let route handlers read `x-country` for scoping. Prefix-redirecting
+  // /api/* would break every client API call in prefixed mode.
+  if (pathname.startsWith('/api/')) {
+    const res = NextResponse.next()
+    res.headers.set('x-country', DEFAULT_COUNTRY)
+    return res
+  }
+
   if (mode === 'implicit-za') {
     const res = NextResponse.next()
     res.headers.set('x-country', DEFAULT_COUNTRY)
