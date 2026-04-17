@@ -10,9 +10,16 @@ import './globals.css'
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#0D1B2A',
 }
 
 export const metadata: Metadata = {
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    title: 'CrankMart',
+    statusBarStyle: 'black-translucent',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '48x48' },

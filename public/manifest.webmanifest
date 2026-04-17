@@ -1,0 +1,57 @@
+{
+  "name": "CrankMart",
+  "short_name": "CrankMart",
+  "description": "South Africa's cycling marketplace. Buy and sell bikes, gear, and parts. Discover routes, events, and shops.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0D1B2A",
+  "background_color": "#0a0f1e",
+  "lang": "en-ZA",
+  "dir": "ltr",
+  "categories": ["shopping", "sports", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse",
+      "short_name": "Browse",
+      "description": "Browse bikes, gear, and parts for sale",
+      "url": "/browse",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Sell a bike",
+      "short_name": "Sell",
+      "description": "List your bike for free",
+      "url": "/sell/step-1",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My account",
+      "short_name": "Account",
+      "description": "Your listings, messages, saved items",
+      "url": "/account",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
