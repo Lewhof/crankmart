@@ -52,13 +52,22 @@ const CATEGORIES = [
   { label: 'Gear',        slug: 'gear-apparel',   img: '/images/10-bike-helmet-gear.jpg' },
 ]
 
-export default function HomePageFull() {
+interface HomePageFullProps {
+  initial?: {
+    featured?: FeaturedListing[]
+    events?: Event[]
+    shops?: Shop[]
+    newsArticles?: NewsArticle[]
+  }
+}
+
+export default function HomePageFull({ initial }: HomePageFullProps = {}) {
   const router = useRouter()
   const [search, setSearch] = useState('')
-  const [featured, setFeatured] = useState<FeaturedListing[]>([])
-  const [events, setEvents] = useState<Event[]>([])
-  const [shops, setShops] = useState<Shop[]>([])
-  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([])
+  const [featured]     = useState<FeaturedListing[]>(initial?.featured     ?? [])
+  const [events]       = useState<Event[]>(          initial?.events       ?? [])
+  const [shops]        = useState<Shop[]>(           initial?.shops        ?? [])
+  const [newsArticles] = useState<NewsArticle[]>(    initial?.newsArticles ?? [])
   const [slideIdx, setSlideIdx] = useState(0)
   const [catExpanded, setCatExpanded] = useState(false)
 
@@ -74,37 +83,8 @@ export default function HomePageFull() {
     return () => clearInterval(t)
   }, [])
 
-  // Fetch featured listings, events and shops in parallel
-  useEffect(() => {
-    fetch('/api/listings?limit=6')
-      .then(r => r.json())
-      .then(d => setFeatured(Array.isArray(d) ? d : []))
-      .catch(() => {})
-
-    fetch('/api/events?limit=3&upcoming=true')
-      .then(r => r.json())
-      .then(d => setEvents(Array.isArray(d) ? d : []))
-      .catch(() => {})
-
-    fetch('/api/directory?limit=4&featured=true')
-      .then(r => r.json())
-      .then(d => setShops(Array.isArray(d?.data) ? d.data : []))
-      .catch(() => {})
-
-    fetch('/api/news?limit=3&featured=true')
-      .then(r => r.json())
-      .then(d => {
-        const arts = d.articles || []
-        // If no featured, fall back to latest 3
-        if (arts.length === 0) {
-          return fetch('/api/news?limit=3')
-            .then(r => r.json())
-            .then(d2 => setNewsArticles(d2.articles || []))
-        }
-        setNewsArticles(arts)
-      })
-      .catch(() => {})
-  }, [])
+  // Data for listings/events/shops/news is seeded by the server wrapper
+  // via the `initial` prop — no client-side waterfall on mount.
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
