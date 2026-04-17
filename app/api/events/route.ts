@@ -48,7 +48,12 @@ export async function GET(request: NextRequest) {
       LIMIT ${limit} OFFSET ${offset}
     `)
 
-    return NextResponse.json(events.rows ?? events)
+    return NextResponse.json(events.rows ?? events, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'Vary': 'Cookie, Accept-Encoding',
+      },
+    })
   } catch (e: any) {
     console.error('Events API error:', e.message)
     return NextResponse.json({ error: 'Failed' }, { status: 500 })

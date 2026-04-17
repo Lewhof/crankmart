@@ -58,13 +58,6 @@ export async function GET(request: NextRequest) {
 
     const whereSql = buildWhere(conditions);
 
-    // Count
-    const countResult = await db.execute(
-      sql`SELECT COUNT(*) AS count FROM businesses ${whereSql}`
-    );
-    const total = parseInt((countResult.rows[0] as any)?.count ?? "0", 10);
-
-    // Data
     const distSelectSql = hasProximity
       ? sql`, (6371 * acos(LEAST(1.0, cos(radians(${userLat})) * cos(radians(location_lat::float)) * cos(radians(location_lng::float) - radians(${userLng})) + sin(radians(${userLat})) * sin(radians(location_lat::float))))) AS distance_from_user`
       : sql``;
@@ -72,19 +65,24 @@ export async function GET(request: NextRequest) {
       ? sql`ORDER BY distance_from_user ASC`
       : sql`ORDER BY is_premium DESC, verified DESC, name ASC`;
 
-    const dataResult = await db.execute(
-      sql`
-        SELECT
-          id, name, slug, business_type, province, city,
-          logo_url, banner_url, description, website, email, phone, whatsapp,
-          brands_stocked, services, verified, is_premium, views_count,
-          location_lat, location_lng${distSelectSql}
-        FROM businesses
-        ${whereSql}
-        ${orderBySql}
-        LIMIT ${limit} OFFSET ${offset}
-      `
-    );
+    // Count + data in parallel — saves one fra1 -> Neon roundtrip per request.
+    const [countResult, dataResult] = await Promise.all([
+      db.execute(sql`SELECT COUNT(*) AS count FROM businesses ${whereSql}`),
+      db.execute(
+        sql`
+          SELECT
+            id, name, slug, business_type, province, city,
+            logo_url, banner_url, description, website, email, phone, whatsapp,
+            brands_stocked, services, verified, is_premium, views_count,
+            location_lat, location_lng${distSelectSql}
+          FROM businesses
+          ${whereSql}
+          ${orderBySql}
+          LIMIT ${limit} OFFSET ${offset}
+        `
+      ),
+    ]);
+    const total = parseInt((countResult.rows[0] as any)?.count ?? "0", 10);
 
     const businesses = dataResult.rows.map((row: any) => ({
       id:          row.id,
@@ -110,16 +108,24 @@ export async function GET(request: NextRequest) {
       distance_from_user: row.distance_from_user ? parseFloat(row.distance_from_user) : null,
     }));
 
-    return NextResponse.json({
-      success: true,
-      data: businesses,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit),
+    return NextResponse.json(
+      {
+        success: true,
+        data: businesses,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages: Math.ceil(total / limit),
+        },
       },
-    });
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          'Vary': 'Cookie, Accept-Encoding',
+        },
+      }
+    );
   } catch (error) {
     console.error("Directory API error:", error);
     return NextResponse.json(

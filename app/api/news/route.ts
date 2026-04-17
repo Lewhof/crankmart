@@ -17,22 +17,31 @@ export async function GET(request: NextRequest) {
       : sql``
     const featuredFilter = featured === 'true' ? sql` AND is_featured = true` : sql``
 
-    const result = await db.execute(sql`
-      SELECT id, title, slug, excerpt, cover_image_url, category, tags,
-             author_name, is_featured, views_count, published_at, created_at
-      FROM news_articles
-      WHERE status = 'approved' AND country = ${country}${categoryFilter}${featuredFilter}
-      ORDER BY is_featured DESC, published_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `)
-
-    const countResult = await db.execute(sql`SELECT COUNT(*) as total FROM news_articles WHERE status = 'approved' AND country = ${country}${categoryFilter}${featuredFilter}`)
+    const [result, countResult] = await Promise.all([
+      db.execute(sql`
+        SELECT id, title, slug, excerpt, cover_image_url, category, tags,
+               author_name, is_featured, views_count, published_at, created_at
+        FROM news_articles
+        WHERE status = 'approved' AND country = ${country}${categoryFilter}${featuredFilter}
+        ORDER BY is_featured DESC, published_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `),
+      db.execute(sql`SELECT COUNT(*) as total FROM news_articles WHERE status = 'approved' AND country = ${country}${categoryFilter}${featuredFilter}`),
+    ])
     const total = parseInt((countResult.rows?.[0] as any)?.total || '0')
 
-    return NextResponse.json({
-      articles: result.rows ?? result,
-      pagination: { total, limit, offset, hasMore: offset + limit < total }
-    })
+    return NextResponse.json(
+      {
+        articles: result.rows ?? result,
+        pagination: { total, limit, offset, hasMore: offset + limit < total },
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          'Vary': 'Cookie, Accept-Encoding',
+        },
+      }
+    )
   } catch (error) {
     console.error('News fetch error:', error)
     return NextResponse.json({ articles: [], pagination: { total: 0, limit: 12, offset: 0, hasMore: false } })
