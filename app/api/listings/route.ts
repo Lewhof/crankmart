@@ -112,39 +112,54 @@ export async function GET(request: NextRequest) {
       } catch { /* invalid JSON — ignore */ }
     }
 
-    const items = await db.select().from(listings)
+    // Run main listing fetch and first-image lookup in parallel to save a
+    // Vercel → Neon roundtrip. Both hit the same index; the image subquery
+    // recomputes the top-N set but it's indexed and cheap.
+    const mainQuery = db.select().from(listings)
       .where(and(...conditions))
       .orderBy(...orderBy)
       .limit(limit).offset(offset)
 
-    // Single JOIN query instead of N+1 per listing
-    const listingIds = items.map(i => i.id)
-    let imageMap: Record<string, any> = {}
-    if (listingIds.length > 0) {
-      // Use raw SQL with tagged template for DISTINCT ON to avoid Drizzle inArray uuid[] cast issue
-      const idList = sql.join(listingIds.map(id => sql`${id}::uuid`), sql`, `)
-      const imgResult = await db.execute(
-        sql`SELECT DISTINCT ON (listing_id) listing_id, image_url, thumb_url, display_order
-            FROM listing_images
-            WHERE listing_id IN (${idList})
-            ORDER BY listing_id, display_order ASC`
+    const whereCombined = and(...conditions) as SQL
+    const orderByCombined = sql.join(orderBy as SQL[], sql`, `)
+    const imgQuery = db.execute(sql`
+      SELECT DISTINCT ON (li.listing_id) li.listing_id, li.image_url, li.thumb_url, li.display_order
+      FROM listing_images li
+      WHERE li.listing_id IN (
+        SELECT id FROM ${listings}
+        WHERE ${whereCombined}
+        ORDER BY ${orderByCombined}
+        LIMIT ${limit} OFFSET ${offset}
       )
-      imgResult.rows.forEach((r: any) => {
-        imageMap[r.listing_id] = {
-          listing_id:    r.listing_id,
-          image_url:     r.image_url,
-          thumb_url:     r.thumb_url,
-          display_order: r.display_order,
-        }
-      })
-    }
+      ORDER BY li.listing_id, li.display_order ASC
+    `)
+
+    const [items, imgResult] = await Promise.all([mainQuery, imgQuery])
+
+    const imageMap: Record<string, unknown> = {}
+    ;(imgResult.rows ?? []).forEach((r: Record<string, unknown>) => {
+      const listingId = String(r.listing_id)
+      imageMap[listingId] = {
+        listing_id:    r.listing_id,
+        image_url:     r.image_url,
+        thumb_url:     r.thumb_url,
+        display_order: r.display_order,
+      }
+    })
 
     const itemsWithImages = items.map(item => ({
       ...item,
       image: imageMap[item.id] ?? null
     }))
 
-    return NextResponse.json(itemsWithImages)
+    return NextResponse.json(itemsWithImages, {
+      headers: {
+        // Edge-cache at Vercel for 60s; tolerate stale while revalidating.
+        // Auth/country-specific variants are handled by the Vary header.
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'Vary': 'Cookie, Accept-Encoding',
+      },
+    })
   } catch (error) {
     console.error('Listings fetch error:', error)
     return NextResponse.json({ error: 'Failed to fetch listings' }, { status: 500 })
