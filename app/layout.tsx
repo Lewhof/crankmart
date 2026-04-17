@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { ConditionalLayout } from '@/components/nav/ConditionalLayout'
 import Analytics from '@/components/Analytics'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
+import CookieBanner from '@/components/CookieBanner'
 import { SessionProvider } from 'next-auth/react'
 import { getThemeVars, buildThemeCss } from '@/lib/theme'
 import './globals.css'
@@ -131,6 +132,7 @@ export default async function RootLayout({
           <ConditionalLayout>
             {children}
           </ConditionalLayout>
+          <CookieBanner />
         </SessionProvider>
       </body>
     </html>
