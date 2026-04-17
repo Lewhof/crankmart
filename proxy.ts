@@ -57,12 +57,32 @@ function applyCountryHeader(req: NextRequest): NextResponse {
 
 // Auth-flow pages that must stay reachable to non-admins so registration,
 // email-verify click-throughs, and password recovery keep working.
+//
+// TEMPORARY (2026-04-17): widened for Phase 1 E2E smoke test. Revert to the
+// minimal list (login/register/verify/forgot-password/reset-password) the
+// moment the smoke pass is green.
 const GATE_ALLOWLIST = [
   '/login',
   '/register',
   '/verify',
   '/forgot-password',
   '/reset-password',
+  // smoke-test additions — remove these lines after smoke sign-off
+  '/browse',
+  '/sell',
+  '/account',
+  '/events',
+  '/news',
+  '/routes',
+  '/shops',
+  '/directory',
+  '/pricing',
+  '/privacy',
+  '/terms',
+  '/how-to',
+  '/style-guide',
+  '/search',
+  '/seller',
 ]
 
 export async function proxy(req: NextRequest) {
