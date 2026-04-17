@@ -8,8 +8,8 @@
  * read it via `getCountry()` in `src/lib/country.ts`.
  *
  * Also enforces the pre-launch Coming Soon gate: non-admins can only reach
- * `/` (the Coming Soon page) and `/api/*` routes. Everything else redirects
- * to `/`. Admins bypass the gate entirely.
+ * the home page, auth-flow pages, and `/api/*` routes. Everything else
+ * redirects home. Admins and superadmins bypass the gate entirely.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -23,8 +23,26 @@ function isCountry(v: string): v is Country {
   return (ACTIVE_COUNTRIES as readonly string[]).includes(v)
 }
 
+function getMode(): 'implicit-za' | 'prefixed' {
+  return (process.env.COUNTRY_ROUTING_MODE || 'implicit-za') as 'implicit-za' | 'prefixed'
+}
+
+/**
+ * Returns the pathname with an active-country prefix stripped off
+ * (e.g. `/za/browse` → `/browse`, `/za` → `/`). In implicit-za mode
+ * this is a no-op. Used so allow-list / home checks don't need to
+ * special-case every `/za/...` twin.
+ */
+function stripCountry(pathname: string): string {
+  for (const c of ACTIVE_COUNTRIES) {
+    if (pathname === `/${c}`) return '/'
+    if (pathname.startsWith(`/${c}/`)) return pathname.slice(`/${c}`.length)
+  }
+  return pathname
+}
+
 function applyCountryHeader(req: NextRequest): NextResponse {
-  const mode = (process.env.COUNTRY_ROUTING_MODE || 'implicit-za') as 'implicit-za' | 'prefixed'
+  const mode = getMode()
   const { pathname, search } = req.nextUrl
 
   // API routes never get the country prefix — they resolve to DEFAULT_COUNTRY
@@ -69,16 +87,21 @@ const GATE_ALLOWLIST = [
 ]
 
 export async function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl
+  const rawPath = req.nextUrl.pathname
 
   // API routes handle their own auth; let them through the gate.
-  if (pathname.startsWith('/api/')) return applyCountryHeader(req)
+  if (rawPath.startsWith('/api/')) return applyCountryHeader(req)
 
-  // Root is the Coming Soon page itself.
-  if (pathname === '/') return applyCountryHeader(req)
+  // Normalise `/za/x` → `/x` before gate checks so prefixed mode doesn't
+  // re-enter the redirect loop via `/za` ↔ `/` bouncing.
+  const path = stripCountry(rawPath)
 
-  // Auth flow pages remain public so register / verify / reset work.
-  if (GATE_ALLOWLIST.some(p => pathname === p || pathname.startsWith(p + '/'))) {
+  // Root is the Coming Soon page itself — /za in prefixed mode also
+  // resolves to the home via stripCountry().
+  if (path === '/') return applyCountryHeader(req)
+
+  // Auth flow + always-public info pages remain public.
+  if (GATE_ALLOWLIST.some(p => path === p || path.startsWith(p + '/'))) {
     return applyCountryHeader(req)
   }
 
@@ -89,7 +112,9 @@ export async function proxy(req: NextRequest) {
 
   if (!isAdmin) {
     const url = req.nextUrl.clone()
-    url.pathname = '/'
+    // Send them to the home of whatever routing mode is active so we don't
+    // immediately redirect again (/ → /za) in prefixed mode.
+    url.pathname = getMode() === 'prefixed' ? `/${DEFAULT_COUNTRY}` : '/'
     url.search = ''
     return NextResponse.redirect(url, 307)
   }
