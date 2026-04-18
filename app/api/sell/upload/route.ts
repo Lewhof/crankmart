@@ -1,43 +1,44 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { put } from '@vercel/blob'
-import { v4 as uuidv4 } from 'uuid'
-import { extname } from 'path'
+import { NextResponse } from 'next/server'
+import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
 import { auth } from '@/auth'
 
-const MAX_SIZE = 10 * 1024 * 1024 // 10 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
+const MAX_SIZE = 10 * 1024 * 1024 // 10 MB
 
-export async function POST(request: NextRequest) {
+/**
+ * Client-direct upload token endpoint.
+ *
+ * The browser POSTs a HandleUploadBody here. We verify the user is signed
+ * in, then return a short-lived Blob token bound to the requested pathname
+ * + content-type + max size. The browser then uploads the bytes directly
+ * to Vercel Blob — server doesn't proxy the file, saving an extra hop.
+ */
+export async function POST(request: Request) {
+  const body = (await request.json()) as HandleUploadBody
+
   try {
-    const session = await auth()
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-    }
-
-    const formData = await request.formData()
-    const file = formData.get('file') as File | null
-
-    if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
-    if (file.size > MAX_SIZE) return NextResponse.json({ error: 'File too large (max 10MB)' }, { status: 400 })
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Invalid file type. Use JPEG, PNG or WebP.' }, { status: 400 })
-    }
-
-    const ext = extname(file.name) || '.jpg'
-    const filename = `listings/${uuidv4()}${ext}`
-
-    const blob = await put(filename, file, {
-      access: 'public',
-      contentType: file.type,
-      addRandomSuffix: false,
+    const result = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async () => {
+        const session = await auth()
+        if (!session?.user?.id) throw new Error('Unauthorized')
+        return {
+          allowedContentTypes: ALLOWED_TYPES,
+          maximumSizeInBytes: MAX_SIZE,
+          addRandomSuffix: false,
+          tokenPayload: JSON.stringify({ userId: session.user.id }),
+        }
+      },
+      onUploadCompleted: async ({ blob }) => {
+        // Hook for any post-upload bookkeeping. Listings rows are written
+        // by /api/sell/publish later — nothing to do here for now.
+        console.log('Listing upload complete:', blob.url)
+      },
     })
-
-    return NextResponse.json({
-      url: blob.url,
-      filename,
-    })
-  } catch (error) {
-    console.error('Upload error:', error)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    return NextResponse.json(result)
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Upload failed'
+    return NextResponse.json({ error: msg }, { status: 401 })
   }
 }

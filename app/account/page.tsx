@@ -12,6 +12,9 @@ import {
 } from 'lucide-react'
 import MessagesTab from '@/components/account/MessagesTab'
 import SaveButton from '@/components/listings/SaveButton'
+import { upload as blobUpload } from '@vercel/blob/client'
+import imageCompression from 'browser-image-compression'
+import { v4 as avatarUuid } from 'uuid'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -549,20 +552,31 @@ function ProfileTab({ session, onAvatarChange }: { session: ReturnType<typeof us
     if (!file) return
     setUploading(true)
     setMsg(null)
-    const fd = new FormData()
-    fd.append('file', file)
     try {
-      const res = await fetch('/api/account/avatar', { method: 'POST', body: fd })
-      const data = await res.json()
-      if (data.avatarUrl) {
-        setAvatarUrl(data.avatarUrl)
-        onAvatarChange(data.avatarUrl)
-        setMsg({ ok: true, text: 'Profile photo updated!' })
-      } else {
-        setMsg({ ok: false, text: data.error ?? 'Upload failed' })
-      }
-    } catch {
-      setMsg({ ok: false, text: 'Upload failed' })
+      // Compress avatar down hard — display max ~400px so 0.5 MB is plenty.
+      let toUpload: File | Blob = file
+      try {
+        toUpload = await imageCompression(file, {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 800,
+          useWebWorker: true,
+          initialQuality: 0.85,
+          fileType: 'image/jpeg',
+        })
+      } catch { toUpload = file }
+
+      const filename = `avatars/${avatarUuid()}.jpg`
+      const blob = await blobUpload(filename, toUpload, {
+        access: 'public',
+        handleUploadUrl: '/api/account/avatar',
+        contentType: 'image/jpeg',
+      })
+
+      setAvatarUrl(blob.url)
+      onAvatarChange(blob.url)
+      setMsg({ ok: true, text: 'Profile photo updated!' })
+    } catch (err) {
+      setMsg({ ok: false, text: err instanceof Error ? err.message : 'Upload failed' })
     } finally {
       setUploading(false)
       e.target.value = ''

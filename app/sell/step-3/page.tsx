@@ -4,6 +4,9 @@ import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ChevronRight, X, ChevronUp, ChevronDown } from 'lucide-react'
+import { upload } from '@vercel/blob/client'
+import imageCompression from 'browser-image-compression'
+import { v4 as uuidv4 } from 'uuid'
 
 const STEPS = ['Category', 'Details', 'Photos', 'Location & Price']
 
@@ -39,17 +42,45 @@ function Step3Content() {
     localStorage.setItem('crankmart-sell-photos', JSON.stringify(toSave))
   }
 
+  /**
+   * Compress + direct-upload a single file to Vercel Blob.
+   *
+   * Compression runs in a Web Worker so a slow phone doesn't block the
+   * UI. Targets ~1 MB max / 2000 px longest edge / quality 0.85 — drops a
+   * 6 MB phone JPEG to ~400-700 KB with no perceptible quality loss for
+   * marketplace browsing. HEIC files from iOS get auto-converted to JPEG
+   * in the same step (browser-image-compression handles the conversion).
+   *
+   * Then `upload()` (from @vercel/blob/client) hands the file straight
+   * to the Blob CDN using a short-lived token — bytes never touch our
+   * Vercel function, removing the iad1->fra1->iad1 double-hop.
+   */
   const uploadFile = async (file: File) => {
-    const formData = new FormData()
-    formData.append('file', file)
+    let toUpload: File | Blob = file
+    try {
+      toUpload = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 2000,
+        useWebWorker: true,
+        initialQuality: 0.85,
+        fileType: 'image/jpeg',
+      })
+    } catch {
+      // If compression fails (rare — e.g. corrupt image), fall back to
+      // the original. The Blob endpoint still enforces 10 MB.
+      toUpload = file
+    }
 
-    const res = await fetch('/api/sell/upload', {
-      method: 'POST',
-      body: formData,
+    const ext = '.jpg'
+    const filename = `listings/${uuidv4()}${ext}`
+
+    const blob = await upload(filename, toUpload, {
+      access: 'public',
+      handleUploadUrl: '/api/sell/upload',
+      contentType: 'image/jpeg',
     })
 
-    if (!res.ok) throw new Error('Upload failed')
-    return await res.json()
+    return { url: blob.url, filename: blob.pathname }
   }
 
   const handleFileSelect = async (files: FileList | null) => {
