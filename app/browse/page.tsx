@@ -150,54 +150,136 @@ const MEGA_MENU = [
   },
 ]
 
-// Category-specific attribute filters
-const CATEGORY_FILTERS: Record<string, Array<{
-  key: string; label: string; options: string[]
-}>> = {
-  mtb: [
-    { key: 'suspension', label: 'Suspension', options: ['Full Sus', 'Hardtail'] },
-    { key: 'frameSize',  label: 'Frame Size', options: ['XS','S','M','L','XL'] },
-    { key: 'wheelSize',  label: 'Wheel Size', options: ['27.5"','29"'] },
-    { key: 'travel',     label: 'Travel',     options: ['100-120mm','130-150mm','160mm+'] },
-  ],
-  enduro: [
-    { key: 'suspension', label: 'Suspension', options: ['Full Sus'] },
-    { key: 'frameSize',  label: 'Frame Size', options: ['S','M','L','XL'] },
-    { key: 'wheelSize',  label: 'Wheel Size', options: ['27.5"','29"','Mixed'] },
-    { key: 'travel',     label: 'Travel',     options: ['150-160mm','160mm+','170mm+'] },
-  ],
-  'road-bike': [
-    { key: 'frameSize', label: 'Frame Size', options: ['XS','S','M','L','XL'] },
-    { key: 'groupset',  label: 'Groupset',   options: ['Shimano 105','Shimano Ultegra','Shimano Dura-Ace','SRAM Rival','SRAM Force','SRAM Red'] },
-    { key: 'frameType', label: 'Frame Type', options: ['Endurance','Aero','Climbing'] },
-  ],
-  'gravel-bike': [
-    { key: 'frameSize', label: 'Frame Size', options: ['XS','S','M','L','XL'] },
-    { key: 'groupset',  label: 'Groupset',   options: ['Shimano GRX','SRAM Rival AXS','SRAM Force AXS','Campagnolo Ekar'] },
-    { key: 'tyreWidth', label: 'Tyre Width', options: ['35-40mm','40-45mm','45mm+'] },
-  ],
-  helmets: [
-    { key: 'size', label: 'Size', options: ['XS/S','S/M','M/L','L/XL'] },
-    { key: 'type', label: 'Type', options: ['Road','MTB Trail','Enduro','XC'] },
-  ],
-  shoes: [
-    { key: 'size', label: 'Size', options: ['EU40','EU41','EU42','EU43','EU44','EU45','EU46'] },
-    { key: 'type', label: 'Type', options: ['Road','MTB Clipless','MTB Flat','Gravel'] },
-  ],
-  'gear-apparel': [
-    { key: 'size',   label: 'Size',   options: ['XS','S','M','L','XL','XXL'] },
-    { key: 'gender', label: 'Gender', options: ['Mens','Womens','Unisex'] },
-    { key: 'type',   label: 'Type',   options: ['Jersey','Bib Shorts','Jacket','Gilet','Kit'] },
-  ],
-  suspension: [
-    { key: 'type',   label: 'Type',   options: ['Fork','Rear Shock','Fork + Shock'] },
-    { key: 'travel', label: 'Travel', options: ['100mm','120mm','140mm','150mm','160mm','170mm'] },
-  ],
-  'e-bikes': [
-    { key: 'motor',     label: 'Motor',    options: ['Bosch Performance CX','Shimano EP8','Yamaha PW-X3','Specialized SL 1.1'] },
-    { key: 'battery',   label: 'Battery',  options: ['250Wh','320Wh','500Wh','625Wh','750Wh'] },
-    { key: 'frameSize', label: 'Frame Size', options: ['S','M','L','XL'] },
-  ],
+// ── Composable facet building blocks ────────────────────────────────────────
+type Facet = { key: string; label: string; options: string[] }
+
+const FRAME_SIZE_BIKE   : Facet = { key: 'frameSize',     label: 'Frame Size', options: ['XS','S','M','L','XL'] }
+const FRAME_SIZE_BIKE_PLUS_XXS: Facet = { key: 'frameSize', label: 'Frame Size', options: ['XXS','XS','S','M','L','XL'] }
+const FRAME_MATERIAL    : Facet = { key: 'frameMaterial', label: 'Frame Material', options: ['Carbon','Aluminium','Steel','Titanium'] }
+const WHEEL_SIZE_MTB    : Facet = { key: 'wheelSize',     label: 'Wheel Size', options: ['27.5"','29"','Mixed'] }
+const WHEEL_SIZE_KIDS   : Facet = { key: 'wheelSize',     label: 'Wheel Size', options: ['12"','16"','20"','24"','26"'] }
+const SUSPENSION        : Facet = { key: 'suspension',    label: 'Suspension', options: ['Full Sus','Hardtail','Rigid'] }
+const TRAVEL            : Facet = { key: 'travel',        label: 'Travel',     options: ['<120mm','120-140mm','140-160mm','160-180mm','180mm+'] }
+const GROUPSET_ROAD     : Facet = { key: 'groupset',      label: 'Groupset',   options: ['Shimano 105','Shimano Ultegra','Shimano Dura-Ace','SRAM Rival','SRAM Force','SRAM Red','Campagnolo'] }
+const GROUPSET_GRAVEL   : Facet = { key: 'groupset',      label: 'Groupset',   options: ['Shimano GRX','SRAM Rival AXS','SRAM Force AXS','Campagnolo Ekar'] }
+const FRAME_TYPE_ROAD   : Facet = { key: 'frameType',     label: 'Frame Type', options: ['Endurance','Aero','Climbing','All-Round'] }
+const TYRE_WIDTH_GRAVEL : Facet = { key: 'tyreWidth',     label: 'Tyre Width', options: ['35-40mm','40-45mm','45mm+'] }
+const E_MOTOR           : Facet = { key: 'motor',         label: 'Motor',      options: ['Bosch Performance CX','Shimano EP8','Yamaha PW-X3','Specialized SL 1.1','Other'] }
+const E_BATTERY         : Facet = { key: 'battery',       label: 'Battery',    options: ['250Wh','320Wh','500Wh','625Wh','750Wh+'] }
+const APPAREL_SIZE      : Facet = { key: 'size',          label: 'Size',       options: ['XS','S','M','L','XL','XXL'] }
+const APPAREL_GENDER    : Facet = { key: 'gender',        label: 'Gender',     options: ['Mens','Womens','Unisex'] }
+const SHOE_SIZE         : Facet = { key: 'size',          label: 'Size',       options: ['EU38','EU39','EU40','EU41','EU42','EU43','EU44','EU45','EU46','EU47'] }
+const HELMET_SIZE       : Facet = { key: 'size',          label: 'Size',       options: ['XS/S','S/M','M/L','L/XL'] }
+const HELMET_TYPE       : Facet = { key: 'type',          label: 'Type',       options: ['Road','XC','Trail','Enduro','DH/Full-Face','Commuter'] }
+const SHOE_TYPE         : Facet = { key: 'type',          label: 'Type',       options: ['Road','MTB Clipless','MTB Flat','Gravel','Casual'] }
+const GENERIC_TYPE      : Facet = { key: 'type',          label: 'Type',       options: [] /* free-text fallback */ }
+
+// Universal "applies to almost every bike-shape" base
+const BIKE_BASE: Facet[] = [FRAME_SIZE_BIKE, FRAME_MATERIAL]
+
+// Universal apparel base
+const APPAREL_BASE: Facet[] = [APPAREL_SIZE, APPAREL_GENDER]
+
+// Catch-all fallback for parts/accessories that don't have specific facets yet
+const FALLBACK_PARTS: Facet[] = []
+
+// ── Category → facets map (covers all MEGA_MENU slugs) ──────────────────────
+const FACET_SCHEMA: Record<string, Facet[]> = {
+  // — Complete Bikes —
+  mtb:                       [...BIKE_BASE, WHEEL_SIZE_MTB, SUSPENSION, TRAVEL],
+  enduro:                    [...BIKE_BASE, WHEEL_SIZE_MTB, { ...SUSPENSION, options: ['Full Sus'] }, { ...TRAVEL, options: ['150-160mm','160-180mm','180mm+'] }],
+  downhill:                  [...BIKE_BASE, WHEEL_SIZE_MTB, { ...SUSPENSION, options: ['Full Sus'] }, { ...TRAVEL, options: ['180-200mm','200mm+'] }],
+  xc:                        [...BIKE_BASE, WHEEL_SIZE_MTB, SUSPENSION, { ...TRAVEL, options: ['<100mm','100-120mm'] }],
+  'trail-mtb':               [...BIKE_BASE, WHEEL_SIZE_MTB, SUSPENSION, { ...TRAVEL, options: ['120-140mm','140-160mm'] }],
+  'hardtail-mtb':            [...BIKE_BASE, WHEEL_SIZE_MTB, { ...SUSPENSION, options: ['Hardtail','Rigid'] }],
+  'full-suspension-mtb':     [...BIKE_BASE, WHEEL_SIZE_MTB, { ...SUSPENSION, options: ['Full Sus'] }, TRAVEL],
+  'dirt-jump':               [...BIKE_BASE, { ...WHEEL_SIZE_MTB, options: ['26"'] }, { ...SUSPENSION, options: ['Hardtail'] }],
+  bmx:                       [...BIKE_BASE, { ...WHEEL_SIZE_KIDS, options: ['20"','24"'] }],
+  cyclocross:                [...BIKE_BASE, GROUPSET_ROAD],
+  'triathlon-tt':            [...BIKE_BASE, GROUPSET_ROAD],
+  'hybrid-city':             [...BIKE_BASE],
+  'fitness-urban':           [...BIKE_BASE],
+  cruiser:                   [...BIKE_BASE],
+  fixedgear:                 [...BIKE_BASE],
+  folding:                   [FRAME_SIZE_BIKE_PLUS_XXS, FRAME_MATERIAL],
+  'fat-bikes':               [...BIKE_BASE, { ...WHEEL_SIZE_MTB, options: ['26"','27.5"'] }],
+  trials:                    [...BIKE_BASE, { ...WHEEL_SIZE_MTB, options: ['20"','24"','26"'] }],
+  tandem:                    [...BIKE_BASE],
+  vintage:                   [...BIKE_BASE],
+  'road-bike':               [...BIKE_BASE, FRAME_TYPE_ROAD, GROUPSET_ROAD],
+  'gravel-bike':             [...BIKE_BASE, GROUPSET_GRAVEL, TYRE_WIDTH_GRAVEL],
+
+  // — E-Bikes —
+  'e-bikes':                 [...BIKE_BASE, E_MOTOR, E_BATTERY],
+  'e-mtb':                   [...BIKE_BASE, WHEEL_SIZE_MTB, E_MOTOR, E_BATTERY],
+  'e-road-gravel':           [...BIKE_BASE, E_MOTOR, E_BATTERY],
+  'e-urban':                 [...BIKE_BASE, E_MOTOR, E_BATTERY],
+  'e-bike-motors':           [E_MOTOR],
+  'e-bike-batteries':        [E_BATTERY],
+  'e-bike-kits':             [E_MOTOR, E_BATTERY],
+
+  // — Frames —
+  'road-frames':             [FRAME_SIZE_BIKE, FRAME_MATERIAL],
+  'mtb-frames-hardtail':     [FRAME_SIZE_BIKE, FRAME_MATERIAL, WHEEL_SIZE_MTB],
+  'mtb-frames-fullsus':      [FRAME_SIZE_BIKE, FRAME_MATERIAL, WHEEL_SIZE_MTB, TRAVEL],
+  'gravel-frames':           [FRAME_SIZE_BIKE, FRAME_MATERIAL],
+  'hybrid-frames':           [FRAME_SIZE_BIKE, FRAME_MATERIAL],
+  'bmx-frames':              [FRAME_MATERIAL],
+  'e-bike-frames':           [FRAME_SIZE_BIKE, FRAME_MATERIAL],
+  framesets:                 [FRAME_SIZE_BIKE, FRAME_MATERIAL],
+  'vintage-frames':          [FRAME_SIZE_BIKE, FRAME_MATERIAL],
+  'restoration-frames':      [FRAME_SIZE_BIKE, FRAME_MATERIAL],
+
+  // — Parts —
+  suspension:                [{ ...GENERIC_TYPE, options: ['Fork','Rear Shock','Fork + Shock'] }, TRAVEL],
+  'front-forks':             [TRAVEL, { key: 'wheelSize', label: 'Wheel Size', options: ['27.5"','29"','Mixed'] }],
+  'rear-shocks':             [{ key: 'mount', label: 'Mount', options: ['Trunnion','Standard'] }],
+  'wheels-tyres':            FALLBACK_PARTS,
+  tyres:                     [{ key: 'wheelSize', label: 'Wheel Size', options: ['26"','27.5"','29"','700c','650b'] }, { key: 'tyreType', label: 'Type', options: ['MTB','Road','Gravel','Cyclocross'] }],
+  wheelsets:                 [{ key: 'wheelSize', label: 'Wheel Size', options: ['26"','27.5"','29"','700c'] }, { key: 'wheelType', label: 'Type', options: ['Tubeless','Clincher','Tubular','Carbon','Aluminium'] }],
+  drivetrain:                [GROUPSET_ROAD],
+  cassettes:                 [{ key: 'speeds', label: 'Speeds', options: ['8','9','10','11','12','13'] }, { key: 'brand', label: 'Brand', options: ['Shimano','SRAM','Campagnolo'] }],
+  derailleurs:               [{ key: 'speeds', label: 'Speeds', options: ['9','10','11','12','13'] }, { key: 'brand', label: 'Brand', options: ['Shimano','SRAM','Campagnolo'] }],
+  cockpit:                   FALLBACK_PARTS,
+  handlebars:                [{ ...GENERIC_TYPE, options: ['Drop','Flat','Riser','Aero','Bullhorn'] }],
+  pedals:                    [{ ...GENERIC_TYPE, options: ['Clipless Road','Clipless MTB SPD','Flat MTB','Hybrid'] }],
+  'saddles-seatposts':       [{ ...GENERIC_TYPE, options: ['Saddle','Seatpost','Dropper Post'] }],
+  brakes:                    [{ ...GENERIC_TYPE, options: ['Disc Hydraulic','Disc Mechanical','Rim','V-Brake'] }],
+
+  // — Gear & Apparel —
+  'gear-apparel':            [...APPAREL_BASE, { ...GENERIC_TYPE, options: ['Jersey','Bib Shorts','Jacket','Gilet','Kit','Base Layer'] }],
+  helmets:                   [HELMET_SIZE, HELMET_TYPE],
+  shoes:                     [SHOE_SIZE, SHOE_TYPE],
+  jerseys:                   [...APPAREL_BASE],
+  'bib-shorts':              [...APPAREL_BASE],
+  jackets:                   [...APPAREL_BASE],
+  gloves:                    [APPAREL_SIZE, { ...GENERIC_TYPE, options: ['Full Finger','Half Finger','Winter','Summer'] }],
+  'protection-armour':       [APPAREL_SIZE, { ...GENERIC_TYPE, options: ['Knee','Elbow','Back','Chest','Full'] }],
+  'glasses-goggles':         [{ ...GENERIC_TYPE, options: ['Glasses','Goggles'] }],
+  'womens-apparel':          [...APPAREL_BASE, { ...GENERIC_TYPE, options: ['Jersey','Bib Shorts','Jacket','Kit'] }],
+
+  // — Accessories —
+  lights:                    [{ ...GENERIC_TYPE, options: ['Front','Rear','Set','Helmet'] }],
+  'computers-gps':           [{ key: 'brand', label: 'Brand', options: ['Garmin','Wahoo','Hammerhead','Bryton','Other'] }],
+  'bags-backpacks':          [{ ...GENERIC_TYPE, options: ['Hydration Pack','Frame Bag','Saddle Bag','Bar Bag','Backpack'] }],
+  'racks-carriers':          [{ ...GENERIC_TYPE, options: ['Roof Rack','Tow Bar','Hitch','Boot'] }],
+  'trainers-rollers':        [{ ...GENERIC_TYPE, options: ['Smart Direct-Drive','Smart Wheel-On','Dumb','Rollers'] }],
+  'tools-accessories':       FALLBACK_PARTS,
+  nutrition:                 FALLBACK_PARTS,
+  'kids-bikes':              [WHEEL_SIZE_KIDS],
+  services:                  FALLBACK_PARTS,
+  wanted:                    FALLBACK_PARTS,
+  trades:                    FALLBACK_PARTS,
+  other:                     FALLBACK_PARTS,
+}
+
+// Backwards-compat alias — old name still referenced in parts of the file.
+const CATEGORY_FILTERS = FACET_SCHEMA
+
+// Drop attrs whose keys aren't valid for the current category
+function pruneAttrs(attrMap: Record<string,string>, cat: string): Record<string,string> {
+  const allowed = new Set((FACET_SCHEMA[cat] || []).map(f => f.key))
+  return Object.fromEntries(Object.entries(attrMap).filter(([k]) => allowed.has(k)))
 }
 
 const PROVINCES = ['Western Cape','Gauteng','KwaZulu-Natal','Eastern Cape','Free State','Limpopo','North West','Mpumalanga','Northern Cape']
@@ -321,10 +403,18 @@ function BrowseContent() {
   }, [fetchListings, category, condition, province, minPrice, maxPrice, attrs, search])
 
   const selectCategory = (slug: string) => {
+    // Strip attrs that aren't valid for the new category instead of nuking
+    // everything — preserves shared facets like frameSize when moving between
+    // bike-shape categories.
+    const pruned = pruneAttrs(attrs, slug)
     setCategory(slug)
-    setAttrs({})  // clear category-specific attrs when switching
-    setDAttrs({})
-    router.replace(`/browse?category=${slug}`, { scroll: false })
+    setAttrs(pruned)
+    setDAttrs(pruned)
+    const sp = new URLSearchParams()
+    if (slug !== 'all') sp.set('category', slug)
+    if (Object.keys(pruned).length) sp.set('attrs', JSON.stringify(pruned))
+    if (search) sp.set('search', search)
+    router.replace(`/browse${sp.toString() ? '?' + sp.toString() : ''}`, { scroll: false })
   }
 
   const openDrawer = () => {
@@ -668,6 +758,76 @@ function BrowseContent() {
           )}
         </div>
       )}
+
+      {/* Applied filter chips — every active facet renders as a removable chip */}
+      {(() => {
+        const facetLookup = Object.fromEntries(
+          (FACET_SCHEMA[category] || []).map(f => [f.key, f.label])
+        )
+        const chips: Array<{ label: string; onRemove: () => void }> = []
+        if (condition) {
+          chips.push({
+            label: `Condition: ${COND_MAP[condition as keyof typeof COND_MAP]?.label ?? condition}`,
+            onRemove: () => setCondition(''),
+          })
+        }
+        if (province) {
+          chips.push({ label: `Province: ${province}`, onRemove: () => setProvince('') })
+        }
+        if (minPrice || maxPrice) {
+          const range = `R${minPrice || '0'} – R${maxPrice || '∞'}`
+          chips.push({ label: `Price: ${range}`, onRemove: () => { setMinPrice(''); setMaxPrice('') } })
+        }
+        Object.entries(attrs).forEach(([k, v]) => {
+          if (!v) return
+          chips.push({
+            label: `${facetLookup[k] || k}: ${v}`,
+            onRemove: () => setAttrs(prev => { const { [k]: _, ...rest } = prev; return rest }),
+          })
+        })
+        if (chips.length === 0) return null
+        return (
+          <div style={{
+            maxWidth: 1280, margin: '0 auto', padding: '8px 16px 0',
+            display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+          }}>
+            {chips.map((c, i) => (
+              <button
+                key={i}
+                onClick={c.onRemove}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '5px 10px 5px 12px', borderRadius: 999,
+                  background: '#E9ECF5', color: 'var(--color-primary)',
+                  border: '1px solid #d2d9e8',
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+                aria-label={`Remove filter ${c.label}`}
+              >
+                {c.label}
+                <X size={12} />
+              </button>
+            ))}
+            {chips.length > 1 && (
+              <button
+                onClick={() => {
+                  setCondition(''); setProvince('')
+                  setMinPrice(''); setMaxPrice('')
+                  setAttrs({})
+                }}
+                style={{
+                  padding: '5px 10px', background: 'none', border: 'none',
+                  color: '#6b7280', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Listing grid */}
       <div className="grid-wrap">
