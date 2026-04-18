@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, PlusCircle, Calendar, CircleUser, Users } from 'lucide-react'
+import { LayoutGrid, Map, Users, Calendar, CircleUser } from 'lucide-react'
 
+// "Sell" is intentionally not in the bottom nav — it's always visible as a
+// primary CTA in the TopNav, and doubling it up wastes a thumb-reach slot.
 const navItems = [
   { href: '/browse',     label: 'Browse',    icon: LayoutGrid },
-  { href: '/sell/step-1', label: 'Sell',     icon: PlusCircle },
+  { href: '/routes',     label: 'Routes',    icon: Map },
   { href: '/community',  label: 'Community', icon: Users },
   { href: '/events',     label: 'Events',    icon: Calendar },
   { href: '/account',    label: 'Account',   icon: CircleUser },
