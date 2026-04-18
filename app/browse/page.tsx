@@ -481,6 +481,13 @@ function BrowseContent() {
         .cat-pill { flex-shrink:0; padding:7px 16px; border-radius:2px; border:1px solid #e4e4e7; background:#fff; font-size:13px; font-weight:500; color:#1a1a1a; cursor:pointer; white-space:nowrap; transition:all .12s; }
         .cat-pill.active { background:var(--color-primary); color:#fff; border-color:var(--color-primary); font-weight:700; }
 
+        /* Sticky filter bar wrapper — desktop only. Mobile already has a
+           fixed bottom action bar for Filters/Sort, so the top bar scrolls
+           away normally on mobile to maximise listing area. */
+        .filter-bar-wrap { background:#f5f5f5; border-bottom:1px solid #e8e8e8; }
+        @media(min-width:768px) {
+          .filter-bar-wrap { position:sticky; top:60px; z-index:35; }
+        }
         .filter-bar { max-width:1280px; margin:0 auto; padding:8px 16px; display:flex; align-items:center; gap:8px; }
         .fbtn { flex-shrink:0; display:flex; align-items:center; gap:5px; padding:7px 14px; border-radius:2px; border:1px solid #e4e4e7; background:#fff; font-size:13px; font-weight:500; color:#1a1a1a; cursor:pointer; white-space:nowrap; }
         .fbtn.active { border-color:var(--color-primary); background:#E9ECF5; color:var(--color-primary); font-weight:700; }
@@ -490,11 +497,16 @@ function BrowseContent() {
         /* Active chips — only on desktop */
         .chips-row { display:none; }
 
+        /* Section header. On desktop stacks below sticky filter bar at 60+48=108.
+           On mobile sticks right under the TopNav since filter bar is non-sticky there. */
         .section-hdr {
           max-width:1280px; margin:0 auto; padding:16px;
           display:flex; align-items:center; justify-content:space-between;
           position:sticky; top:60px; z-index:30;
           background:#f5f5f5; border-bottom:1px solid #ebebeb;
+        }
+        @media(min-width:768px) {
+          .section-hdr { top:108px; }
         }
         .section-hdr h3 { font-size:18px; font-weight:800; color:#1a1a1a; margin:0; }
         .section-hdr small { font-size:12px; color:#9a9a9a; }
@@ -663,8 +675,8 @@ function BrowseContent() {
         )}
       </div>
 
-      {/* Filter bar */}
-      <div style={{ background: '#f5f5f5', borderBottom: '1px solid #e8e8e8' }}>
+      {/* Filter bar — sticky on desktop under the TopNav */}
+      <div className="filter-bar-wrap">
         {/* Main row: Filters | Search | count */}
         <div className="filter-bar">
           <button className={`fbtn${activeCount > 0 ? ' active' : ''}`} onClick={openDrawer}>
