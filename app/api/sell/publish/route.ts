@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/db'
 import { listings, listingImages, listingCategories } from '@/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
 import { getCountry } from '@/lib/country'
 import { randomBytes } from 'crypto'
 import { sendEmail, listingPublishedEmail } from '@/lib/email'
 import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
 import { isEmailVerified } from '@/lib/email-verify'
+import { isPlausibleSerial, normaliseSerial } from '@/lib/serial'
 
 function slugify(text: string): string {
   return text
@@ -82,7 +83,38 @@ export async function POST(request: NextRequest) {
       suspBrand, axleStandard, brakeStandard, drivetrainBrand,
       gpsBrand, apparelSize, gender, kidsWheelSize, kidsAge,
       helmetSize, shoeSize, recentUpgrades,
+      serialNumber,
     } = body
+
+    // Stolen-serial gate: refuse to publish if the frame serial is in our
+    // approved registry. Defence-in-depth — the client also checks before
+    // submitting, but the server is the source of truth.
+    const cleanSerial = serialNumber && isPlausibleSerial(serialNumber)
+      ? normaliseSerial(serialNumber)
+      : null
+    if (cleanSerial) {
+      try {
+        const stolen = await db.execute(sql`
+          SELECT 1 FROM stolen_reports
+          WHERE status = 'approved' AND serial_number = ${cleanSerial}
+            AND (${!bikeMake} OR LOWER(brand) = LOWER(${bikeMake || ''}))
+          LIMIT 1
+        `)
+        const hit = stolen.rows?.[0] ?? (stolen as unknown as unknown[])[0]
+        if (hit) {
+          return NextResponse.json(
+            {
+              error: 'This frame serial is registered as stolen on CrankMart. We can\'t publish this listing. If you believe this is an error, contact support@crankmart.com with your proof of purchase.',
+              code: 'stolen_serial',
+            },
+            { status: 403 }
+          )
+        }
+      } catch (e) {
+        // Fail open — don't block the seller on a transient DB issue.
+        console.error('Stolen serial check failed (non-fatal):', e)
+      }
+    }
 
     // Build attributes object — all optional fields that don't have their own column
     const attributes: Record<string, string> = {}
@@ -193,6 +225,7 @@ export async function POST(request: NextRequest) {
       drivetrainSpeeds: drivetrainSpeeds ? parseInt(drivetrainSpeeds) : null,
       brakeType: brakeType || null,
       componentBrands: componentBrands || null,
+      serialNumber: cleanSerial,
       damageNotes: damageNotes || null,
       colour: colour || null,
       attributes: Object.keys(attributes).length > 0 ? attributes : {},

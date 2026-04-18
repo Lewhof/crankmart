@@ -161,6 +161,12 @@ function Step4Content() {
           setPublishing(false)
           return
         }
+        // 403 + stolen_serial — block publish, point to support
+        if (res.status === 403 && err.code === 'stolen_serial') {
+          setPublishError({ message: err.error || 'This frame serial is registered as stolen.', code: 'stolen_serial' })
+          setPublishing(false)
+          return
+        }
         setPublishError({ message: err.error || 'Publish failed', code: 'publish' })
         setPublishing(false)
         return
@@ -518,7 +524,9 @@ function Step4Content() {
             }}
           >
             <div style={{ fontWeight: 700, marginBottom: 6 }}>
-              {publishError.code === 'email_unverified' ? 'Email not verified' : 'Could not publish'}
+              {publishError.code === 'email_unverified' ? 'Email not verified'
+               : publishError.code === 'stolen_serial' ? 'Listing blocked — serial is reported stolen'
+               : 'Could not publish'}
             </div>
             <div style={{ marginBottom: publishError.code === 'email_unverified' ? 10 : 0 }}>
               {publishError.message}

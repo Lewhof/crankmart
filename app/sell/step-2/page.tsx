@@ -112,6 +112,7 @@ function Step2Content() {
     gpsBrand:'', apparelSize:'', gender:'', kidsWheelSize:'', kidsAge:'',
     helmetSize:'', shoeSize:'', colour:'', recentUpgrades:'', damageNotes:'',
     seatpost:'', shifters:'', saddle:'', pedalType:'', stem:'', crank:'', chain:'', cassette:'', extras:'',
+    serialNumber:'',
   })
 
   const [brandSuggestions, setBrandSuggestions] = useState<string[]>([])
@@ -338,6 +339,20 @@ function Step2Content() {
               <div className="grid-2">
                 <Sel label="Frame Size" field="frameSize" options={frameSizes} form={form} onChange={handleFormChange} />
                 <Sel label="Frame Material" field="frameMaterial" options={FRAME_MATERIALS} form={form} onChange={handleFormChange} />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Frame Serial Number <span style={{ color:'#9a9a9a', fontWeight:400 }}>(recommended)</span></label>
+                <input
+                  className="form-input"
+                  value={form.serialNumber}
+                  onChange={e => handleFormChange('serialNumber', e.target.value)}
+                  placeholder="Stamped under the bottom bracket"
+                  autoComplete="off"
+                />
+                <div style={{ fontSize:11, color:'#9a9a9a', marginTop:4, lineHeight:1.5 }}>
+                  Buyers can verify a serial isn&apos;t reported stolen via <a href="/check" target="_blank" rel="noreferrer" style={{ color:'#0D1B2A', fontWeight:600 }}>/check</a>. Listings with a serial number sell faster and build trust. We&apos;ll block the listing if this serial is registered as stolen.
+                </div>
               </div>
 
               {(isMTB || isFrame) && (

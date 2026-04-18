@@ -27,6 +27,8 @@ export const limiters = {
   reports:    make(10, 300, 'reports'),
   waitlist:   make(5, 60, 'waitlist'),
   publicApi:  make(120, 60, 'public-api'),
+  stolenCheck:  make(10, 3600, 'stolen-check'),   // 10 / IP / hour
+  stolenReport: make(5, 86400, 'stolen-report'),  // 5 / user / day
 }
 
 export function clientKey(request: NextRequest, suffix = ''): string {

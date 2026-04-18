@@ -149,6 +149,7 @@ export const listings = pgTable('listings', {
   drivetrainSpeeds: integer('drivetrain_speeds'),
   brakeType: varchar('brake_type', { length: 50 }),
   componentBrands: varchar('component_brands', { length: 255 }),
+  serialNumber: varchar('serial_number', { length: 64 }),
   damageNotes: text('damage_notes'),
   tradeConsidered: boolean('trade_considered').default(false),
   originalReceipt: boolean('original_receipt').default(false),

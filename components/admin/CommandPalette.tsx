@@ -17,6 +17,7 @@ const NAV: NavItem[] = [
 
   { label: 'Users',           href: '/admin/users',            group: 'People' },
   { label: 'Verifications',   href: '/admin/verifications',    group: 'People' },
+  { label: 'Stolen Reports',  href: '/admin/stolen-reports',   group: 'People', keywords: ['theft', 'stolen', 'serial', 'bike'] },
   { label: 'Messages',        href: '/admin/messages',         group: 'People', keywords: ['inbox', 'conversations'] },
 
   { label: 'Marketing',       href: '/admin/marketing',        group: 'Commerce' },

@@ -89,6 +89,7 @@ const GATE_ALLOWLIST = [
   // Always-public info pages — no user data, safe to show while gated.
   '/safety',
   '/status',
+  '/check',
 ]
 
 export async function proxy(req: NextRequest) {
