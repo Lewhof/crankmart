@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Package, Users, Calendar, Building2, MessageSquare,
   Flag, Menu, X, Settings, Newspaper, BarChart2, Navigation, Palette,
   Zap, SearchCheck, ShieldCheck, ShieldAlert, Mail, CreditCard, Keyboard, Megaphone, ClipboardList, Send,
-  Users as UsersIcon, MessageCircle, Flag as FlagIcon,
+  Users as UsersIcon, MessageCircle, Flag as FlagIcon, Inbox,
 } from 'lucide-react'
 import { CommandPalette } from './CommandPalette'
 import { CountrySwitcher } from './CountrySwitcher'
@@ -21,7 +21,8 @@ type NavItem = {
 type NavEntry = NavItem | { label: string; items: NavItem[] }
 
 const NAV: NavEntry[] = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, short: 'd' },
+  { href: '/admin',         label: 'Dashboard', icon: LayoutDashboard, short: 'd' },
+  { href: '/admin/tickets', label: 'Tickets',   icon: Inbox,           short: 't' },
 
   { label: 'Content', items: [
     { href: '/admin/listings',  label: 'Listings',  icon: Package,    short: 'l' },
