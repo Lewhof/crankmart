@@ -6,6 +6,9 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, X, Loader } from 'lucide-react'
+import { upload as blobUpload } from '@vercel/blob/client'
+import imageCompression from 'browser-image-compression'
+import { v4 as uploadUuid } from 'uuid'
 
 const CONDITIONS = [
   { value: 'new', label: 'New' },
@@ -144,15 +147,26 @@ function EditContent() {
     load()
   }, [listingId, router])
 
+  // Same client-direct + Web-Worker compress flow as /sell/step-3.
+  // /api/sell/upload only issues a token; bytes go straight to Blob CDN.
   const uploadFile = async (file: File) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    const res = await fetch('/api/sell/upload', {
-      method: 'POST',
-      body: formData,
+    let toUpload: File | Blob = file
+    try {
+      toUpload = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 2000,
+        useWebWorker: true,
+        initialQuality: 0.85,
+        fileType: 'image/jpeg',
+      })
+    } catch { toUpload = file }
+    const filename = `listings/${uploadUuid()}.jpg`
+    const blob = await blobUpload(filename, toUpload, {
+      access: 'public',
+      handleUploadUrl: '/api/sell/upload',
+      contentType: 'image/jpeg',
     })
-    if (!res.ok) throw new Error('Upload failed')
-    return await res.json()
+    return { url: blob.url }
   }
 
   const handleAddPhotos = async () => {

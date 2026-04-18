@@ -30,6 +30,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'tranquilitas.com' },
       { protocol: 'https', hostname: '*.tranquilitas.com' },
       { protocol: 'https', hostname: 'images.squarespace-cdn.com' },
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+      { protocol: 'https', hostname: 'public.blob.vercel-storage.com' },
       { protocol: 'http', hostname: '*' },
       {
         protocol: 'https',
