@@ -89,23 +89,6 @@ const GATE_ALLOWLIST = [
   // Always-public info pages — no user data, safe to show while gated.
   '/safety',
   '/status',
-  // SMOKE TEST WINDOW (2026-04-17): widened so a fresh non-admin can walk
-  // register → verify → list → message → report → export → delete.
-  // REVERT to the minimal list above once smoke pass is signed off.
-  '/browse',
-  '/sell',
-  '/account',
-  '/events',
-  '/news',
-  '/routes',
-  '/shops',
-  '/directory',
-  '/pricing',
-  '/privacy',
-  '/terms',
-  '/how-to',
-  '/seller',
-  '/search',
 ]
 
 export async function proxy(req: NextRequest) {
