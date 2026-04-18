@@ -9,6 +9,13 @@ import { neon } from '@neondatabase/serverless'
 
 const items = [
   {
+    title: 'PayU payment integration (multi-region alternative to PayFast)',
+    description: `Add PayU as a second payment processor. PayU supports SA (PayU Payments South Africa), Poland, Turkey, LATAM, India — covers multiple regions under one gateway, which beats stitching PayFast + Stripe + others per country. Use cases: primary processor for AU when we launch paid features there (PayU is active in AU via CheckoutHub); fallback/redundancy for PayFast in SA; future-proofs expansion into a 3rd country. Wire into the boost-initiate flow + ITN-equivalent webhook. Abstract the processor choice behind a PaymentsProvider interface so boost + subscription code doesn't branch per gateway. Confirm merchant account eligibility + fee comparison vs PayFast (PayFast is 3.5% + R3.00; PayU typically 2.6–3.4%). Country routing: select processor by listing's country at boost-initiate time.`,
+    priority: 'medium',
+    effort: 'l',
+    categories: ['payments', 'commerce', 'ops'],
+  },
+  {
     title: 'Superadmin country toggle on live site',
     description: `Currently the superadmin country switcher lives only in /admin. Add a country-toggle on the public site (header or footer, superadmin-only) so the same admin can QA both verticals end-to-end without jumping into the admin panel. Reads the existing admin_country cookie; shows current country + a "Switch to AU/ZA" action. Only renders for role ∈ {admin, superadmin} — invisible to normal users. Should flip without a page reload when possible (writes cookie + triggers a refresh).`,
     priority: 'medium',

@@ -45,10 +45,15 @@ const NAV: NavEntry[] = [
   ] },
 
   { label: 'Commerce', items: [
-    { href: '/admin/marketing', label: 'Marketing', icon: Megaphone,   short: 'm' },
-    { href: '/admin/waitlist',  label: 'Waitlist',  icon: Send },
-    { href: '/admin/boosts',    label: 'Boosts',    icon: Zap },
-    { href: '/admin/payfast',   label: 'PayFast',   icon: CreditCard },
+    { href: '/admin/marketing',            label: 'Marketing',   icon: Megaphone,   short: 'm' },
+    { href: '/admin/marketing/campaigns',  label: '· Campaigns', icon: Megaphone },
+    { href: '/admin/marketing/segments',   label: '· Segments',  icon: Megaphone },
+    { href: '/admin/marketing/lists',      label: '· Lists',     icon: Megaphone },
+    { href: '/admin/marketing/templates',  label: '· Templates', icon: Megaphone },
+    { href: '/admin/marketing/calendar',   label: '· Calendar',  icon: Megaphone },
+    { href: '/admin/waitlist',             label: 'Waitlist',    icon: Send },
+    { href: '/admin/boosts',               label: 'Boosts',      icon: Zap },
+    { href: '/admin/payfast',              label: 'PayFast',     icon: CreditCard },
   ] },
 
   { label: 'Insights', items: [
