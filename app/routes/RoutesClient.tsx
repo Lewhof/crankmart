@@ -581,7 +581,10 @@ export default function RoutesClient() {
 
       <style>{`
         * { box-sizing: border-box; }
-        body { overflow-x: hidden; }
+        /* overflow-x: clip, not hidden — hidden creates a scroll container on
+           <body> and breaks position:sticky on siblings (browse filter bar).
+           clip suppresses overflow without becoming a scroll parent. */
+        body { overflow-x: clip; }
         .routes-grid { grid-template-columns: 1fr; }
         @media (min-width: 540px) { .routes-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 900px) { .routes-grid { grid-template-columns: repeat(3, 1fr); } }
