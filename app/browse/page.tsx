@@ -315,6 +315,10 @@ function BrowseContent() {
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
   const [attrs, setAttrs] = useState<Record<string, string>>({})
+  const [sort, setSort] = useState<'newest' | 'price_asc' | 'price_desc'>(
+    (params.get('sort') as 'newest' | 'price_asc' | 'price_desc') || 'newest'
+  )
+  const [total, setTotal] = useState<number | null>(null)
 
   // Draft filters (inside drawer before Apply)
   const [dCondition, setDCondition] = useState('')
@@ -332,7 +336,8 @@ function BrowseContent() {
 
   const buildQuery = (
     cat: string, cond: string, prov: string, min: string, max: string,
-    attrMap: Record<string, string>, searchTerm: string, offset: number
+    attrMap: Record<string, string>, searchTerm: string, offset: number,
+    sortMode: string, withTotal: boolean
   ) => {
     const q = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(offset) })
     if (searchTerm) q.set('search', searchTerm)
@@ -341,23 +346,29 @@ function BrowseContent() {
     if (prov) q.set('province', prov)
     if (min)  q.set('minPrice', min)
     if (max)  q.set('maxPrice', max)
+    if (sortMode && sortMode !== 'newest') q.set('sort', sortMode)
+    if (withTotal) q.set('withTotal', '1')
     const activeAttrs = Object.fromEntries(Object.entries(attrMap).filter(([, v]) => v))
     if (Object.keys(activeAttrs).length) q.set('attrs', JSON.stringify(activeAttrs))
     return q
   }
 
   const fetchListings = useCallback(async (
-    cat: string, cond: string, prov: string, min: string, max: string, attrMap: Record<string, string>, searchTerm: string = ''
+    cat: string, cond: string, prov: string, min: string, max: string,
+    attrMap: Record<string, string>, searchTerm: string = '', sortMode: string = 'newest'
   ) => {
     setLoading(true)
     setHasMore(true)
-    const q = buildQuery(cat, cond, prov, min, max, attrMap, searchTerm, 0)
+    const q = buildQuery(cat, cond, prov, min, max, attrMap, searchTerm, 0, sortMode, true)
     try {
       const res = await fetch(`/api/listings?${q}`)
-      const data = await res.json()
-      setAllItems(data)
-      setItems(data)
-      setHasMore(data.length === PAGE_SIZE)
+      const body = await res.json()
+      const items = Array.isArray(body) ? body : (body.items ?? [])
+      const totalN = Array.isArray(body) ? items.length : Number(body.total ?? items.length)
+      setAllItems(items)
+      setItems(items)
+      setTotal(totalN)
+      setHasMore(items.length < totalN && items.length === PAGE_SIZE)
     } finally { setLoading(false) }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -365,17 +376,18 @@ function BrowseContent() {
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return
     setLoadingMore(true)
-    const q = buildQuery(category, condition, province, minPrice, maxPrice, attrs, search, allItems.length)
+    const q = buildQuery(category, condition, province, minPrice, maxPrice, attrs, search, allItems.length, sort, false)
     try {
       const res = await fetch(`/api/listings?${q}`)
-      const data = await res.json()
+      const body = await res.json()
+      const data: ListingItem[] = Array.isArray(body) ? body : (body.items ?? [])
       const merged = [...allItems, ...data]
       setAllItems(merged)
       setItems(merged)
-      setHasMore(data.length === PAGE_SIZE)
+      setHasMore(total != null ? merged.length < total : data.length === PAGE_SIZE)
     } finally { setLoadingMore(false) }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadingMore, hasMore, category, condition, province, minPrice, maxPrice, attrs, search, allItems])
+  }, [loadingMore, hasMore, category, condition, province, minPrice, maxPrice, attrs, search, sort, allItems, total])
 
   // Show-more pattern: user clicks to reveal the next batch instead of
   // auto-loading on scroll — removes the bouncing-content-below-the-fold
@@ -399,8 +411,8 @@ function BrowseContent() {
   }, [session])
 
   useEffect(() => {
-    fetchListings(category, condition, province, minPrice, maxPrice, attrs, search)
-  }, [fetchListings, category, condition, province, minPrice, maxPrice, attrs, search])
+    fetchListings(category, condition, province, minPrice, maxPrice, attrs, search, sort)
+  }, [fetchListings, category, condition, province, minPrice, maxPrice, attrs, search, sort])
 
   const selectCategory = (slug: string) => {
     // Strip attrs that aren't valid for the new category instead of nuking
@@ -1054,39 +1066,160 @@ function BrowseContent() {
 
         <div className="fdr-ftr">
           <button className="btn-clear" onClick={clearFilters}>Clear All</button>
-          <button className="btn-apply" onClick={applyFilters}>Show Results</button>
+          <button className="btn-apply" onClick={applyFilters}>
+            {total != null ? `Show ${total} ${total === 1 ? 'result' : 'results'}` : 'Show Results'}
+          </button>
         </div>
       </div>
 
-      {/* Back to top FAB */}
+      {/* Back to top FAB — pushed up by 64 px on mobile to clear the action bar */}
       {showBackToTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           aria-label="Back to top"
+          className="back-to-top"
           style={{
             position: 'fixed',
-            bottom: 80,
             right: 20,
-            width: 44,
-            height: 44,
-            borderRadius: '50%',
-            backgroundColor: '#0D1B2A',
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            width: 44, height: 44, borderRadius: '50%',
+            backgroundColor: '#0D1B2A', color: '#fff',
+            border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
             zIndex: 50,
-            fontSize: 20,
-            lineHeight: 1,
+            fontSize: 20, lineHeight: 1,
           }}
         >
           ↑
         </button>
       )}
+
+      {/* Mobile sticky action bar — Filters | Show more | Sort */}
+      <BrowseActionBar
+        activeFilterCount={[condition, province, minPrice || maxPrice, ...Object.values(attrs).filter(Boolean)].filter(Boolean).length}
+        showMoreEnabled={hasMore && !loading}
+        loadingMore={loadingMore}
+        loadedCount={items.length}
+        sort={sort}
+        onOpenFilters={openDrawer}
+        onLoadMore={loadMore}
+        onSortChange={(s) => setSort(s)}
+      />
+
+      <style>{`
+        .back-to-top { bottom: 80px; }
+        @media (max-width: 767px) { .back-to-top { bottom: calc(72px + env(safe-area-inset-bottom)); } }
+      `}</style>
     </div>
+  )
+}
+
+// ── Sticky bottom action bar (mobile) ────────────────────────────────────────
+function BrowseActionBar({
+  activeFilterCount, showMoreEnabled, loadingMore, loadedCount,
+  sort, onOpenFilters, onLoadMore, onSortChange,
+}: {
+  activeFilterCount: number
+  showMoreEnabled: boolean
+  loadingMore: boolean
+  loadedCount: number
+  sort: 'newest' | 'price_asc' | 'price_desc'
+  onOpenFilters: () => void
+  onLoadMore: () => void
+  onSortChange: (s: 'newest' | 'price_asc' | 'price_desc') => void
+}) {
+  const [sortOpen, setSortOpen] = useState(false)
+  const SORT_LABEL: Record<typeof sort, string> = {
+    newest:     'Newest',
+    price_asc:  'Price ↑',
+    price_desc: 'Price ↓',
+  }
+  return (
+    <>
+      <div className="browse-action-bar" role="toolbar" aria-label="Browse actions">
+        <button className="bab-btn" onClick={onOpenFilters} aria-label="Filters">
+          <SlidersHorizontal size={15} /> Filters
+          {activeFilterCount > 0 && <span className="bab-badge">{activeFilterCount}</span>}
+        </button>
+        <button
+          className="bab-btn bab-btn--primary"
+          onClick={onLoadMore}
+          disabled={!showMoreEnabled}
+          aria-label="Show more listings"
+        >
+          {loadingMore ? '…' : showMoreEnabled ? `Show more · ${loadedCount}` : 'All shown'}
+        </button>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <button className="bab-btn" onClick={() => setSortOpen(o => !o)} aria-label="Sort">
+            ↕ {SORT_LABEL[sort]}
+          </button>
+          {sortOpen && (
+            <>
+              <div onClick={() => setSortOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 200 }} />
+              <div className="bab-sort-menu">
+                {(['newest', 'price_asc', 'price_desc'] as const).map(s => (
+                  <button
+                    key={s}
+                    onClick={() => { onSortChange(s); setSortOpen(false) }}
+                    className={`bab-sort-item${sort === s ? ' active' : ''}`}
+                  >
+                    {SORT_LABEL[s]}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+      <style>{`
+        .browse-action-bar {
+          position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+          display: none;
+          background: #fff;
+          border-top: 1px solid #ebebeb;
+          padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+          gap: 8px;
+        }
+        @media (max-width: 767px) {
+          .browse-action-bar { display: flex; }
+          /* Push the cookie banner up so it sits above the action bar */
+          .browse-action-bar ~ * .cm-cookie-banner { bottom: 72px; }
+        }
+        .bab-btn {
+          flex: 1;
+          display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+          padding: 10px 8px;
+          background: #f5f5f5; color: #1a1a1a;
+          border: 1px solid #e4e4e7; border-radius: 6px;
+          font-size: 13px; font-weight: 700; white-space: nowrap;
+          cursor: pointer;
+        }
+        .bab-btn:disabled { opacity: 0.5; cursor: default; }
+        .bab-btn--primary { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+        .bab-badge {
+          margin-left: 4px; padding: 1px 7px; border-radius: 10px;
+          background: var(--color-primary); color: #fff; font-size: 11px; font-weight: 800;
+        }
+        .bab-btn--primary .bab-badge { background: #fff; color: var(--color-primary); }
+        .bab-sort-menu {
+          position: absolute; right: 0; bottom: 100%;
+          margin-bottom: 6px;
+          background: #fff; border: 1px solid #e4e4e7;
+          border-radius: 8px; min-width: 160px;
+          box-shadow: 0 8px 24px rgba(0,0,0,.14);
+          z-index: 201;
+          overflow: hidden;
+        }
+        .bab-sort-item {
+          display: block; width: 100%;
+          padding: 11px 14px;
+          background: #fff; border: none; text-align: left;
+          font-size: 13px; color: #1a1a1a; cursor: pointer;
+        }
+        .bab-sort-item:hover { background: #f5f5f5; }
+        .bab-sort-item.active { background: #E9ECF5; color: var(--color-primary); font-weight: 700; }
+      `}</style>
+    </>
   )
 }
 

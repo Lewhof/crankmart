@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { listings, listingCategories } from '@/db/schema'
-import { eq, desc, and, gte, lte, ilike, sql, SQL } from 'drizzle-orm'
+import { eq, desc, asc, and, gte, lte, ilike, sql, SQL } from 'drizzle-orm'
 import { auth } from '@/auth'
 import { getCountry } from '@/lib/country'
 
@@ -80,8 +80,15 @@ export async function GET(request: NextRequest) {
     if (minPrice)  conditions.push(gte(listings.price, minPrice))
     if (maxPrice)  conditions.push(lte(listings.price, maxPrice))
 
+    // Sort: 'newest' (default) | 'price_asc' | 'price_desc'.
+    // Boost-promoted listings always float to the top of whichever sort.
+    const sort = p.get('sort') || 'newest'
+    let orderBy: any[] =
+      sort === 'price_asc'  ? [desc(listings.boostEnabled), asc(listings.price),  desc(listings.createdAt)] :
+      sort === 'price_desc' ? [desc(listings.boostEnabled), desc(listings.price), desc(listings.createdAt)] :
+                              [desc(listings.boostEnabled), desc(listings.createdAt)]
+
     // Full-text search with ILIKE fallback for short/partial terms
-    let orderBy = [desc(listings.boostEnabled), desc(listings.createdAt)] as any[]
     if (search) {
       const term = `%${search}%`
       conditions.push(sql`(
@@ -134,7 +141,15 @@ export async function GET(request: NextRequest) {
       ORDER BY li.listing_id, li.display_order ASC
     `)
 
-    const [items, imgResult] = await Promise.all([mainQuery, imgQuery])
+    // Total count for the same filter set — feeds the "Show {N} results" CTA
+    // in the browse drawer. Same indexed predicate so it's cheap.
+    const countQuery = db.execute(sql`
+      SELECT COUNT(*)::int AS total FROM ${listings} WHERE ${whereCombined}
+    `)
+
+    const [items, imgResult, countResult] = await Promise.all([mainQuery, imgQuery, countQuery])
+    const totalRows = (countResult.rows?.[0] ?? {}) as { total?: number }
+    const total = Number(totalRows.total ?? 0)
 
     const imageMap: Record<string, unknown> = {}
     ;(imgResult.rows ?? []).forEach((r: Record<string, unknown>) => {
@@ -152,7 +167,14 @@ export async function GET(request: NextRequest) {
       image: imageMap[item.id] ?? null
     }))
 
-    return NextResponse.json(itemsWithImages, {
+    // Response shape change (additive): old callers that did `data.map(...)`
+    // continue to work because the JSON IS still an array — but readers can
+    // also opt in to the wrapped form via ?withTotal=1 to get { items, total }.
+    // Doing it this way avoids a breaking change for /sell, /home, etc.
+    const wantsWrapped = request.nextUrl.searchParams.get('withTotal') === '1'
+    const payload = wantsWrapped ? { items: itemsWithImages, total } : itemsWithImages
+
+    return NextResponse.json(payload, {
       headers: {
         // Edge-cache at Vercel for 60s; tolerate stale while revalidating.
         // Auth/country-specific variants are handled by the Vary header.
