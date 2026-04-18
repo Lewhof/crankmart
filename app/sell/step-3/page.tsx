@@ -10,6 +10,7 @@ const STEPS = ['Category', 'Details', 'Photos', 'Location & Price']
 function Step3Content() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const [images, setImages] = useState<Array<{ url: string; preview?: string; file?: File }>>([])
   const [uploading, setUploading] = useState(false)
@@ -203,7 +204,10 @@ function Step3Content() {
         .dropzone:hover { border-color: #0D1B2A; background: #f8f9ff; }
         .dropzone.active { border-color: #0D1B2A; background: #f8f9ff; }
         .dropzone-text { font-size: 13px; color: #9a9a9a; margin-bottom: 8px; }
-        .dropzone-btn { display: inline-block; padding: 10px 20px; background: var(--color-primary); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 600; }
+        .dropzone-btn { display: inline-block; padding: 10px 20px; background: var(--color-primary); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        /* Camera button only on mobile — desktop has no camera */
+        .dropzone-btn--camera { display: none; }
+        @media (max-width: 767px) { .dropzone-btn--camera { display: inline-block; } }
 
         .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
         @media(min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -257,17 +261,22 @@ function Step3Content() {
           <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', marginBottom: 4 }}>Photos</h2>
           <p style={{ fontSize: 13, color: '#9a9a9a', marginBottom: 16 }}>Upload at least 1 clear photo (max 15). First photo is the cover.</p>
 
-          {/* Hidden file input — triggered programmatically */}
+          {/* Hidden file inputs — gallery picker + camera capture (mobile) */}
           <input
             ref={fileInputRef}
             type="file"
             multiple
             accept="image/*,.heic,.heif"
             style={{ display: 'none' }}
-            onChange={e => {
-              const files = e.target.files
-              handleFileSelect(files)
-            }}
+            onChange={e => handleFileSelect(e.target.files)}
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style={{ display: 'none' }}
+            onChange={e => handleFileSelect(e.target.files)}
           />
 
           {/* Dropzone — clicks trigger file input directly */}
@@ -283,8 +292,18 @@ function Step3Content() {
             <div className="dropzone-text">
               {uploading ? 'Uploading...' : 'Drag photos here or click to browse'}
             </div>
-            <div className="dropzone-btn" onClick={e => { e.stopPropagation(); if (!uploading) fileInputRef.current?.click() }}>
-              {uploading ? 'Uploading...' : 'Choose Photos'}
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <div className="dropzone-btn" onClick={e => { e.stopPropagation(); if (!uploading) fileInputRef.current?.click() }}>
+                {uploading ? 'Uploading...' : 'Choose Photos'}
+              </div>
+              {/* Camera button — only visible on mobile via media query */}
+              <div
+                className="dropzone-btn dropzone-btn--camera"
+                onClick={e => { e.stopPropagation(); if (!uploading) cameraInputRef.current?.click() }}
+                style={{ background: '#fff', color: 'var(--color-primary)', border: '2px solid var(--color-primary)' }}
+              >
+                📷 Take Photo
+              </div>
             </div>
           </div>
 

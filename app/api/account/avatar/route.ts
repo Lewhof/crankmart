@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join, extname } from 'path'
+import { put } from '@vercel/blob'
 import { v4 as uuidv4 } from 'uuid'
+import { extname } from 'path'
 import { auth } from '@/auth'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 
-const UPLOAD_DIR    = '/home/velo/storage/crankmart/uploads/avatars'
-const PUBLIC_URL    = '/uploads/avatars'
-const MAX_SIZE      = 5 * 1024 * 1024   // 5MB
+const MAX_SIZE      = 5 * 1024 * 1024   // 5 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 export async function POST(req: NextRequest) {
@@ -23,21 +21,25 @@ export async function POST(req: NextRequest) {
   if (file.size > MAX_SIZE) return NextResponse.json({ error: 'Max 5MB' }, { status: 400 })
   if (!ALLOWED_TYPES.includes(file.type)) return NextResponse.json({ error: 'JPEG, PNG or WebP only' }, { status: 400 })
 
-  await mkdir(UPLOAD_DIR, { recursive: true })
+  try {
+    const ext      = extname(file.name) || '.jpg'
+    const filename = `avatars/${uuidv4()}${ext}`
 
-  const ext      = extname(file.name) || '.jpg'
-  const filename = `${uuidv4()}${ext}`
-  const filepath = join(UPLOAD_DIR, filename)
+    const blob = await put(filename, file, {
+      access: 'public',
+      contentType: file.type,
+      addRandomSuffix: false,
+    })
 
-  await writeFile(filepath, Buffer.from(await file.arrayBuffer()))
+    await db.update(users)
+      .set({ avatarUrl: blob.url, updatedAt: new Date() })
+      .where(eq(users.id, session.user.id))
 
-  const avatarUrl = `${PUBLIC_URL}/${filename}`
-
-  await db.update(users)
-    .set({ avatarUrl, updatedAt: new Date() })
-    .where(eq(users.id, session.user.id))
-
-  return NextResponse.json({ avatarUrl })
+    return NextResponse.json({ avatarUrl: blob.url })
+  } catch (error) {
+    console.error('Avatar upload error:', error)
+    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+  }
 }
 
 export async function DELETE() {

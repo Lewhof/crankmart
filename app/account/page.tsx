@@ -364,26 +364,52 @@ function EventsTab({ userId }: { userId: string }) {
 function SavedTab() {
   const [savedListings, setSavedListings] = useState<SavedListing[]>([])
   const [savedRoutes, setSavedRoutes] = useState<Record<string, unknown>[]>([])
+  const [savedEvents, setSavedEvents] = useState<Record<string, unknown>[]>([])
   const [loadingL, setLoadingL] = useState(true)
   const [loadingR, setLoadingR] = useState(true)
+  const [loadingE, setLoadingE] = useState(true)
+  const [activeSub, setActiveSub] = useState<'listings' | 'routes' | 'events'>('listings')
 
   useEffect(() => {
     fetch('/api/listings/saved').then(r => r.json()).then(d => setSavedListings(Array.isArray(d) ? d : [])).finally(() => setLoadingL(false))
     fetch('/api/routes/saved').then(r => r.json()).then(d => setSavedRoutes(Array.isArray(d) ? d : [])).finally(() => setLoadingR(false))
+    fetch('/api/events/saved').then(r => r.json()).then(d => setSavedEvents(Array.isArray(d) ? d : (d?.events ?? []))).catch(() => setSavedEvents([])).finally(() => setLoadingE(false))
   }, [])
 
+  const counts = { listings: savedListings.length, routes: savedRoutes.length, events: savedEvents.length }
+  const pill = (key: 'listings' | 'routes' | 'events', label: string, n: number) => (
+    <button
+      key={key}
+      onClick={() => setActiveSub(key)}
+      style={{
+        padding: '8px 16px', border: 'none', borderRadius: 999, cursor: 'pointer',
+        background: activeSub === key ? 'var(--color-primary)' : '#f0f0f0',
+        color: activeSub === key ? '#fff' : '#1a1a1a',
+        fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap',
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+      }}
+    >
+      {label}
+      <span style={{
+        background: activeSub === key ? 'rgba(255,255,255,.25)' : '#d4d4d4',
+        color: activeSub === key ? '#fff' : '#1a1a1a',
+        fontSize: 11, padding: '1px 7px', borderRadius: 999, fontWeight: 800,
+      }}>{n}</span>
+    </button>
+  )
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* Saved Listings */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#1a1a1a' }}>Saved Listings</div>
-            <div style={{ fontSize: 12, color: '#9a9a9a', marginTop: 2 }}>{loadingL ? '…' : `${savedListings.length}`}</div>
-          </div>
-          <Link href="/browse" style={{ fontSize: 12, fontWeight: 700, color: '#0D1B2A', textDecoration: 'none' }}>Browse more →</Link>
-        </div>
-        {loadingL ? <Spinner /> : savedListings.length === 0 ? (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      {/* Sub-tab pills */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        {pill('listings', 'Listings', counts.listings)}
+        {pill('routes',   'Routes',   counts.routes)}
+        {pill('events',   'Events',   counts.events)}
+      </div>
+
+      {/* — Saved Listings — */}
+      {activeSub === 'listings' && (
+        loadingL ? <Spinner /> : savedListings.length === 0 ? (
           <EmptyState icon={<Heart size={22} />} title="Nothing saved yet" sub="Tap ♥ on any listing to save it here." action={{ href: '/browse', label: 'Browse listings' }} />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(155px,1fr))', gap: 10 }}>
@@ -406,18 +432,12 @@ function SavedTab() {
               </Link>
             ))}
           </div>
-        )}
-      </div>
+        )
+      )}
 
-      <div style={{ height: 1, background: '#ebebeb' }} />
-
-      {/* Saved Routes */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <div style={{ fontSize: 15, fontWeight: 800, color: '#1a1a1a' }}>Saved Routes</div>
-          <Link href="/routes" style={{ fontSize: 12, fontWeight: 700, color: '#0D1B2A', textDecoration: 'none' }}>Explore routes →</Link>
-        </div>
-        {loadingR ? <Spinner /> : savedRoutes.length === 0 ? (
+      {/* — Saved Routes — */}
+      {activeSub === 'routes' && (
+        loadingR ? <Spinner /> : savedRoutes.length === 0 ? (
           <EmptyState icon={<Star size={22} />} title="No saved routes" sub="Browse routes and bookmark your favourites." action={{ href: '/routes', label: 'Browse routes' }} />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 10 }}>
@@ -440,8 +460,36 @@ function SavedTab() {
               </Link>
             ))}
           </div>
-        )}
-      </div>
+        )
+      )}
+
+      {/* — Saved Events — */}
+      {activeSub === 'events' && (
+        loadingE ? <Spinner /> : savedEvents.length === 0 ? (
+          <EmptyState icon={<Star size={22} />} title="No saved events" sub="Tap ♥ on any event to save it here." action={{ href: '/events', label: 'Browse events' }} />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 10 }}>
+            {savedEvents.map((e: Record<string, unknown>) => (
+              <Link key={String(e.id)} href={`/events/${e.slug}`} style={{ textDecoration: 'none' }}>
+                <div style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ height: 90, background: 'linear-gradient(135deg,#1a2744,#0D1B2A)', position: 'relative' }}>
+                    {e.banner_url ? <img src={String(e.banner_url)} alt={String(e.title)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : null}
+                  </div>
+                  <div style={{ padding: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0D1B2A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{String(e.title)}</div>
+                    <div style={{ fontSize: 11, color: '#9a9a9a', display: 'flex', alignItems: 'center', gap: 3, margin: '3px 0' }}><MapPin size={10} /> {String(e.city ?? e.province ?? '')}</div>
+                    {Boolean(e.start_date) && (
+                      <div style={{ fontSize: 11, color: '#9a9a9a' }}>
+                        {new Date(String(e.start_date)).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )
+      )}
     </div>
   )
 }

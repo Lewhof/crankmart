@@ -272,7 +272,11 @@ export default function RoutesClient() {
   )
 
   const RouteCard = ({ route }: { route: Route & { distance_from_user?: number } }) => (
-    <div className="rt-card" style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 2, overflow: 'hidden' }}>
+    <Link
+      href={`/routes/${route.slug}`}
+      className="rt-card"
+      style={{ display: 'block', background: '#fff', border: '1px solid #ebebeb', borderRadius: 2, overflow: 'hidden', textDecoration: 'none', color: 'inherit', transition: 'box-shadow .15s, transform .15s' }}
+    >
       <div style={{ height: 130, position: 'relative', overflow: 'hidden', background: route.hero_image_url ? 'none' : `linear-gradient(135deg, ${getDisciplineColor(route.discipline)}22, ${getDisciplineColor(route.discipline)}55)` }}>
         {route.hero_image_url
           ? <img src={route.hero_image_url} alt={route.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -319,11 +323,11 @@ export default function RoutesClient() {
             ))}
           </div>
         )}
-        <Link href={`/routes/${route.slug}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', padding: '9px', borderRadius: 2, background: 'var(--color-primary)', color: '#fff', textDecoration: 'none', fontSize: 12, fontWeight: 700 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', padding: '9px', borderRadius: 2, background: 'var(--color-primary)', color: '#fff', fontSize: 12, fontWeight: 700 }}>
           View Route <ChevronRight size={13} />
-        </Link>
+        </div>
       </div>
-    </div>
+    </Link>
   )
 
   return (
