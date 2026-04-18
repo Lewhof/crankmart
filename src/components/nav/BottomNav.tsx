@@ -2,14 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, PlusCircle, Calendar, CircleUser, Map } from 'lucide-react'
+import { LayoutGrid, PlusCircle, Calendar, CircleUser, Users } from 'lucide-react'
 
 const navItems = [
-  { href: '/browse',     label: 'Browse',  icon: LayoutGrid },
-  { href: '/sell/step-1', label: 'Sell',   icon: PlusCircle },
-  { href: '/events',     label: 'Events',  icon: Calendar },
-  { href: '/routes',     label: 'Routes',  icon: Map },
-  { href: '/account',    label: 'Account', icon: CircleUser },
+  { href: '/browse',     label: 'Browse',    icon: LayoutGrid },
+  { href: '/sell/step-1', label: 'Sell',     icon: PlusCircle },
+  { href: '/community',  label: 'Community', icon: Users },
+  { href: '/events',     label: 'Events',    icon: Calendar },
+  { href: '/account',    label: 'Account',   icon: CircleUser },
 ]
 
 export function BottomNav() {

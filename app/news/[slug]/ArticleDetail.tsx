@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Eye, ArrowLeft, Share2, Calendar } from 'lucide-react'
+import { CommentThread } from '@/components/community/CommentThread'
 
 interface Article {
   id: string; title: string; slug: string; excerpt: string; body: string
@@ -148,6 +149,8 @@ export default function ArticleDetailPage() {
             </p>
           )}
         </div>
+
+        <CommentThread targetType="news" targetId={article.id} title="Discussion" />
 
         {/* Related articles */}
         {related.length > 0 && (

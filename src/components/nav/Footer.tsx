@@ -4,20 +4,22 @@ import Link from 'next/link'
 
 const COLS = [
   {
-    title: 'Directory',
+    title: 'Community',
     links: [
-      { href: '/directory', label: 'Bike Shops' },
-      { href: '/directory?cat=coaching', label: 'Coaching' },
-      { href: '/directory?cat=brands', label: 'Brands' },
+      { href: '/community',          label: 'Community hub' },
+      { href: '/community/stolen',   label: 'Stolen registry' },
+      { href: '/community/lost',     label: 'Lost & found' },
+      { href: '/community/check',    label: 'Check a serial' },
     ],
   },
   {
     title: 'Explore',
     links: [
-      { href: '/browse', label: 'Classifieds' },
-      { href: '/events', label: 'Events' },
-      { href: '/routes', label: 'Trails' },
-      { href: '/news', label: 'News' },
+      { href: '/browse',    label: 'Classifieds' },
+      { href: '/events',    label: 'Events' },
+      { href: '/routes',    label: 'Trails' },
+      { href: '/directory', label: 'Bike Shops' },
+      { href: '/news',      label: 'News' },
     ],
   },
   {

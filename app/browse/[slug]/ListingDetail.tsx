@@ -9,6 +9,7 @@ import {
   MapPin, MessageCircle, Shield, CheckCircle, X, Tag, Zap, Search, SlidersHorizontal, ChevronRight
 } from 'lucide-react'
 import ContactSeller from '@/components/listings/ContactSeller'
+import { CommentThread } from '@/components/community/CommentThread'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
@@ -1011,6 +1012,11 @@ export default function ListingDetailClient() {
               })}
             </div>
           )}
+        </div>
+
+        {/* Community discussion */}
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px' }}>
+          <CommentThread targetType="listing" targetId={listing.id} title="Questions & discussion" />
         </div>
       </div>
 

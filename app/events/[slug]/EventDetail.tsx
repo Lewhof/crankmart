@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, MapPin, ExternalLink, Heart, Share2, Clock } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { CommentThread } from '@/components/community/CommentThread'
 
 interface Event {
   id: string; title: string; slug: string; description: string
@@ -274,6 +275,8 @@ export default function EventDetail({ event }: { event: Event }) {
             )}
           </div>
         </div>
+
+        <CommentThread targetType="event" targetId={event.id} title="Event discussion" />
 
         {/* Related events */}
         {related.length > 0 && (

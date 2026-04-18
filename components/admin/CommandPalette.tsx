@@ -17,8 +17,12 @@ const NAV: NavItem[] = [
 
   { label: 'Users',           href: '/admin/users',            group: 'People' },
   { label: 'Verifications',   href: '/admin/verifications',    group: 'People' },
-  { label: 'Stolen Reports',  href: '/admin/stolen-reports',   group: 'People', keywords: ['theft', 'stolen', 'serial', 'bike'] },
   { label: 'Messages',        href: '/admin/messages',         group: 'People', keywords: ['inbox', 'conversations'] },
+
+  { label: 'Discussions',     href: '/admin/community/discussions', group: 'Community', keywords: ['comments', 'posts'] },
+  { label: 'Flags',           href: '/admin/community/flags',       group: 'Community', keywords: ['reports', 'moderation', 'spam'] },
+  { label: 'Stolen Reports',  href: '/admin/stolen-reports',        group: 'Community', keywords: ['theft', 'stolen', 'serial', 'bike'] },
+  { label: 'Members',         href: '/admin/community/members',     group: 'Community', keywords: ['ban', 'suspend', 'handle'] },
 
   { label: 'Marketing',       href: '/admin/marketing',        group: 'Commerce' },
   { label: 'Waitlist',        href: '/admin/waitlist',         group: 'Commerce', keywords: ['signup', 'notify', 'email', 'launch'] },

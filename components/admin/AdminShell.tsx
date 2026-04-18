@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Package, Users, Calendar, Building2, MessageSquare,
   Flag, Menu, X, Settings, Newspaper, BarChart2, Navigation, Palette,
   Zap, SearchCheck, ShieldCheck, ShieldAlert, Mail, CreditCard, Keyboard, Megaphone, ClipboardList, Send,
+  Users as UsersIcon, MessageCircle, Flag as FlagIcon,
 } from 'lucide-react'
 import { CommandPalette } from './CommandPalette'
 import { CountrySwitcher } from './CountrySwitcher'
@@ -33,8 +34,14 @@ const NAV: NavEntry[] = [
   { label: 'People', items: [
     { href: '/admin/users',           label: 'Users',           icon: Users,         short: 'u' },
     { href: '/admin/verifications',   label: 'Verifications',   icon: ShieldCheck,   short: 'v' },
-    { href: '/admin/stolen-reports',  label: 'Stolen Reports',  icon: ShieldAlert,   short: 's' },
     { href: '/admin/messages',        label: 'Messages',        icon: MessageSquare, short: 'i' },
+  ] },
+
+  { label: 'Community', items: [
+    { href: '/admin/community/discussions', label: 'Discussions',    icon: MessageCircle, short: 'c' },
+    { href: '/admin/community/flags',       label: 'Flags',          icon: FlagIcon },
+    { href: '/admin/stolen-reports',        label: 'Stolen Reports', icon: ShieldAlert,  short: 's' },
+    { href: '/admin/community/members',     label: 'Members',        icon: UsersIcon },
   ] },
 
   { label: 'Commerce', items: [
@@ -277,6 +284,7 @@ export function AdminShell({
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>News</span><span><kbd>g</kbd> <kbd>n</kbd></span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Users</span><span><kbd>g</kbd> <kbd>u</kbd></span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Verifications</span><span><kbd>g</kbd> <kbd>v</kbd></span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Discussions</span><span><kbd>g</kbd> <kbd>c</kbd></span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Stolen Reports</span><span><kbd>g</kbd> <kbd>s</kbd></span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Messages (inbox)</span><span><kbd>g</kbd> <kbd>i</kbd></span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Marketing</span><span><kbd>g</kbd> <kbd>m</kbd></span></div>

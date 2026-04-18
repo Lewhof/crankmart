@@ -29,6 +29,12 @@ export const limiters = {
   publicApi:  make(120, 60, 'public-api'),
   stolenCheck:  make(10, 3600, 'stolen-check'),   // 10 / IP / hour
   stolenReport: make(5, 86400, 'stolen-report'),  // 5 / user / day
+  // Community
+  commentWrite: make(15, 300, 'comment-write'),   // 15 / user / 5 min
+  reactionToggle: make(60, 60, 'reaction-toggle'), // 60 / user / min — generous, idempotent
+  flagSubmit:   make(5, 3600, 'flag-submit'),     // 5 / user / hour
+  lostReport:   make(3, 86400, 'lost-report'),    // 3 / user / day
+  profileWrite: make(10, 3600, 'profile-write'),  // 10 / user / hour
 }
 
 export function clientKey(request: NextRequest, suffix = ''): string {

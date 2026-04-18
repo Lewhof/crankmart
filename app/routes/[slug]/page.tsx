@@ -8,6 +8,7 @@ import MiniMap from './MiniMap'
 
 import GalleryWrapper from './GalleryWrapper'
 import ReviewsSection from './ReviewsSection'
+import { CommentThread } from '@/components/community/CommentThread'
 
 const DISCIPLINE_COLOR: Record<string, string> = {
   road: '#3B82F6', mtb: '#7C3AED', gravel: '#D97706', urban: '#10B981', bikepacking: '#EC4899',
@@ -248,6 +249,8 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ sl
             initialAvgRating={avgRating}
             initialReviewCount={reviewCount}
           />
+
+          <CommentThread targetType="route" targetId={r.id as string} title="Trail chat" />
           {/* LEGACY reviews placeholder — kept for JSX structure, hidden */}
           {false && <section style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 2, padding: 24, marginBottom: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>

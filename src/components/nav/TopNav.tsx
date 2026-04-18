@@ -8,6 +8,7 @@ import { Search, Menu, X, User, LogOut, Package, Heart, ChevronDown, MessageCirc
 
 const NAV_LINKS = [
   { href: '/browse',    label: 'Browse' },
+  { href: '/community', label: 'Community' },
   { href: '/events',    label: 'Events' },
   { href: '/routes',    label: 'Routes' },
   { href: '/directory', label: 'Shops' },
@@ -149,6 +150,9 @@ export function TopNav() {
                       </div>
                       <Link href="/account" className="user-menu-item" onClick={() => setUserMenuOpen(false)}>
                         <User size={14} /> My Account
+                      </Link>
+                      <Link href="/account/profile" className="user-menu-item" onClick={() => setUserMenuOpen(false)}>
+                        <User size={14} /> Public profile
                       </Link>
                       <Link href="/account?tab=listings" className="user-menu-item" onClick={() => setUserMenuOpen(false)}>
                         <Package size={14} /> My Listings
