@@ -738,6 +738,7 @@ function BrowseContent() {
             <button
               onClick={loadMore}
               disabled={loadingMore}
+              className="hdr-show-more"
               style={{
                 padding: '8px 18px',
                 background: loadingMore ? '#e4e4e7' : 'var(--color-primary)',
@@ -1109,6 +1110,8 @@ function BrowseContent() {
       <style>{`
         .back-to-top { bottom: 80px; }
         @media (max-width: 767px) { .back-to-top { bottom: calc(72px + env(safe-area-inset-bottom)); } }
+        /* Header "Show more" is duplicated by the bottom action bar on mobile — keep only desktop */
+        @media (max-width: 767px) { .hdr-show-more { display: none !important; } }
       `}</style>
     </div>
   )
