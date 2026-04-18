@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { Search, Menu, X, User, LogOut, Package, Heart, ChevronDown, MessageCircle, Settings } from 'lucide-react'
+import { SuperadminCountryToggle } from './SuperadminCountryToggle'
 
 const NAV_LINKS = [
   { href: '/browse',    label: 'Browse' },
@@ -115,6 +116,11 @@ export function TopNav() {
 
           {/* Right actions — pushed to far right on mobile too */}
           <div style={{ display:'flex',alignItems:'center',gap:6,flexShrink:0,marginLeft:'auto' }}>
+            {/* Superadmin site-wide country toggle — left of the admin cog, admins only */}
+            {session?.user && ['admin', 'superadmin'].includes((session.user as { role?: string }).role ?? '') && (
+              <SuperadminCountryToggle />
+            )}
+
             {/* Admin settings icon — visible to admin + superadmin */}
             {session?.user && ['admin', 'superadmin'].includes((session.user as { role?: string }).role ?? '') && (
               <Link href="/admin" title="Admin Settings" style={{
