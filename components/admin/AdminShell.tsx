@@ -51,6 +51,7 @@ const NAV: NavEntry[] = [
     { href: '/admin/marketing/segments',   label: '· Segments',  icon: Megaphone },
     { href: '/admin/marketing/lists',      label: '· Lists',     icon: Megaphone },
     { href: '/admin/marketing/templates',  label: '· Templates', icon: Megaphone },
+    { href: '/admin/marketing/sequences',  label: '· Sequences', icon: Megaphone },
     { href: '/admin/marketing/calendar',   label: '· Calendar',  icon: Megaphone },
     { href: '/admin/waitlist',             label: 'Waitlist',    icon: Send },
     { href: '/admin/boosts',               label: 'Boosts',      icon: Zap },
