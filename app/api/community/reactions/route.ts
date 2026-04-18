@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
+import { getCountry } from '@/lib/country'
 
 /**
  * POST   /api/community/reactions  — toggle a reaction (idempotent body shape)
@@ -55,9 +56,10 @@ export async function POST(req: NextRequest) {
   `)
   const wasReacted = ((had.rows ?? had) as unknown[]).length > 0
   if (!wasReacted) {
+    const country = await getCountry()
     await db.execute(sql`
-      INSERT INTO comment_reactions (comment_id, user_id, reaction)
-      VALUES (${body.commentId}::uuid, ${session.user.id}::uuid, ${reaction})
+      INSERT INTO comment_reactions (comment_id, user_id, reaction, country)
+      VALUES (${body.commentId}::uuid, ${session.user.id}::uuid, ${reaction}, ${country})
       ON CONFLICT DO NOTHING
     `)
   }

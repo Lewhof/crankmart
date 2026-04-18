@@ -1,13 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Star, Trash2, GripVertical } from 'lucide-react'
-
-const SA_PROVINCES = [
-  'Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal',
-  'Limpopo', 'Mpumalanga', 'Northern Cape', 'North West', 'Western Cape',
-]
+import { adminCountryFromCookie, getProvincesStatic } from '@/lib/regions-static'
 
 const DISCIPLINES = ['road', 'mtb', 'gravel', 'urban', 'bikepacking']
 const DIFFICULTIES = ['beginner', 'intermediate', 'advanced', 'expert']
@@ -53,6 +49,7 @@ export default function EditRoutePage() {
   const router = useRouter()
   const id = params.id as string
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const provinces = useMemo(() => getProvincesStatic(adminCountryFromCookie()), [])
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -374,7 +371,7 @@ export default function EditRoutePage() {
               <select value={form.province} onChange={e => set('province', e.target.value)}
                 style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e4e4e7', borderRadius: 8, fontSize: 13, background: '#fff' }}>
                 <option value="">— select —</option>
-                {SA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                {provinces.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
             {grid2(<>{inp('Region', 'region')}{inp('Town', 'town')}</>)}

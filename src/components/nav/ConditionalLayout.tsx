@@ -6,7 +6,13 @@ import { TopNav } from './TopNav'
 import { BottomNav } from './BottomNav'
 import { Footer } from './Footer'
 
-export function ConditionalLayout({ children }: { children: React.ReactNode }) {
+export function ConditionalLayout({
+  children,
+  geoBanner,
+}: {
+  children: React.ReactNode
+  geoBanner?: React.ReactNode
+}) {
   const pathname = usePathname()
   const { data: session } = useSession()
   const role = (session?.user as { role?: string } | undefined)?.role
@@ -21,6 +27,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      {geoBanner}
       <TopNav />
       <main className="pb-20 md:pb-0">
         {children}

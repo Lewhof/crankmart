@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense, useRef } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -9,17 +9,13 @@ import { ArrowLeft, X, Loader } from 'lucide-react'
 import { upload as blobUpload } from '@vercel/blob/client'
 import imageCompression from 'browser-image-compression'
 import { v4 as uploadUuid } from 'uuid'
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
 
 const CONDITIONS = [
   { value: 'new', label: 'New' },
   { value: 'like_new', label: 'Like New' },
   { value: 'used', label: 'Used' },
   { value: 'poor', label: 'Poor' },
-]
-
-const SA_PROVINCES = [
-  'Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal', 'Limpopo',
-  'Mpumalanga', 'Northern Cape', 'North West', 'Western Cape',
 ]
 
 const FRAME_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '46', '48', '50', '52', '54', '56', '58', '60', '62']
@@ -55,8 +51,10 @@ interface EditFormData {
 function EditContent() {
   const router = useRouter()
   const params = useParams()
+  const pathname = usePathname()
   const listingId = params?.id as string
   const { status } = useSession()
+  const provinces = getProvincesStatic(countryFromPath(pathname))
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -517,7 +515,7 @@ function EditContent() {
               onChange={(e) => setForm({ ...form, province: e.target.value })}
             >
               <option value="">Select province...</option>
-              {SA_PROVINCES.map(p => (
+              {provinces.map(p => (
                 <option key={p} value={p}>{p}</option>
               ))}
             </select>

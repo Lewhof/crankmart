@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -22,6 +23,7 @@ interface MyListing {
   id: string; slug: string; title: string; price: string
   condition: string; status: string; viewsCount: number | null
   savesCount: number | null; createdAt: string; expiresAt: string | null
+  country?: 'za' | 'au' | null
   image: { imageUrl: string } | null
 }
 
@@ -50,6 +52,7 @@ interface SavedListing {
   condition: string; city: string | null; province: string | null
   bike_make: string | null; bike_model: string | null
   thumb_url: string | null
+  country?: 'za' | 'au' | null
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -65,8 +68,12 @@ const STATUS_COLORS: Record<string, string> = {
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' })
 }
-function fmtPrice(p: string) {
-  return `R ${parseFloat(p).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`
+// Per-listing currency: fall back to ZA if a row pre-dates the country column.
+function fmtPriceFor(country: string | undefined | null, p: string): string {
+  const c = (country === 'au' ? 'au' : 'za') as 'za' | 'au'
+  const sym = c === 'au' ? 'A$' : 'R '
+  const locale = c === 'au' ? 'en-AU' : 'en-ZA'
+  return `${sym}${parseFloat(p).toLocaleString(locale, { maximumFractionDigits: 0 })}`
 }
 
 // ─── Boost Button ─────────────────────────────────────────────────────────────
@@ -147,7 +154,7 @@ function ListingsTab({ userId }: { userId: string }) {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <Link href={`/browse/${l.slug}`} style={{ textDecoration: 'none' }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: '#1a1a1a', margin: '2px 0' }}>{fmtPrice(l.price)}</div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: '#1a1a1a', margin: '2px 0' }}>{fmtPriceFor(l.country, l.price)}</div>
                 </Link>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 4 }}>
                   <StatusBadge status={l.status} />
@@ -428,7 +435,7 @@ function SavedTab() {
                   <div style={{ padding: 10 }}>
                     {l.bike_make && <div style={{ fontSize: 10, color: '#9a9a9a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 2 }}>{l.bike_make}</div>}
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.bike_model ?? l.title}</div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#1a1a1a' }}>{fmtPrice(l.price)}</div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: '#1a1a1a' }}>{fmtPriceFor(l.country, l.price)}</div>
                     <div style={{ fontSize: 11, color: '#9a9a9a', marginTop: 4, display: 'flex', alignItems: 'center', gap: 3 }}><MapPin size={10} /> {l.city ?? l.province}</div>
                   </div>
                 </div>
@@ -497,13 +504,12 @@ function SavedTab() {
   )
 }
 
-const SA_PROVINCES = [
-  'Eastern Cape','Free State','Gauteng','KwaZulu-Natal',
-  'Limpopo','Mpumalanga','North West','Northern Cape','Western Cape',
-]
+// Provinces list comes from regions-static (country-aware) — imported at top.
 
 // ─── Profile Tab ─────────────────────────────────────────────────────────────
 function ProfileTab({ session, onAvatarChange }: { session: ReturnType<typeof useSession>['data']; onAvatarChange: (url: string | null) => void }) {
+  const pathname = usePathname()
+  const provinces = getProvincesStatic(countryFromPath(pathname))
   const [uploading, setUploading] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>((session?.user as Record<string,unknown>)?.avatarUrl as string ?? null)
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
@@ -661,8 +667,8 @@ function ProfileTab({ session, onAvatarChange }: { session: ReturnType<typeof us
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <select autoFocus value={editValue} onChange={e => setEditValue(e.target.value)}
                 style={{ flex: 1, minWidth: 160, height: 34, padding: '0 10px', border: '1px solid #d1d5db', borderRadius: 2, fontSize: 14 }}>
-                <option value="">— Select province —</option>
-                {SA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                <option value="">— Select —</option>
+                {provinces.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
               <button onClick={() => saveEdit('province')} disabled={saving} style={{ ...BTN_PRIMARY, height: 34 }}>{saving ? '…' : 'Save'}</button>
               <button onClick={cancelEdit} style={{ ...BTN_OUTLINE, height: 34 }}>Cancel</button>

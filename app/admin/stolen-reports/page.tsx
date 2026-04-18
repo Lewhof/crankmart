@@ -98,7 +98,14 @@ export default function StolenReportsPage() {
     id: r.id,
     cells: [
       <div key="s">
-        <div style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700, fontSize: 13 }}>{r.serial_number}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700, fontSize: 13 }}>{r.serial_number}</span>
+          <span style={{
+            fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 3,
+            background: 'var(--admin-surface-2)', color: 'var(--admin-text-dim)',
+            textTransform: 'uppercase', letterSpacing: .3,
+          }}>{r.country || 'za'}</span>
+        </div>
         <div style={{ fontSize: 11, color: 'var(--admin-text-dim)', marginTop: 2 }}>
           {r.brand}{r.model ? ` ${r.model}` : ''}{r.year ? ` · ${r.year}` : ''}
         </div>

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { getCountry } from '@/lib/country'
+import { getProvincesStatic } from '@/lib/regions-static'
 import { ShieldAlert, Search, MapPin, Plus } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -33,7 +34,6 @@ interface PageProps {
 }
 
 const PAGE_SIZE = 24
-const SA_PROVINCES = ['Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal', 'Limpopo', 'Mpumalanga', 'Northern Cape', 'North West', 'Western Cape']
 
 async function fetchReports(opts: { province: string; brand: string; page: number; status: string }) {
   const country = await getCountry()
@@ -77,6 +77,8 @@ export default async function StolenIndexPage({ searchParams }: PageProps) {
   const brand = sp.brand ?? ''
   const page = Math.max(1, parseInt(sp.page ?? '1'))
   const status = sp.status === 'recovered' ? 'recovered' : 'approved'
+  const country = await getCountry()
+  const provinces = getProvincesStatic(country)
   const data = await fetchReports({ province, brand, page, status })
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
 
@@ -130,7 +132,7 @@ export default async function StolenIndexPage({ searchParams }: PageProps) {
           name="province-decor" // visual only; real navigation via chips below
         >
           <option value="">Province</option>
-          {SA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+          {provinces.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
         {province && (
           <Link href={buildHref({ province: '' })} style={chipStyle}>{province} ✕</Link>
@@ -142,7 +144,7 @@ export default async function StolenIndexPage({ searchParams }: PageProps) {
 
       {/* Province chips (server-side, no JS needed) */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
-        {SA_PROVINCES.map(p => (
+        {provinces.map(p => (
           <Link
             key={p}
             href={buildHref({ province: province === p ? '' : p })}

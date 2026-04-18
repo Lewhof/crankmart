@@ -3,8 +3,10 @@ import { ConditionalLayout } from '@/components/nav/ConditionalLayout'
 import Analytics from '@/components/Analytics'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import CookieBanner from '@/components/CookieBanner'
+import { GeoSuggestBanner } from '@/components/GeoSuggestBanner'
 import { SessionProvider } from 'next-auth/react'
 import { getThemeVars, buildThemeCss } from '@/lib/theme'
+import { getCountry } from '@/lib/country'
 import './globals.css'
 
 export const viewport = {
@@ -118,6 +120,7 @@ export default async function RootLayout({
 }) {
   const theme = await getThemeVars()
   const themeCss = buildThemeCss(theme)
+  const country = await getCountry()
 
   return (
     <html lang="en">
@@ -136,7 +139,7 @@ export default async function RootLayout({
         <SessionProvider>
           <GoogleAnalytics />
           <Analytics />
-          <ConditionalLayout>
+          <ConditionalLayout geoBanner={<GeoSuggestBanner currentCountry={country} />}>
             {children}
           </ConditionalLayout>
           <CookieBanner />

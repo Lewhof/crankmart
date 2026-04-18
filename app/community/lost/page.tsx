@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { getCountry } from '@/lib/country'
+import { getProvincesStatic } from '@/lib/regions-static'
 import { Frown, MapPin, Plus } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -33,7 +34,6 @@ interface PageProps {
 }
 
 const PAGE_SIZE = 24
-const SA_PROVINCES = ['Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal', 'Limpopo', 'Mpumalanga', 'Northern Cape', 'North West', 'Western Cape']
 
 async function fetchReports(opts: { province: string; brand: string; page: number }) {
   const country = await getCountry()
@@ -76,6 +76,8 @@ export default async function LostIndexPage({ searchParams }: PageProps) {
   const province = sp.province ?? ''
   const brand = sp.brand ?? ''
   const page = Math.max(1, parseInt(sp.page ?? '1'))
+  const country = await getCountry()
+  const provinces = getProvincesStatic(country)
   const data = await fetchReports({ province, brand, page })
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
 
@@ -114,7 +116,7 @@ export default async function LostIndexPage({ searchParams }: PageProps) {
       </header>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
-        {SA_PROVINCES.map(p => (
+        {provinces.map(p => (
           <Link
             key={p}
             href={buildHref({ province: province === p ? '' : p })}

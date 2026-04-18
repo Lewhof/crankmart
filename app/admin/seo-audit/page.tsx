@@ -98,8 +98,10 @@ export default function SeoAuditPage() {
   const total = results.length
   const progress = total > 0 ? Math.round((counts.pass / total) * 100) : 0
 
+  // Admin-internal timestamp — uses the browser's locale + zone so operators
+  // in either country see their own time without a country-context fetch.
   const formatTime = (iso: string) => {
-    try { return new Date(iso).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg', hour12: false }) }
+    try { return new Date(iso).toLocaleString(undefined, { hour12: false }) }
     catch { return iso }
   }
 

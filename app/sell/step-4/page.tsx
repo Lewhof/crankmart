@@ -1,30 +1,24 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, ChevronRight, Loader, ChevronDown } from 'lucide-react'
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
+import { getCountryConfig } from '@/lib/country-config'
 
 const STEPS = ['Category', 'Details', 'Photos', 'Location & Price']
-
-const SA_PROVINCES = [
-  'Eastern Cape',
-  'Free State',
-  'Gauteng',
-  'KwaZulu-Natal',
-  'Limpopo',
-  'Mpumalanga',
-  'Northern Cape',
-  'North West',
-  'Western Cape',
-]
 
 function Step4Content() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const country = countryFromPath(pathname)
+  const provinces = getProvincesStatic(country)
+  const regionLabel = getCountryConfig(country).regionLabel
 
   const [form, setForm] = useState({
     price: '',
@@ -420,16 +414,16 @@ function Step4Content() {
             </label>
           </div>
 
-          {/* Province */}
+          {/* Province / State */}
           <div className="form-group">
-            <label className="form-label">Province *</label>
+            <label className="form-label">{regionLabel} *</label>
             <select
               className="form-input"
               value={form.province}
               onChange={e => handleChange('province', e.target.value)}
             >
-              <option value="">Select province...</option>
-              {SA_PROVINCES.map(p => (
+              <option value="">Select {regionLabel.toLowerCase()}…</option>
+              {provinces.map(p => (
                 <option key={p} value={p}>{p}</option>
               ))}
             </select>

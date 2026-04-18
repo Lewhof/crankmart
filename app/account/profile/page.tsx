@@ -1,16 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { ArrowLeft, Loader, CheckCircle2, ExternalLink } from 'lucide-react'
 import { suggestHandle } from '@/lib/community'
-
-const SA_PROVINCES = ['Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal', 'Limpopo', 'Mpumalanga', 'Northern Cape', 'North West', 'Western Cape']
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
+import { getCountryConfig } from '@/lib/country-config'
 
 export default function AccountProfilePage() {
   const router = useRouter()
+  const pathname = usePathname()
+  const country = countryFromPath(pathname)
+  const provinces = getProvincesStatic(country)
+  const regionLabel = getCountryConfig(country).regionLabel
   const { status } = useSession()
   const [form, setForm] = useState({
     handle: '',
@@ -119,10 +123,10 @@ export default function AccountProfilePage() {
           />
         </Field>
 
-        <Field label="Province">
+        <Field label={regionLabel}>
           <select value={form.profileProvince} onChange={e => setForm(f => ({ ...f, profileProvince: e.target.value }))} style={inputStyle}>
             <option value="">Don&apos;t show</option>
-            {SA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+            {provinces.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
         </Field>
 

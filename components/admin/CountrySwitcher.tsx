@@ -6,7 +6,7 @@ import { Globe, Check, ChevronDown } from 'lucide-react'
 
 const COUNTRY_LABELS: Record<string, string> = {
   za: 'South Africa',
-  // au: 'Australia',  // future
+  au: 'Australia',
 }
 
 export function CountrySwitcher({

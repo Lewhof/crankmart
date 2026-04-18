@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm'
 import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
 import { isFlagReason, isTargetType } from '@/lib/community'
 import { sendEmail } from '@/lib/email'
+import { getCountry } from '@/lib/country'
 
 const FLAG_TARGET_TYPES = ['comment', 'listing', 'event', 'route', 'news', 'stolen_report', 'lost_report'] as const
 
@@ -50,14 +51,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid reason' }, { status: 400 })
   }
 
+  const country = await getCountry()
   await db.execute(sql`
-    INSERT INTO content_flags (target_type, target_id, reporter_id, reason, notes)
+    INSERT INTO content_flags (target_type, target_id, reporter_id, reason, notes, country)
     VALUES (
       ${body.targetType},
       ${body.targetId}::uuid,
       ${reporterId ? sql`${reporterId}::uuid` : sql`NULL`},
       ${body.reason},
-      ${body.notes ?? null}
+      ${body.notes ?? null},
+      ${country}
     )
   `)
 

@@ -1,16 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { upload } from '@vercel/blob/client'
 import imageCompression from 'browser-image-compression'
 import { ShieldAlert, Camera, Loader, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { countryFromPath } from '@/lib/regions-static'
+import { getCountryConfig } from '@/lib/country-config'
 
 export default function StolenReportPage() {
   const router = useRouter()
   const params = useSearchParams()
+  const pathname = usePathname()
+  const country = countryFromPath(pathname)
+  const policeLabel = getCountryConfig(country).policeLabel
   const { data: session, status } = useSession()
 
   const [form, setForm] = useState({
@@ -121,7 +126,7 @@ export default function StolenReportPage() {
           </h1>
           <p style={{ margin: '0 0 18px', fontSize: 14, color: '#065F46' }}>
             {success.status === 'approved'
-              ? 'Your SAPS case + photo passed the auto-approve gate. Your bike is now visible on the public registry.'
+              ? `Your ${policeLabel.toLowerCase()} + photo passed the auto-approve gate. Your bike is now visible on the public registry.`
               : 'An admin will review your report shortly. You\'ll get an email when it\'s approved.'}
           </p>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
@@ -149,7 +154,7 @@ export default function StolenReportPage() {
       </h1>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6b7280', lineHeight: 1.55 }}>
         Adding a bike here means any CrankMart seller attempting to list it will be blocked, and anyone checking the serial will see your report.
-        <strong> Include SAPS case + a proof-of-ownership photo to get auto-approved instantly.</strong>
+        <strong> Include your {policeLabel.toLowerCase()} + a proof-of-ownership photo to get auto-approved instantly.</strong>
       </p>
 
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -181,8 +186,13 @@ export default function StolenReportPage() {
         </div>
 
         <Row two>
-          <Field label="SAPS case number (auto-approve)">
-            <input value={form.sapsCaseNo} onChange={setField('sapsCaseNo')} placeholder="e.g. CAS 123/04/2026" style={inputStyle} />
+          <Field label={`${policeLabel} (auto-approve)`}>
+            <input
+              value={form.sapsCaseNo}
+              onChange={setField('sapsCaseNo')}
+              placeholder={country === 'au' ? 'e.g. E12345678 (state police)' : 'e.g. CAS 123/04/2026'}
+              style={inputStyle}
+            />
           </Field>
           <Field label="Date stolen">
             <input type="date" value={form.stolenDate} onChange={setField('stolenDate')} style={inputStyle} />

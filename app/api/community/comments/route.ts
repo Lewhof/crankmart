@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { limiters, clientKey, check, rateLimitHeaders } from '@/lib/ratelimit'
 import { isTargetType, sanitiseCommentBody } from '@/lib/community'
+import { getCountry } from '@/lib/country'
 
 export interface CommentRow {
   id: string
@@ -43,6 +44,7 @@ export async function GET(req: NextRequest) {
 
   const session = await auth()
   const viewerId = session?.user?.id ?? null
+  const country = await getCountry()
 
   const cursorClause = cursor
     ? sql`AND c.created_at < ${cursor}::timestamp`
@@ -58,7 +60,8 @@ export async function GET(req: NextRequest) {
         : sql`false`} AS viewer_has_reacted
     FROM comments c
     JOIN users u ON u.id = c.user_id
-    WHERE c.target_type = ${targetType}
+    WHERE c.country = ${country}
+      AND c.target_type = ${targetType}
       AND c.target_id = ${targetId}::uuid
       AND c.status = 'approved'
       ${cursorClause}
@@ -161,14 +164,16 @@ export async function POST(req: NextRequest) {
     effectiveParentId = parent.parent_id ?? parent.id
   }
 
+  const country = await getCountry()
   const insertRes = await db.execute(sql`
-    INSERT INTO comments (target_type, target_id, parent_id, user_id, body)
+    INSERT INTO comments (target_type, target_id, parent_id, user_id, body, country)
     VALUES (
       ${body.targetType},
       ${body.targetId}::uuid,
       ${effectiveParentId ? sql`${effectiveParentId}::uuid` : sql`NULL`},
       ${session.user.id}::uuid,
-      ${text}
+      ${text},
+      ${country}
     )
     RETURNING id, created_at
   `)

@@ -14,10 +14,10 @@
 import { headers } from 'next/headers'
 import { eq, type SQL } from 'drizzle-orm'
 
-export type Country = 'za'
-// Future: 'au' | 'uk' | 'us' | 'nz'
+export type Country = 'za' | 'au'
+// Future: 'uk' | 'us' | 'nz'
 
-export const ACTIVE_COUNTRIES: readonly Country[] = ['za'] as const
+export const ACTIVE_COUNTRIES: readonly Country[] = ['za', 'au'] as const
 export const DEFAULT_COUNTRY: Country = 'za'
 
 export type RoutingMode = 'implicit-za' | 'prefixed'

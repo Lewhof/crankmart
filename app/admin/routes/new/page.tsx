@@ -1,12 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-
-const SA_PROVINCES = [
-  'Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal',
-  'Limpopo', 'Mpumalanga', 'Northern Cape', 'North West', 'Western Cape',
-]
+import { adminCountryFromCookie, getProvincesStatic } from '@/lib/regions-static'
 
 const DISCIPLINES = ['road', 'mtb', 'gravel', 'urban', 'bikepacking']
 const DIFFICULTIES = ['beginner', 'intermediate', 'advanced', 'expert']
@@ -40,6 +36,7 @@ function fmtTime(mins: number) {
 
 export default function NewRoutePage() {
   const router = useRouter()
+  const provinces = useMemo(() => getProvincesStatic(adminCountryFromCookie()), [])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tagInput, setTagInput] = useState('')
@@ -220,7 +217,7 @@ export default function NewRoutePage() {
                 <select value={form.province} onChange={e => set('province', e.target.value)}
                   style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e4e4e7', borderRadius: 8, fontSize: 13, background: '#fff' }}>
                   <option value="">— select —</option>
-                  {SA_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                  {provinces.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               {grid2(<>{inp('Region', 'region')}{inp('Town', 'town')}</>)}

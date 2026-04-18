@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { getAdminCountry } from '@/lib/admin-country'
+import { formatPrice } from '@/lib/currency'
 import { Card, PageHeader, StatCard, StatusPill, Table, Empty } from '@/components/admin/primitives'
 import { toneForStatus } from '@/components/admin/tone'
 import { ArrowRight } from 'lucide-react'
@@ -128,7 +129,7 @@ export default async function AdminDashboard() {
                 cells: [
                   <Link key="t" href={`/admin/listings/${l.id}`} style={{ color: 'var(--admin-text)', textDecoration: 'none', fontWeight: 600 }}>{l.title}</Link>,
                   l.seller_name,
-                  `R ${Number(l.price).toLocaleString('en-ZA')}`,
+                  formatPrice(country, l.price),
                   <StatusPill key="s" label={l.moderation_status} tone={toneForStatus(l.moderation_status)} />,
                 ],
               }))}
