@@ -37,6 +37,8 @@ function Step4Content() {
 
   const [publishing, setPublishing] = useState(false)
   const [duplicate, setDuplicate] = useState<{ existingSlug: string; existingTitle: string } | null>(null)
+  const [publishError, setPublishError] = useState<{ message: string; code: string } | null>(null)
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'already' | 'error'>('idle')
   const [previewExpanded, setPreviewExpanded] = useState(false)
   const [previewData, setPreviewData] = useState<{ title?: string; image?: string; category?: string } | null>(null)
 
@@ -108,9 +110,10 @@ function Step4Content() {
 
   const handlePublish = async (forceDuplicate?: boolean) => {
     if (!form.price || !form.province || !form.city) {
-      alert('Please fill in price, province, and city')
+      setPublishError({ message: 'Please fill in price, province, and city.', code: 'validation' })
       return
     }
+    setPublishError(null)
 
     setPublishing(true)
     try {
@@ -152,7 +155,15 @@ function Step4Content() {
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || 'Publish failed')
+        // 403 + email_unverified gets a specific banner with a Resend button
+        if (res.status === 403 && err.code === 'email_unverified') {
+          setPublishError({ message: err.error || 'Please verify your email before publishing.', code: 'email_unverified' })
+          setPublishing(false)
+          return
+        }
+        setPublishError({ message: err.error || 'Publish failed', code: 'publish' })
+        setPublishing(false)
+        return
       }
 
       const { slug, listingId } = await res.json()
@@ -171,9 +182,23 @@ function Step4Content() {
       // Redirect to listing
       router.push(`/sell/success?slug=${slug}&title=${listingTitle}&listingId=${listingId}`)
     } catch (err) {
-      // Publish error — shown to user via alert below
-      alert(err instanceof Error ? err.message : 'Failed to publish')
+      setPublishError({ message: err instanceof Error ? err.message : 'Failed to publish', code: 'network' })
       setPublishing(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    setResendStatus('sending')
+    try {
+      const res = await fetch('/api/auth/resend-verify', { method: 'POST' })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setResendStatus(body?.alreadyVerified ? 'already' : 'sent')
+      } else {
+        setResendStatus('error')
+      }
+    } catch {
+      setResendStatus('error')
     }
   }
 
@@ -478,6 +503,53 @@ function Step4Content() {
               </>
             )}
           </button>
+        )}
+
+        {publishError && (
+          <div
+            role="alert"
+            style={{
+              marginTop: 14, padding: '14px 16px',
+              background: publishError.code === 'email_unverified' ? '#FEF3C7' : '#FEE2E2',
+              border: `1px solid ${publishError.code === 'email_unverified' ? '#FCD34D' : '#FCA5A5'}`,
+              borderRadius: 8,
+              color: publishError.code === 'email_unverified' ? '#92400E' : '#991B1B',
+              fontSize: 13, lineHeight: 1.5,
+            }}
+          >
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>
+              {publishError.code === 'email_unverified' ? 'Email not verified' : 'Could not publish'}
+            </div>
+            <div style={{ marginBottom: publishError.code === 'email_unverified' ? 10 : 0 }}>
+              {publishError.message}
+            </div>
+            {publishError.code === 'email_unverified' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleResendVerification}
+                  disabled={resendStatus === 'sending' || resendStatus === 'sent'}
+                  style={{
+                    padding: '7px 14px', borderRadius: 6,
+                    background: '#92400E', color: '#fff', border: 'none',
+                    fontSize: 12, fontWeight: 700,
+                    cursor: resendStatus === 'sending' || resendStatus === 'sent' ? 'default' : 'pointer',
+                    opacity: resendStatus === 'sent' ? 0.7 : 1,
+                  }}
+                >
+                  {resendStatus === 'sending' ? 'Sending…'
+                   : resendStatus === 'sent'    ? 'Sent ✓'
+                   : resendStatus === 'already' ? 'Already verified — refresh'
+                   : 'Resend verification email'}
+                </button>
+                {resendStatus === 'sent' && (
+                  <span style={{ fontSize: 12 }}>Check your inbox, click the link, then retry Publish.</span>
+                )}
+                {resendStatus === 'error' && (
+                  <span style={{ fontSize: 12 }}>Couldn&apos;t send — try again in a minute.</span>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
