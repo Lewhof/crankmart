@@ -1,9 +1,11 @@
 /**
  * Removes everything seeded by `seed-test-users.ts` from the database.
  *
- * Strategy: deletes by deterministic markers — test emails (`@crankmart.test`),
- * shop/event/listing slugs prefixed with `test-` AND tagged `source = 'lew_test'`,
- * and the known stolen-test serial. Cascading FKs handle dependent rows.
+ * Strategy: deletes by an explicit list of test emails (since they live on
+ * the real @crankmart.com production domain, we cannot match by domain — we
+ * have to match the exact 6 addresses), plus shops/events tagged
+ * `source = 'lew_test'`, plus the known stolen-test serial. Cascading FKs
+ * handle dependent rows where defined.
  *
  * Usage:
  *   npx tsx scripts/cleanup-test-data.ts        # delete for real
@@ -16,7 +18,16 @@ import { neon } from '@neondatabase/serverless'
 
 const SEED_SOURCE = 'lew_test'
 const STOLEN_TEST_SERIAL = 'TEST-STOLEN-001'
-const TEST_EMAIL_DOMAIN = '@crankmart.test'
+
+// Keep in sync with TEST_USERS in seed-test-users.ts.
+const TEST_EMAILS = [
+  'test.sa@crankmart.com',
+  'test.au@crankmart.com',
+  'test.shop.sa@crankmart.com',
+  'test.shop.au@crankmart.com',
+  'test.event.sa@crankmart.com',
+  'test.event.au@crankmart.com',
+]
 
 async function main() {
   const url = process.env.DATABASE_URL
@@ -27,7 +38,7 @@ async function main() {
   console.log(`Test-data cleanup — ${dry ? 'DRY RUN' : 'LIVE'}\n`)
 
   // Count before / preview
-  const userRows = await sql`SELECT id, email FROM users WHERE email LIKE ${`%${TEST_EMAIL_DOMAIN}`}`
+  const userRows = await sql`SELECT id, email FROM users WHERE email = ANY(${TEST_EMAILS}::text[])`
   const userIds = userRows.map(r => r.id as string)
 
   const shopRows = await sql`SELECT id, slug FROM businesses WHERE source = ${SEED_SOURCE}`
@@ -127,7 +138,7 @@ async function main() {
 
   // 8. Finally users themselves
   if (userIds.length > 0) {
-    await sql`DELETE FROM users WHERE email LIKE ${`%${TEST_EMAIL_DOMAIN}`}`
+    await sql`DELETE FROM users WHERE email = ANY(${TEST_EMAILS}::text[])`
     console.log(`  ✓ deleted ${userRows.length} user(s)`)
   }
 

@@ -2,15 +2,29 @@
  * Seeds the E2E smoke-test cohort: 6 test users + their attached test data
  * (2 shops, 2 events, 6 listings, 1 stolen-bike registration).
  *
- * Every row is tagged `seed_source = 'lew_test'` so cleanup-test-data.ts can
- * remove the entire cohort in one pass.
+ * Test addresses use the real `@crankmart.com` domain — set up as aliases
+ * pointing at Lew's main mailbox so every transactional/marketing email
+ * actually lands in his inbox during smoke testing (verification email,
+ * password reset, message notifications, Touch 1/2/3 outreach, etc.).
+ *
+ * Required mailbox setup (one-time):
+ *   test.sa@crankmart.com         → forwards to lew's real mailbox
+ *   test.au@crankmart.com         → ditto
+ *   test.shop.sa@crankmart.com    → ditto
+ *   test.shop.au@crankmart.com    → ditto
+ *   test.event.sa@crankmart.com   → ditto
+ *   test.event.au@crankmart.com   → ditto
+ *
+ * Cleanup: scripts/cleanup-test-data.ts matches the same 6 addresses to
+ * remove the cohort cleanly. Tag `seed_source = 'lew_test'` on shops and
+ * events for belt-and-braces deletion.
  *
  * Usage:
  *   npx tsx scripts/seed-test-users.ts          # seed for real
  *   npx tsx scripts/seed-test-users.ts --dry    # print what would be inserted
  *
- * Idempotent: re-running finds existing rows by deterministic email/slug and
- * skips them. Safe against partial previous runs.
+ * Idempotent: re-running upserts (resets password + role each time so test
+ * creds always work even if a prior run drifted).
  *
  * Test users + the credential they all share:
  *   Password: Test1234!  (bcrypt-hashed at rest)
@@ -34,13 +48,14 @@ interface TestUser {
   handle: string
 }
 
+// Keep these in sync with cleanup-test-data.ts TEST_EMAILS.
 const TEST_USERS: TestUser[] = [
-  { key: 'reg_sa',   email: 'test.sa@crankmart.test',       name: 'Test User SA',       role: 'seller',     country: 'za', province: 'Western Cape',          city: 'Cape Town',     handle: 'test_sa' },
-  { key: 'reg_au',   email: 'test.au@crankmart.test',       name: 'Test User AU',       role: 'seller',     country: 'au', province: 'New South Wales',       city: 'Sydney',        handle: 'test_au' },
-  { key: 'shop_sa',  email: 'test.shop.sa@crankmart.test',  name: 'Shop Owner SA',      role: 'shop_owner', country: 'za', province: 'Gauteng',               city: 'Johannesburg',  handle: 'test_shop_sa' },
-  { key: 'shop_au',  email: 'test.shop.au@crankmart.test',  name: 'Shop Owner AU',      role: 'shop_owner', country: 'au', province: 'Victoria',              city: 'Melbourne',     handle: 'test_shop_au' },
-  { key: 'event_sa', email: 'test.event.sa@crankmart.test', name: 'Event Organiser SA', role: 'organiser',  country: 'za', province: 'KwaZulu-Natal',         city: 'Durban',        handle: 'test_event_sa' },
-  { key: 'event_au', email: 'test.event.au@crankmart.test', name: 'Event Organiser AU', role: 'organiser',  country: 'au', province: 'Queensland',            city: 'Brisbane',      handle: 'test_event_au' },
+  { key: 'reg_sa',   email: 'test.sa@crankmart.com',       name: 'Test User SA',       role: 'seller',     country: 'za', province: 'Western Cape',     city: 'Cape Town',     handle: 'test_sa' },
+  { key: 'reg_au',   email: 'test.au@crankmart.com',       name: 'Test User AU',       role: 'seller',     country: 'au', province: 'New South Wales',  city: 'Sydney',        handle: 'test_au' },
+  { key: 'shop_sa',  email: 'test.shop.sa@crankmart.com',  name: 'Shop Owner SA',      role: 'shop_owner', country: 'za', province: 'Gauteng',          city: 'Johannesburg',  handle: 'test_shop_sa' },
+  { key: 'shop_au',  email: 'test.shop.au@crankmart.com',  name: 'Shop Owner AU',      role: 'shop_owner', country: 'au', province: 'Victoria',         city: 'Melbourne',     handle: 'test_shop_au' },
+  { key: 'event_sa', email: 'test.event.sa@crankmart.com', name: 'Event Organiser SA', role: 'organiser',  country: 'za', province: 'KwaZulu-Natal',    city: 'Durban',        handle: 'test_event_sa' },
+  { key: 'event_au', email: 'test.event.au@crankmart.com', name: 'Event Organiser AU', role: 'organiser',  country: 'au', province: 'Queensland',       city: 'Brisbane',      handle: 'test_event_au' },
 ]
 
 interface TestShop {
