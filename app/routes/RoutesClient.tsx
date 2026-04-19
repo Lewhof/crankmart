@@ -359,7 +359,7 @@ export default function RoutesClient() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 20px', display: 'flex', gap: 0, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {[
             { icon: <Navigation size={14} />, label: `${total || 50} Routes`, sub: 'Verified' },
-            { icon: <MapPin size={14} />,      label: '9 Provinces',          sub: 'All covered' },
+            { icon: <MapPin size={14} />,      label: `${PROVINCES.length} ${country === 'au' ? 'States' : 'Provinces'}`, sub: 'All covered' },
             { icon: <TrendingUp size={14} />,  label: 'All Levels',           sub: 'Beg → Expert' },
             { icon: <Mountain size={14} />,    label: 'Road · MTB · Gravel',  sub: 'Every discipline' },
           ].map((s, i) => (
@@ -508,7 +508,8 @@ export default function RoutesClient() {
               <MapComponent
                 routes={mapRoutes}
                 onRouteClick={(slug) => { window.location.href = `/routes/${slug}` }}
-                zoom={6}
+                center={country === 'au' ? [-25, 135] : [-29, 25]}
+                zoom={country === 'au' ? 4 : 6}
                 userLat={userLat}
                 userLng={userLng}
                 nearbyKm={nearbyKm}

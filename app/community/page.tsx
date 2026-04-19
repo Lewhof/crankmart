@@ -3,12 +3,18 @@ import Link from 'next/link'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { getCountry } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
+import { getLocale } from '@/lib/currency'
 import { ShieldAlert, Search, MessageCircle, MapPin, Frown, Users } from 'lucide-react'
 
-export const metadata: Metadata = {
-  title: 'Community — CrankMart',
-  description: 'South African cycling community: stolen bike registry, lost bike reports, serial lookup, and discussion across the marketplace.',
-  robots: { index: true, follow: true },
+export async function generateMetadata(): Promise<Metadata> {
+  const cfg = getCountryConfig(await getCountry())
+  const adj = cfg.name === 'South Africa' ? 'South African' : cfg.name === 'Australia' ? 'Australian' : cfg.name
+  return {
+    title: 'Community — CrankMart',
+    description: `${adj} cycling community: stolen bike registry, lost bike reports, serial lookup, and discussion across the marketplace.`,
+    robots: { index: true, follow: true },
+  }
 }
 
 export const revalidate = 120
@@ -86,9 +92,13 @@ async function fetchHub() {
 
 export default async function CommunityHubPage() {
   const hub = await fetchHub()
+  const country = await getCountry()
+  const cfg = getCountryConfig(country)
+  const locale = getLocale(country)
+  const adj = country === 'au' ? 'AU' : 'SA'
 
   const fmt = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }) : null
+    iso ? new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }) : null
 
   return (
     <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px 80px', fontFamily: 'system-ui, sans-serif', color: '#1a1a1a' }}>
@@ -97,7 +107,7 @@ export default async function CommunityHubPage() {
       <section style={{ marginBottom: 36 }}>
         <h1 style={{ fontSize: 32, fontWeight: 900, margin: 0, letterSpacing: -0.5 }}>CrankMart Community</h1>
         <p style={{ fontSize: 15, color: '#4b5563', margin: '6px 0 0', maxWidth: 640, lineHeight: 1.55 }}>
-          SA&apos;s dedicated registry for stolen + lost bikes, serial-number checks, and community conversations across every listing, event, and route.
+          {adj}&apos;s dedicated registry for stolen + lost bikes, serial-number checks, and community conversations across every listing, event, and route.
         </p>
 
         {/* Stat strip */}
@@ -133,7 +143,7 @@ export default async function CommunityHubPage() {
           href="/community/stolen/report"
           icon={<MapPin size={20} />}
           title="Report stolen"
-          body="Add your bike to the registry. SAPS case + photo auto-approves instantly."
+          body={`Add your bike to the registry. ${cfg.policeLabel} + photo auto-approves instantly.`}
         />
       </section>
 
@@ -206,7 +216,7 @@ function Stat({ label, value, tone }: { label: string; value: number; tone?: 'go
         {label}
       </span>
       <span style={{ fontSize: 20, fontWeight: 800, color: tone === 'good' ? '#059669' : '#1a1a1a' }}>
-        {value.toLocaleString('en-ZA')}
+        {value.toLocaleString()}
       </span>
     </div>
   )
