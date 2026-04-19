@@ -1,16 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Eye, ArrowLeft, Share2, Calendar } from 'lucide-react'
 import { CommentThread } from '@/components/community/CommentThread'
+import { sanitizeArticleHtml } from '@/lib/sanitize-html'
 
 interface Article {
   id: string; title: string; slug: string; excerpt: string; body: string
   cover_image_url: string | null; category: string; tags: string[]
   author_name: string; author_bio: string | null; source_url: string | null
+  author_handle: string | null; author_avatar: string | null
   is_featured: boolean; views_count: number; published_at: string
 }
 
@@ -59,8 +61,13 @@ export default function ArticleDetailPage() {
     </div>
   )
 
-  const dateFormatted = new Date(article.published_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })
-  const paragraphs = article.body.split('\n\n').filter(Boolean)
+  const dateFormatted = new Date(article.published_at).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
+  // Body may be either Tiptap-emitted HTML (new submissions) or legacy
+  // plain text seeded earlier. If it looks like HTML we sanitise + render
+  // via dangerouslySetInnerHTML; otherwise we fall back to paragraph split.
+  const looksLikeHtml = useMemo(() => /<\/?[a-z][\s\S]*>/i.test(article.body), [article.body])
+  const safeHtml = useMemo(() => looksLikeHtml ? sanitizeArticleHtml(article.body) : '', [looksLikeHtml, article.body])
+  const paragraphs = looksLikeHtml ? [] : article.body.split('\n\n').filter(Boolean)
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>
@@ -69,7 +76,16 @@ export default function ArticleDetailPage() {
         .skel{animation:pulse 1.4s infinite;background:#efefef;border-radius:8px}
         .related-card{background:#fff;border-radius:10px;border:1px solid #ebebeb;overflow:hidden;text-decoration:none;color:inherit;display:flex;gap:12px;padding:12px;transition:box-shadow .15s}
         .related-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+        .article-body{font-size:16px;line-height:1.75;color:#374151}
         .article-body p{font-size:16px;line-height:1.75;color:#374151;margin:0 0 20px}
+        .article-body h2{font-size:22px;font-weight:800;color:#1a1a1a;margin:32px 0 14px}
+        .article-body h3{font-size:18px;font-weight:700;color:#1a1a1a;margin:26px 0 12px}
+        .article-body ul,.article-body ol{padding-left:22px;margin:0 0 20px}
+        .article-body li{margin:0 0 6px}
+        .article-body blockquote{border-left:3px solid #0D1B2A;padding-left:14px;color:#4b5563;font-style:italic;margin:20px 0}
+        .article-body a{color:var(--color-primary);text-decoration:underline}
+        .article-body img{max-width:100%;border-radius:10px;margin:20px 0;display:block}
+        .article-body strong{color:#1a1a1a}
       `}</style>
 
       {/* Hero image */}
@@ -99,11 +115,22 @@ export default function ArticleDetailPage() {
         <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: '16px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, border: '1px solid #ebebeb', borderTop: 'none' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--color-primary)', color: '#fff', fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {article.author_name[0]}
-              </div>
+              {article.author_avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={article.author_avatar} alt={article.author_name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--color-primary)', color: '#fff', fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {article.author_name[0]}
+                </div>
+              )}
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{article.author_name}</div>
+                {article.author_handle ? (
+                  <Link href={`/u/${article.author_handle}`} style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', textDecoration: 'none' }}>
+                    {article.author_name}
+                  </Link>
+                ) : (
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{article.author_name}</div>
+                )}
                 {article.author_bio && <div style={{ fontSize: 12, color: '#9a9a9a' }}>{article.author_bio}</div>}
               </div>
             </div>
@@ -126,10 +153,15 @@ export default function ArticleDetailPage() {
             {article.excerpt}
           </p>
 
-          {/* Body paragraphs */}
-          <div className="article-body">
-            {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
-          </div>
+          {/* Body — HTML from Tiptap (sanitised) for new submissions, paragraph
+               split for legacy plain-text seed articles */}
+          {looksLikeHtml ? (
+            <div className="article-body" dangerouslySetInnerHTML={{ __html: safeHtml }} />
+          ) : (
+            <div className="article-body">
+              {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+            </div>
+          )}
 
           {/* Tags */}
           {article.tags && article.tags.length > 0 && (
@@ -166,7 +198,7 @@ export default function ArticleDetailPage() {
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: '0 0 4px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.title}</p>
-                    <p style={{ fontSize: 12, color: '#9a9a9a', margin: 0 }}>{r.author_name} · {new Date(r.published_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}</p>
+                    <p style={{ fontSize: 12, color: '#9a9a9a', margin: 0 }}>{r.author_name} · {new Date(r.published_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</p>
                   </div>
                 </Link>
               ))}

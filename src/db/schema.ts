@@ -686,3 +686,163 @@ export const pageViews = pgTable(
     countryCodeIdx: index('idx_pv_country').on(t.countryCode),
   }),
 )
+
+// ─── Social Media — profiles, posts, assets, short-links ───────────────────
+
+export const socialPlatformEnum = pgEnum('social_platform', [
+  'instagram',
+  'facebook',
+  'tiktok',
+  'youtube',
+  'twitter',
+  'linkedin',
+  'threads',
+  'pinterest',
+  'bluesky',
+  'strava',
+])
+
+export const socialPostStatusEnum = pgEnum('social_post_status', [
+  'draft',
+  'scheduled',
+  'published',
+  'failed',
+  'archived',
+])
+
+export const socialAssetRightsEnum = pgEnum('social_asset_rights', [
+  'owned',
+  'ugc_pending',
+  'ugc_approved',
+  'licensed',
+  'unknown',
+])
+
+export const socialProfiles = pgTable(
+  'social_profiles',
+  {
+    id:              uuid('id').primaryKey().defaultRandom(),
+    platform:        socialPlatformEnum('platform').notNull(),
+    handle:          varchar('handle', { length: 120 }).notNull(),
+    url:             varchar('url', { length: 500 }).notNull(),
+    country:         char('country', { length: 2 }).notNull().default('za'),
+    displayInFooter: boolean('display_in_footer').notNull().default(true),
+    isActive:        boolean('is_active').notNull().default(true),
+    sortOrder:       integer('sort_order').notNull().default(0),
+    createdAt:       timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt:       timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    platformCountryIdx: uniqueIndex('social_profiles_platform_country_uniq').on(t.platform, t.country),
+    countryActiveIdx:   index('social_profiles_country_active_idx').on(t.country, t.isActive),
+  }),
+)
+
+export const socialAssets = pgTable(
+  'social_assets',
+  {
+    id:            uuid('id').primaryKey().defaultRandom(),
+    url:           varchar('url', { length: 500 }).notNull(),
+    thumbUrl:      varchar('thumb_url', { length: 500 }),
+    mime:          varchar('mime', { length: 50 }),
+    width:         integer('width'),
+    height:        integer('height'),
+    sizeBytes:     integer('size_bytes'),
+    title:         varchar('title', { length: 255 }),
+    altText:       varchar('alt_text', { length: 500 }),
+    tags:          text('tags').array().notNull().default(sql`ARRAY[]::text[]`),
+    rightsStatus:  socialAssetRightsEnum('rights_status').notNull().default('owned'),
+    rightsNote:    text('rights_note'),
+    uploadedBy:    uuid('uploaded_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt:     timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt:     timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    createdIdx:   index('social_assets_created_idx').on(t.createdAt),
+    rightsIdx:    index('social_assets_rights_idx').on(t.rightsStatus),
+  }),
+)
+
+export const socialPosts = pgTable(
+  'social_posts',
+  {
+    id:               uuid('id').primaryKey().defaultRandom(),
+    authorId:         uuid('author_id').references(() => users.id, { onDelete: 'set null' }),
+    country:          char('country', { length: 2 }).notNull().default('za'),
+    status:           socialPostStatusEnum('status').notNull().default('draft'),
+    platforms:        text('platforms').array().notNull().default(sql`ARRAY[]::text[]`),
+    title:            varchar('title', { length: 255 }),
+    body:             text('body').notNull().default(''),
+    assetIds:         uuid('asset_ids').array().notNull().default(sql`ARRAY[]::uuid[]`),
+    linkedListingId:  uuid('linked_listing_id').references(() => listings.id, { onDelete: 'set null' }),
+    linkedEventId:    uuid('linked_event_id').references(() => events.id, { onDelete: 'set null' }),
+    linkedRouteId:    uuid('linked_route_id').references(() => routes.id, { onDelete: 'set null' }),
+    linkedBusinessId: uuid('linked_business_id').references(() => businesses.id, { onDelete: 'set null' }),
+    utmCampaign:      varchar('utm_campaign', { length: 120 }),
+    scheduledAt:      timestamp('scheduled_at', { withTimezone: true }),
+    publishedAt:      timestamp('published_at', { withTimezone: true }),
+    errorLog:         text('error_log'),
+    createdAt:        timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt:        timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    statusScheduledIdx: index('social_posts_status_scheduled_idx').on(t.status, t.scheduledAt),
+    countryIdx:         index('social_posts_country_idx').on(t.country),
+    authorIdx:          index('social_posts_author_idx').on(t.authorId),
+  }),
+)
+
+export const socialMetrics = pgTable(
+  'social_metrics',
+  {
+    id:            uuid('id').primaryKey().defaultRandom(),
+    postId:        uuid('post_id').notNull().references(() => socialPosts.id, { onDelete: 'cascade' }),
+    platform:      socialPlatformEnum('platform').notNull(),
+    impressions:   integer('impressions').default(0),
+    clicks:        integer('clicks').default(0),
+    engagements:   integer('engagements').default(0),
+    capturedAt:    timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    postPlatformIdx: index('social_metrics_post_platform_idx').on(t.postId, t.platform),
+  }),
+)
+
+export const shortLinks = pgTable(
+  'short_links',
+  {
+    id:          uuid('id').primaryKey().defaultRandom(),
+    slug:        varchar('slug', { length: 40 }).notNull().unique(),
+    destination: varchar('destination', { length: 1000 }).notNull(),
+    utmSource:   varchar('utm_source', { length: 60 }),
+    utmMedium:   varchar('utm_medium', { length: 60 }),
+    utmCampaign: varchar('utm_campaign', { length: 120 }),
+    utmContent:  varchar('utm_content', { length: 120 }),
+    clicks:      integer('clicks').notNull().default(0),
+    postId:      uuid('post_id').references(() => socialPosts.id, { onDelete: 'set null' }),
+    createdBy:   uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    expiresAt:   timestamp('expires_at', { withTimezone: true }),
+    createdAt:   timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    slugIdx: uniqueIndex('short_links_slug_uniq').on(t.slug),
+  }),
+)
+
+export const socialPostsRelations = relations(socialPosts, ({ one, many }) => ({
+  author:    one(users,      { fields: [socialPosts.authorId],         references: [users.id] }),
+  listing:   one(listings,   { fields: [socialPosts.linkedListingId],  references: [listings.id] }),
+  event:     one(events,     { fields: [socialPosts.linkedEventId],    references: [events.id] }),
+  route:     one(routes,     { fields: [socialPosts.linkedRouteId],    references: [routes.id] }),
+  business:  one(businesses, { fields: [socialPosts.linkedBusinessId], references: [businesses.id] }),
+  metrics:   many(socialMetrics),
+}))
+
+export const socialMetricsRelations = relations(socialMetrics, ({ one }) => ({
+  post: one(socialPosts, { fields: [socialMetrics.postId], references: [socialPosts.id] }),
+}))
+
+export const shortLinksRelations = relations(shortLinks, ({ one }) => ({
+  post:    one(socialPosts, { fields: [shortLinks.postId],    references: [socialPosts.id] }),
+  creator: one(users,       { fields: [shortLinks.createdBy], references: [users.id] }),
+}))

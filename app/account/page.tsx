@@ -10,6 +10,7 @@ import {
   MapPin, Heart, Package, MessageCircle, Settings, LogOut,
   ChevronRight, Plus, Eye, Bookmark, AlertCircle, Edit3, Zap,
   Building2, Calendar, Star, ExternalLink, Shield, CheckCircle, Camera,
+  Newspaper,
 } from 'lucide-react'
 import MessagesTab from '@/components/account/MessagesTab'
 import SaveButton from '@/components/listings/SaveButton'
@@ -722,6 +723,90 @@ function Spinner() {
   )
 }
 
+// ─── My Submissions Tab — user's news article submissions w/ status ──────────
+interface MySubmissionRow {
+  id: string
+  title: string
+  slug: string
+  status: 'pending' | 'approved' | 'rejected' | 'draft'
+  category: string
+  cover_image_url: string | null
+  created_at: string
+  published_at: string | null
+  views_count: number
+}
+
+function SubmissionsTab() {
+  const [items, setItems] = useState<MySubmissionRow[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/account/my-submissions')
+      .then(r => r.json())
+      .then(d => setItems(Array.isArray(d) ? d : (d?.items ?? [])))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <Spinner />
+
+  if (items.length === 0) return (
+    <EmptyState
+      icon={<Newspaper size={28} color="#9a9a9a" />}
+      title="No submissions yet"
+      sub="Pitch a race recap, gear review or industry update. Editors review every submission before it goes live."
+      action={{ href: '/news/submit', label: 'Submit your first article' }}
+      secondary={{ href: '/news', label: 'Browse news' }}
+    />
+  )
+
+  const STATUS_COLOURS: Record<MySubmissionRow['status'], { bg: string; fg: string; label: string }> = {
+    pending:  { bg: '#FEF3C7', fg: '#92400E', label: 'Awaiting review' },
+    approved: { bg: '#D1FAE5', fg: '#065F46', label: 'Published' },
+    rejected: { bg: '#FEE2E2', fg: '#991B1B', label: 'Not accepted' },
+    draft:    { bg: '#E5E7EB', fg: '#374151', label: 'Draft' },
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <div style={{ fontSize: 13, color: '#6b7280' }}>{items.length} submission{items.length === 1 ? '' : 's'}</div>
+        <Link href="/news/submit" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'var(--color-primary)', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
+          <Plus size={14} /> New submission
+        </Link>
+      </div>
+      {items.map(it => {
+        const status = STATUS_COLOURS[it.status]
+        const date = new Date(it.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+        return (
+          <div key={it.id} style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 10, padding: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ width: 64, height: 64, borderRadius: 8, background: '#f5f5f5', flexShrink: 0, overflow: 'hidden' }}>
+              {it.cover_image_url
+                /* eslint-disable-next-line @next/next/no-img-element */
+                ? <img src={it.cover_image_url} alt={it.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9a9a9a' }}><Newspaper size={20} /></div>
+              }
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ display: 'inline-block', padding: '2px 8px', background: status.bg, color: status.fg, borderRadius: 4, fontSize: 11, fontWeight: 700 }}>{status.label}</span>
+                <span style={{ fontSize: 11, color: '#9a9a9a', textTransform: 'capitalize' }}>{it.category}</span>
+                {it.status === 'approved' && it.views_count > 0 && (
+                  <span style={{ fontSize: 11, color: '#9a9a9a', display: 'inline-flex', alignItems: 'center', gap: 3 }}><Eye size={11} /> {it.views_count}</span>
+                )}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.title}</div>
+              <div style={{ fontSize: 11, color: '#9a9a9a', marginTop: 2 }}>Submitted {date}</div>
+            </div>
+            {it.status === 'approved' && (
+              <Link href={`/news/${it.slug}`} style={{ padding: '6px 12px', border: '1px solid #e4e4e7', borderRadius: 6, fontSize: 12, fontWeight: 600, color: '#1a1a1a', textDecoration: 'none', whiteSpace: 'nowrap' }}>View live →</Link>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function EmptyState({ icon, title, sub, action, secondary }: { icon: React.ReactNode; title: string; sub: string; action: { href: string; label: string }; secondary?: { href: string; label: string } }) {
   return (
     <div style={{ textAlign: 'center', padding: '48px 24px', background: '#fff', border: '1px solid #ebebeb', borderRadius: 2 }}>
@@ -747,7 +832,7 @@ function AccountPageInner() {
   const searchParams = useSearchParams()
   const country      = countryFromPath(usePathname())
 
-  const VALID_TABS = ['listings', 'shop', 'events', 'saved', 'messages', 'profile']
+  const VALID_TABS = ['listings', 'shop', 'events', 'submissions', 'saved', 'messages', 'profile']
   const initialTab = VALID_TABS.includes(searchParams.get('tab') ?? '') ? searchParams.get('tab')! : 'listings'
   const [tab, setTab] = useState(initialTab)
 
@@ -773,12 +858,13 @@ function AccountPageInner() {
   const userId   = session.user?.id ?? ''
 
   const TABS = [
-    { id: 'listings', label: 'My Listings',  icon: Package },
-    { id: 'shop',     label: 'My Shop',       icon: Building2 },
-    { id: 'events',   label: 'My Events',     icon: Calendar },
-    { id: 'saved',    label: 'Saved',          icon: Heart },
-    { id: 'messages', label: 'Messages',       icon: MessageCircle },
-    { id: 'profile',  label: 'Profile',        icon: Settings },
+    { id: 'listings',    label: 'My Listings',    icon: Package },
+    { id: 'shop',        label: 'My Shop',        icon: Building2 },
+    { id: 'events',      label: 'My Events',      icon: Calendar },
+    { id: 'submissions', label: 'My Submissions', icon: Newspaper },
+    { id: 'saved',       label: 'Saved',          icon: Heart },
+    { id: 'messages',    label: 'Messages',       icon: MessageCircle },
+    { id: 'profile',     label: 'Profile',        icon: Settings },
   ]
 
   const switchTab = (id: string) => {
@@ -820,12 +906,13 @@ function AccountPageInner() {
 
         {/* ── Content ── */}
         <div style={{ padding: '20px 16px' }}>
-          {tab === 'listings' && <ListingsTab userId={userId} />}
-          {tab === 'shop'     && <ShopTab userId={userId} />}
-          {tab === 'events'   && <EventsTab userId={userId} />}
-          {tab === 'saved'    && <SavedTab />}
-          {tab === 'messages' && <MessagesTab />}
-          {tab === 'profile'  && <ProfileTab session={session} onAvatarChange={(url) => setHeroAvatar(url)} />}
+          {tab === 'listings'    && <ListingsTab userId={userId} />}
+          {tab === 'shop'        && <ShopTab userId={userId} />}
+          {tab === 'events'      && <EventsTab userId={userId} />}
+          {tab === 'submissions' && <SubmissionsTab />}
+          {tab === 'saved'       && <SavedTab />}
+          {tab === 'messages'    && <MessagesTab />}
+          {tab === 'profile'     && <ProfileTab session={session} onAvatarChange={(url) => setHeroAvatar(url)} />}
         </div>
       </div>
     </div>

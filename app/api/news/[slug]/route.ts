@@ -10,9 +10,17 @@ export async function GET(
   try {
     const { slug } = await params
     const country = await getCountry()
+    // Join submitted_by user so the article header can link to /u/[handle]
+    // and show the actual user's avatar (when the article came in via the
+    // logged-in submission flow, not the legacy freeform-author seed path).
     const result = await db.execute(sql`
-      SELECT * FROM news_articles
-      WHERE slug = ${slug} AND status = 'approved' AND country = ${country}
+      SELECT
+        n.*,
+        u.handle      AS author_handle,
+        u.avatar_url  AS author_avatar
+      FROM news_articles n
+      LEFT JOIN users u ON u.id = n.submitted_by
+      WHERE n.slug = ${slug} AND n.status = 'approved' AND n.country = ${country}
       LIMIT 1
     `)
     const rows = Array.isArray(result.rows) ? result.rows : (Array.isArray(result) ? result : [])
