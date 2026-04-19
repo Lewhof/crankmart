@@ -656,3 +656,33 @@ export const whiteboardItems = pgTable(
     countryTitleUniq:         uniqueIndex('whiteboard_country_title_uniq').on(t.country, t.title),
   }),
 )
+
+// ─── Page Views — traffic + visitor tracking for admin analytics ───────────
+// Geo fields are populated from cf-ipcountry / ip-api lookup at write time
+// (see /api/analytics/track). Admin analytics reads via raw SQL in
+// /api/admin/analytics/stats; this definition exists so the table has a
+// canonical schema source + drizzle-kit sees it on future generate runs.
+export const pageViews = pgTable(
+  'page_views',
+  {
+    id:          serial('id').primaryKey(),
+    path:        varchar('path',         { length: 500 }).notNull(),
+    referrer:    varchar('referrer',     { length: 500 }),
+    country:     varchar('country',      { length: 100 }),
+    countryCode: varchar('country_code', { length: 10 }),
+    city:        varchar('city',         { length: 100 }),
+    region:      varchar('region',       { length: 100 }),
+    device:      varchar('device',       { length: 20 }),
+    browser:     varchar('browser',      { length: 50 }),
+    visitorId:   varchar('visitor_id',   { length: 64 }),
+    sessionId:   varchar('session_id',   { length: 64 }),
+    createdAt:   timestamp('created_at', { withTimezone: true }).defaultNow(),
+  },
+  (t) => ({
+    pathIdx:        index('idx_pv_path').on(t.path),
+    createdIdx:     index('idx_pv_created').on(t.createdAt),
+    visitorIdx:     index('idx_pv_visitor').on(t.visitorId),
+    sessionIdx:     index('idx_pv_session').on(t.sessionId),
+    countryCodeIdx: index('idx_pv_country').on(t.countryCode),
+  }),
+)

@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
+import { checkAdminApi } from '@/lib/admin'
 
+// Kept as a "repair button" for re-creating the page_views table in new
+// environments or after a schema wipe. Canonical schema now lives in
+// src/db/schema.ts + drizzle/0020_page_views.sql — prefer those for fresh
+// deploys. Gated to admins so a public caller can't probe DDL endpoints.
 export async function GET() {
+  const adminCheck = await checkAdminApi()
+  if (adminCheck instanceof NextResponse) return adminCheck
+
   try {
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS page_views (
