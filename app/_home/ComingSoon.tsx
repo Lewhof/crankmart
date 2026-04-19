@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { Bike, Eye, EyeOff, Loader2, ArrowRight, Lock, Zap, MapPin, Calendar, Store, Shield } from 'lucide-react'
+import { countryFromPath } from '@/lib/regions-static'
+import { getCountryConfig } from '@/lib/country-config'
 
 const SLIDES = [
   { src: '/images/01-hero-mtb-karoo.jpg',           type: 'photo' },
@@ -14,6 +16,9 @@ const SLIDES = [
 ]
 
 export default function ComingSoon() {
+  const country = countryFromPath(usePathname())
+  const cfg = getCountryConfig(country)
+  const adj = country === 'au' ? 'AU' : 'SA'
   const [showLogin, setShowLogin] = useState(false)
   const [email,     setEmail]     = useState('')
   const [password,  setPassword]  = useState('')
@@ -127,7 +132,7 @@ export default function ComingSoon() {
             Coming Soon
           </div>
           <h1 style={{ fontSize: 'clamp(32px,6vw,64px)', fontWeight: 900, color: '#fff', margin: 0, lineHeight: 1.1, letterSpacing: '-1.5px' }}>
-            South Africa&apos;s<br />
+            {cfg.name}&apos;s<br />
             <span style={{ background: 'linear-gradient(90deg,#818cf8,#a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Cycling Marketplace
             </span>
@@ -135,13 +140,13 @@ export default function ComingSoon() {
         </div>
 
         <p className="cs-fade cs-delay-2" style={{ fontSize: 16, color: 'rgba(255,255,255,.65)', maxWidth: 480, margin: '0 auto 32px', lineHeight: 1.7 }}>
-          Buy and sell bikes, gear &amp; parts. Discover routes, events, and local shops — all in one place built for SA cyclists.
+          Buy and sell bikes, gear &amp; parts. Discover routes, events, and local shops — all in one place built for {adj} cyclists.
         </p>
 
         <div className="cs-fade cs-delay-2" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 40 }}>
           {[
             { icon: <Zap size={12} />,      label: 'Free to list' },
-            { icon: <MapPin size={12} />,   label: 'SA only' },
+            { icon: <MapPin size={12} />,   label: `${adj} only` },
             { icon: <Calendar size={12} />, label: 'Events & routes' },
             { icon: <Store size={12} />,    label: 'Business directory' },
             { icon: <Shield size={12} />,   label: 'Trusted marketplace' },
@@ -218,7 +223,7 @@ export default function ComingSoon() {
         )}
 
         <p style={{ position: 'absolute', bottom: 24, fontSize: 12, color: 'rgba(255,255,255,.2)' }}>
-          © 2026 CrankMart · South Africa&apos;s cycling marketplace
+          © 2026 CrankMart · {cfg.name}&apos;s cycling marketplace
         </p>
       </div>
     </div>
