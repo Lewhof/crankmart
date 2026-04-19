@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { MapPin, Navigation, TrendingUp, Clock, Mountain, ChevronRight, Search, Map, LayoutGrid, SlidersHorizontal, X, LocateFixed } from 'lucide-react'
 import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
+import { getCityCoords } from '@/lib/geo-coords'
 
 const MapComponent = dynamic(() => import('./MapComponent'), { ssr: false, loading: () => (
   <div style={{ width: '100%', height: '100%', background: '#E9ECF5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -188,7 +189,16 @@ export default function RoutesClient() {
       params.set('page', '1')
       const res = await fetch(`/api/routes?${params}`, { headers: { 'x-country': country } })
       const data = await res.json()
-      setAllMapRoutes((data.routes ?? []).filter((r: Route) => r.lat && r.lng))
+      // Routes seeded for AU don't have lat/lng yet — fall back to a town/state
+      // lookup so they still pin on the map. SA seed has real GPS, so the
+      // fallback only kicks in where the DB row is null.
+      const withCoords = (data.routes ?? []).map((r: Route) => {
+        if (r.lat && r.lng) return r
+        const fallback = getCityCoords(r.town, r.province)
+        if (!fallback) return r
+        return { ...r, lat: String(fallback[0]), lng: String(fallback[1]) }
+      })
+      setAllMapRoutes(withCoords.filter((r: Route) => r.lat && r.lng))
     } catch { setAllMapRoutes([]) }
     finally { setMapLoading(false) }
   }, [buildFilterParams, country])
