@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
         // Edge-cache at Vercel for 60s; tolerate stale while revalidating.
         // Auth/country-specific variants are handled by the Vary header.
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
-        'Vary': 'Cookie, Accept-Encoding',
+        'Vary': 'Cookie, Accept-Encoding, x-country',
       },
     })
   } catch (error) {
