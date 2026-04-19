@@ -3,6 +3,8 @@ import Link from "next/link";
 import { db } from "@/db";
 import { businesses as businessesTable } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { getCountry } from "@/lib/country";
+import { getCountryConfig } from "@/lib/country-config";
 
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   "bike-shops": "Bike Shops",
@@ -41,19 +43,20 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { type } = await params;
   const displayName = CATEGORY_DISPLAY_NAMES[type] || type;
+  const cfg = getCountryConfig(await getCountry());
 
   return {
     title: `${displayName} | CrankMart Directory`,
-    description: `Browse ${displayName.toLowerCase()} in South Africa. Find verified cycling businesses on CrankMart's directory.`,
+    description: `Browse ${displayName.toLowerCase()} in ${cfg.name}. Find verified cycling businesses on CrankMart's directory.`,
     openGraph: {
       title: `${displayName}`,
-      description: `Discover ${displayName.toLowerCase()} across South Africa.`,
-      url: `https://crankmart.com/directory/category/${type}`,
+      description: `Discover ${displayName.toLowerCase()} across ${cfg.name}.`,
+      url: `https://crankmart.com/${cfg.code}/directory/category/${type}`,
       siteName: "CrankMart",
       type: "website",
     },
     alternates: {
-      canonical: `https://crankmart.com/directory/category/${type}`,
+      canonical: `https://crankmart.com/${cfg.code}/directory/category/${type}`,
     },
   };
 }
@@ -79,6 +82,7 @@ async function getBusinessesByCategory(type: string) {
 
 export default async function CategoryPage({ params }: Props) {
   const { type } = await params;
+  const cfg = getCountryConfig(await getCountry());
 
   // Only allow valid category slugs
   if (!VALID_CATEGORIES.includes(type)) {
@@ -151,7 +155,7 @@ export default async function CategoryPage({ params }: Props) {
 
         <h1 className="text-4xl font-bold mb-4">{displayName}</h1>
         <p className="text-xl text-gray-600">
-          Find verified {displayName.toLowerCase()} across South Africa on CrankMart.
+          Find verified {displayName.toLowerCase()} across {cfg.name} on CrankMart.
         </p>
       </div>
 

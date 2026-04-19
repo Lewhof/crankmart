@@ -745,6 +745,7 @@ function AccountPageInner() {
   const { data: session, status } = useSession()
   const router       = useRouter()
   const searchParams = useSearchParams()
+  const country      = countryFromPath(usePathname())
 
   const VALID_TABS = ['listings', 'shop', 'events', 'saved', 'messages', 'profile']
   const initialTab = VALID_TABS.includes(searchParams.get('tab') ?? '') ? searchParams.get('tab')! : 'listings'
@@ -800,7 +801,7 @@ function AccountPageInner() {
           </div>
           <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>{session.user?.name ?? 'Cyclist'}</div>
           <div style={{ fontSize: 13, opacity: .7, display: 'flex', alignItems: 'center', gap: 4 }}>
-            <MapPin size={12} /> {(session.user as Record<string, unknown>)?.province as string ?? 'South Africa'}
+            <MapPin size={12} /> {(session.user as Record<string, unknown>)?.province as string ?? (country === 'au' ? 'Australia' : 'South Africa')}
           </div>
         </div>
 

@@ -54,7 +54,7 @@ export default async function LostDetailPage({ params }: PageProps) {
   if (!r) notFound()
 
   const fmt = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' }) : null
+    iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) : null
 
   return (
     <main style={{ maxWidth: 820, margin: '0 auto', padding: '32px 20px 80px', fontFamily: 'system-ui, sans-serif', color: '#1a1a1a' }}>

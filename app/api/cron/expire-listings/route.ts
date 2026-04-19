@@ -3,6 +3,8 @@ import { db } from '@/db'
 import { listings, users } from '@/db/schema'
 import { eq, and, lt, sql } from 'drizzle-orm'
 import { sendEmail, listingExpiryReminderEmail } from '@/lib/email'
+import { getLocale } from '@/lib/currency'
+import type { Country } from '@/lib/country'
 
 const RENEWAL_EMAIL_SENT = 'renewal_email_sent'
 
@@ -37,8 +39,9 @@ export async function GET(request: NextRequest) {
         if (seller.length === 0) continue
 
         const sellerUser = seller[0]
+        const listingCountry: Country = (listing.country as Country) ?? 'za'
         const expiresDate = listing.expiresAt
-          ? new Date(listing.expiresAt).toLocaleDateString('en-ZA', {
+          ? new Date(listing.expiresAt).toLocaleDateString(getLocale(listingCountry), {
               day: '2-digit',
               month: 'short',
               year: 'numeric',

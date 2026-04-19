@@ -75,7 +75,7 @@ export default async function CheckResultPage({ params, searchParams }: PageProp
                   <div style={{ fontWeight: 700 }}>{m.sourceLabel}</div>
                   {m.reportedAt && (
                     <div style={{ marginTop: 2 }}>
-                      Reported {new Date(m.reportedAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      Reported {new Date(m.reportedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}
                     </div>
                   )}
                   {m.sapsCaseNo && <div style={{ marginTop: 2 }}>SAPS case: {m.sapsCaseNo}</div>}
@@ -136,7 +136,7 @@ export default async function CheckResultPage({ params, searchParams }: PageProp
 
       {result?.cached && result.cachedAt && (
         <p style={{ marginTop: 20, fontSize: 11, color: '#9ca3af', textAlign: 'center' }}>
-          Cached result from {new Date(result.cachedAt).toLocaleString('en-ZA')}.
+          Cached result from {new Date(result.cachedAt).toLocaleString()}.
         </p>
       )}
     </main>

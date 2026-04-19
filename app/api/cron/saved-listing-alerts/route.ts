@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { sendEmail } from '@/lib/email'
+import { formatPrice, getLocale } from '@/lib/currency'
+import type { Country } from '@/lib/country'
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +27,8 @@ export async function GET(request: NextRequest) {
         l.price,
         l.expires_at,
         l.bike_make,
-        l.bike_model
+        l.bike_model,
+        l.country
       FROM saved_listings sl
       JOIN users u ON u.id = sl.user_id
       JOIN listings l ON l.id = sl.listing_id
@@ -40,11 +43,12 @@ export async function GET(request: NextRequest) {
 
     for (const row of rows) {
       try {
-        const expiresDate = new Date(row.expires_at).toLocaleDateString('en-ZA', {
+        const country: Country = (row.country as Country) ?? 'za'
+        const expiresDate = new Date(row.expires_at).toLocaleDateString(getLocale(country), {
           day: '2-digit', month: 'short', year: 'numeric'
         })
         const listingTitle = [row.bike_make, row.bike_model, row.title].filter(Boolean)[0] || row.title
-        const price = `R ${parseFloat(row.price).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`
+        const price = formatPrice(country, row.price)
 
         await sendEmail({
           to: row.user_email,
