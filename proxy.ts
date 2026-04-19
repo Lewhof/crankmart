@@ -49,20 +49,30 @@ function stripCountry(pathname: string): { path: string; country: Country | null
   return { path: pathname, country: null }
 }
 
+/**
+ * Build a request-header bag with x-country set so the page render reads
+ * the right country via headers(). NextResponse.next/rewrite must receive
+ * `{ request: { headers } }` — `res.headers.set()` only sets RESPONSE
+ * headers (visible to the browser), which the page renderer never sees.
+ */
+function withCountryHeader(req: NextRequest, country: Country): Headers {
+  const h = new Headers(req.headers)
+  h.set('x-country', country)
+  return h
+}
+
 function applyCountryHeader(req: NextRequest, forceCountry?: Country): NextResponse {
   const mode = getMode()
   const { pathname, search } = req.nextUrl
 
   if (pathname.startsWith('/api/')) {
-    const res = NextResponse.next()
-    res.headers.set('x-country', forceCountry ?? DEFAULT_COUNTRY)
-    return res
+    const headers = withCountryHeader(req, forceCountry ?? DEFAULT_COUNTRY)
+    return NextResponse.next({ request: { headers } })
   }
 
   if (mode === 'implicit-za') {
-    const res = NextResponse.next()
-    res.headers.set('x-country', DEFAULT_COUNTRY)
-    return res
+    const headers = withCountryHeader(req, DEFAULT_COUNTRY)
+    return NextResponse.next({ request: { headers } })
   }
 
   const first = pathname.split('/')[1] || ''
@@ -71,9 +81,8 @@ function applyCountryHeader(req: NextRequest, forceCountry?: Country): NextRespo
     // route — the app/ tree isn't nested under a [country] segment.
     const rewritten = req.nextUrl.clone()
     rewritten.pathname = pathname.slice(`/${first}`.length) || '/'
-    const res = NextResponse.rewrite(rewritten)
-    res.headers.set('x-country', first)
-    return res
+    const headers = withCountryHeader(req, first)
+    return NextResponse.rewrite(rewritten, { request: { headers } })
   }
 
   const url = req.nextUrl.clone()

@@ -2,47 +2,57 @@
 
 /**
  * Site-visible superadmin country toggle. Lives in TopNav for admins + superadmins
- * so QA across /za and /au doesn't require a round-trip into /admin. Reads the
- * existing admin_country cookie that CountrySwitcher writes; POSTs the same
- * /api/admin/country endpoint to flip and refresh.
+ * so QA across /za and /au doesn't require a round-trip into /admin.
+ *
+ * Source of truth for the active country is the URL path (countryFromPath).
+ * The httpOnly admin_country cookie can't be read from JS, so deriving from
+ * the URL is the only reliable way to keep the button label correct.
+ *
+ * On pick: navigate to /<newCountry>/<rest-of-path> and POST the cookie
+ * (admin pages still read it via getAdminCountry() to scope queries).
  *
  * Invisible to non-admin sessions — never a concern for public users.
  */
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Globe } from 'lucide-react'
-import { REGIONS_STATIC } from '@/lib/regions-static'
+import { REGIONS_STATIC, countryFromPath } from '@/lib/regions-static'
 import { getCountryConfig } from '@/lib/country-config'
 
-// Client-safe country list — Object.keys(REGIONS_STATIC) mirrors ACTIVE_COUNTRIES
-// without dragging in next/headers via src/lib/country.ts.
 const COUNTRIES = Object.keys(REGIONS_STATIC) as Array<keyof typeof REGIONS_STATIC>
 
 export function SuperadminCountryToggle() {
   const { data: session } = useSession()
   const router = useRouter()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
 
   const role = (session?.user as { role?: string } | undefined)?.role
   if (role !== 'admin' && role !== 'superadmin') return null
 
-  // Read current pick from cookie so the button label reflects the active context.
-  const current = typeof document !== 'undefined'
-    ? (document.cookie.split('; ').find(c => c.startsWith('admin_country='))?.split('=')[1] ?? 'za')
-    : 'za'
+  const current = countryFromPath(pathname)
 
   async function pick(c: string) {
     if (c === current) { setOpen(false); return }
     setBusy(true)
     try {
+      // Sync the admin filter cookie so /admin pages scope to the new country.
       await fetch('/api/admin/country', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ country: c }),
-      })
+      }).catch(() => {})
+
+      // Build the new URL by replacing (or prepending) the country segment.
+      const segments = (pathname ?? '/').split('/').filter(Boolean)
+      const first = segments[0]
+      const hasCountryPrefix = first === 'za' || first === 'au'
+      const rest = hasCountryPrefix ? segments.slice(1) : segments
+      const target = `/${c}${rest.length ? '/' + rest.join('/') : ''}`
+      router.push(target)
       router.refresh()
     } finally {
       setBusy(false)
