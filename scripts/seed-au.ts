@@ -321,7 +321,7 @@ async function main() {
           ${s.name}, ${s.slug}, ${s.business_type ?? 'shop'}, 'au',
           ${s.province}, ${s.city},
           ${s.website ?? null}, ${s.description ?? null},
-          'pending', 'seed-au'
+          'verified', 'seed-au'
         )
         ON CONFLICT (slug) DO NOTHING
         RETURNING id
