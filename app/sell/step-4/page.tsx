@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { ArrowLeft, ChevronRight, Loader, ChevronDown } from 'lucide-react'
 import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
 import { getCountryConfig } from '@/lib/country-config'
+import { formatPrice, getCurrency } from '@/lib/currency'
 
 const STEPS = ['Category', 'Details', 'Photos', 'Location & Price']
 
@@ -348,7 +349,7 @@ function Step4Content() {
                       {previewData.title || 'Your listing title'}
                     </p>
                     <p style={{ fontSize: 16, fontWeight: 800, color: '#1a1a1a' }}>
-                      R {form.price ? parseInt(form.price).toLocaleString('en-ZA') : '0'}
+                      {form.price ? formatPrice(country, form.price) : formatPrice(country, 0)}
                     </p>
                   </div>
                 </div>
@@ -386,9 +387,9 @@ function Step4Content() {
 
           {/* Price */}
           <div className="form-group">
-            <label className="form-label">Price (ZAR) *</label>
+            <label className="form-label">Price ({getCurrency(country)}) *</label>
             <div className="price-input-group">
-              <span className="price-prefix">R</span>
+              <span className="price-prefix">{getCountryConfig(country).currencySymbol}</span>
               <input
                 className="form-input price-input"
                 type="number"

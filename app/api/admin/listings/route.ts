@@ -9,6 +9,7 @@ interface ListingRow {
   title: string;
   slug: string;
   price: number;
+  country: string;
   status: string;
   moderation_status: string;
   created_at: string;
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
     const result = await db.execute(
       sql`
         SELECT
-          l.id, l.title, l.slug, l.price, l.status, l.moderation_status,
+          l.id, l.title, l.slug, l.price, l.country, l.status, l.moderation_status,
           l.created_at, l.category_id, u.name as seller_name,
           (SELECT image_url FROM listing_images WHERE listing_id = l.id LIMIT 1) as thumb_url
         FROM listings l

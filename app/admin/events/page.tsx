@@ -82,7 +82,7 @@ export default function AdminEventsPage() {
   }
 
   const fmt = (d: string) =>
-    d ? new Date(d).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
+    d ? new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
 
   const tabBtn = (active: boolean): React.CSSProperties => ({
     padding: '6px 14px',

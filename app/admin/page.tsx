@@ -156,7 +156,7 @@ export default async function AdminDashboard() {
                   </span>,
                   <span key="e" style={{ color: 'var(--admin-text-dim)' }}>{u.email}</span>,
                   <span key="d" style={{ color: 'var(--admin-text-dim)', fontSize: 12 }}>
-                    {new Date(u.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}
+                    {new Date(u.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
                   </span>,
                 ],
               }))}

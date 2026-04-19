@@ -105,7 +105,7 @@ export default function CommunityFlagsPage() {
         <div style={{ color: 'var(--admin-text-dim)', fontSize: 11, marginTop: 2 }}>{f.reporter_email || '—'}</div>
       </div>,
       <div key="d" style={{ fontSize: 12, color: 'var(--admin-text-dim)' }}>
-        {new Date(f.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+        {new Date(f.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
       </div>,
       <div key="a" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {tab === 'pending' && (

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { countryFromPath, getProvincesStatic } from "@/lib/regions-static";
 
 const BUSINESS_TYPES = [
   { value: "shop", label: "Bike Shop" },
@@ -11,18 +12,6 @@ const BUSINESS_TYPES = [
   { value: "service_center", label: "Workshop / Service Center" },
   { value: "tour_operator", label: "Tour Operator / Bike Hire" },
   { value: "event_organiser", label: "Event Organiser" },
-];
-
-const PROVINCES = [
-  "Western Cape",
-  "Gauteng",
-  "KwaZulu-Natal",
-  "Eastern Cape",
-  "Free State",
-  "Limpopo",
-  "Mpumalanga",
-  "Northern Cape",
-  "North West",
 ];
 
 const SERVICES = [
@@ -39,6 +28,8 @@ const SERVICES = [
 export default function RegisterPage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const country = countryFromPath(usePathname());
+  const PROVINCES = getProvincesStatic(country);
   const [mode, setMode] = useState<"choose" | "self" | "concierge">("choose");
   const [loading, setLoading] = useState(false);
 

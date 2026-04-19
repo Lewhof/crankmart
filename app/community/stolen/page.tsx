@@ -3,13 +3,17 @@ import Link from 'next/link'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { getCountry } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
 import { getProvincesStatic } from '@/lib/regions-static'
 import { ShieldAlert, Search, MapPin, Plus } from 'lucide-react'
 
-export const metadata: Metadata = {
-  title: 'Stolen bike registry | CrankMart Community',
-  description: 'Browse verified stolen bike reports across South Africa. Filter by province and brand. Help reunite cyclists with their bikes.',
-  robots: { index: true, follow: true },
+export async function generateMetadata(): Promise<Metadata> {
+  const cfg = getCountryConfig(await getCountry())
+  return {
+    title: 'Stolen bike registry | CrankMart Community',
+    description: `Browse verified stolen bike reports across ${cfg.name}. Filter by ${cfg.regionLabel.toLowerCase()} and brand. Help reunite cyclists with their bikes.`,
+    robots: { index: true, follow: true },
+  }
 }
 
 export const revalidate = 60
@@ -78,12 +82,13 @@ export default async function StolenIndexPage({ searchParams }: PageProps) {
   const page = Math.max(1, parseInt(sp.page ?? '1'))
   const status = sp.status === 'recovered' ? 'recovered' : 'approved'
   const country = await getCountry()
+  const cfg = getCountryConfig(country)
   const provinces = getProvincesStatic(country)
   const data = await fetchReports({ province, brand, page, status })
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
 
   const fmt = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }) : null
+    iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : null
 
   const buildHref = (over: Partial<{ province: string; brand: string; page: number; status: string }>) => {
     const next = { province, brand, page: 1, status, ...over }
@@ -105,7 +110,7 @@ export default async function StolenIndexPage({ searchParams }: PageProps) {
             <ShieldAlert size={26} style={{ color: '#DC2626' }} /> Stolen bike registry
           </h1>
           <p style={{ fontSize: 14, color: '#6b7280', margin: 0, maxWidth: 640 }}>
-            Verified reports of bikes stolen in South Africa. Found one for sale? Use{' '}
+            Verified reports of bikes stolen in {cfg.name}. Found one for sale? Use{' '}
             <Link href="/community/check" style={{ color: '#0D1B2A', fontWeight: 600 }}>/community/check</Link> to look up a serial.
           </p>
         </div>

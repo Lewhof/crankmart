@@ -3,13 +3,17 @@ import Link from 'next/link'
 import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { getCountry } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
 import { getProvincesStatic } from '@/lib/regions-static'
 import { Frown, MapPin, Plus } from 'lucide-react'
 
-export const metadata: Metadata = {
-  title: 'Lost bike registry | CrankMart Community',
-  description: 'Lost your bike? Post it here; the community helps look. Browse recent lost-bike reports across South Africa.',
-  robots: { index: true, follow: true },
+export async function generateMetadata(): Promise<Metadata> {
+  const cfg = getCountryConfig(await getCountry())
+  return {
+    title: 'Lost bike registry | CrankMart Community',
+    description: `Lost your bike? Post it here; the community helps look. Browse recent lost-bike reports across ${cfg.name}.`,
+    robots: { index: true, follow: true },
+  }
 }
 
 export const revalidate = 60
@@ -82,7 +86,7 @@ export default async function LostIndexPage({ searchParams }: PageProps) {
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
 
   const fmt = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }) : null
+    iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : null
 
   const buildHref = (over: Partial<{ province: string; brand: string; page: number }>) => {
     const next = { province, brand, page: 1, ...over }

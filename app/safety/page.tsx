@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { buildAlternates } from '@/lib/hreflang'
+import { getCountry } from '@/lib/country'
 
 export const metadata: Metadata = {
   title: 'Trust & Safety — CrankMart',
@@ -104,12 +105,14 @@ const sections: Array<{ heading: string; body: React.ReactNode }> = [
   },
 ]
 
-export default function SafetyPage() {
+export default async function SafetyPage() {
+  const country = await getCountry()
+  const adj = country === 'au' ? 'AU' : 'SA'
   return (
     <main style={{ maxWidth: 720, margin: '48px auto 96px', padding: '0 20px', fontFamily: 'system-ui, sans-serif', color: '#1a1a1a' }}>
       <h1 style={{ fontSize: 34, fontWeight: 900, letterSpacing: -1, margin: '0 0 12px' }}>Trust &amp; Safety</h1>
       <p style={{ fontSize: 16, color: '#4b5563', lineHeight: 1.6, margin: '0 0 32px' }}>
-        CrankMart is a community of real SA cyclists buying and selling with each other. Here&apos;s how we keep
+        CrankMart is a community of real {adj} cyclists buying and selling with each other. Here&apos;s how we keep
         it that way — and what to do when something goes wrong.
       </p>
 

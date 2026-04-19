@@ -70,7 +70,7 @@ export default function VerificationsPage() {
   }
 
   const fmt = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
+    iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
 
   const tabBtn = (active: boolean): React.CSSProperties => ({
     padding: '8px 14px',

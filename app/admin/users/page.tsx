@@ -100,7 +100,7 @@ export default function UsersPage() {
         </div>
       </div>,
       <span key="e" style={{ color: 'var(--admin-text-dim)' }}>{u.email}</span>,
-      <span key="d" style={{ color: 'var(--admin-text-dim)' }}>{new Date(u.created_at).toLocaleDateString('en-ZA')}</span>,
+      <span key="d" style={{ color: 'var(--admin-text-dim)' }}>{new Date(u.created_at).toLocaleDateString()}</span>,
       <span key="l">{u.listing_count}</span>,
       <StatusPill key="s" label={u.status === 'banned' ? 'Banned' : 'Active'} tone={toneForStatus(u.status === 'banned' ? 'banned' : 'active')} />,
       <div key="a" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

@@ -94,7 +94,7 @@ export default function TicketDetailPage() {
   if (!ticket) return <Empty message="Ticket not found." />
 
   const fmt = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
+    iso ? new Date(iso).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
 
   const isOverdue = ticket.sla_due_at && new Date(ticket.sla_due_at) < new Date() && ticket.status !== 'done'
 

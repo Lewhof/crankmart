@@ -89,7 +89,7 @@ export default function TicketsPage() {
         {timeUntil(r.sla_due_at)}
       </div>,
       <div key="c" style={{ fontSize: 12, color: 'var(--admin-text-dim)' }}>
-        {new Date(r.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+        {new Date(r.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
       </div>,
     ],
   }))

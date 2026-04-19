@@ -5,12 +5,15 @@ import { Eye, Trash2, CheckCircle, XCircle } from 'lucide-react'
 import {
   PageHeader, Card, Table, StatusPill, toneForStatus, Button, BulkActionBar, Empty,
 } from '@/components/admin/primitives'
+import { formatPrice } from '@/lib/currency'
+import type { Country } from '@/lib/country'
 
 interface Listing {
   id: string
   title: string
   seller_name: string
   price: string
+  country: Country
   status: string
   moderation_status: string
   created_at: string
@@ -101,7 +104,7 @@ export default function ListingsPage() {
     cells: [
       <span key="t" style={{ fontWeight: 600 }}>{l.title}</span>,
       <span key="s" style={{ color: 'var(--admin-text-dim)' }}>{l.seller_name}</span>,
-      <span key="p">R{parseFloat(l.price || '0').toFixed(2)}</span>,
+      <span key="p">{formatPrice(l.country ?? 'za', l.price || '0', { showCents: true })}</span>,
       <StatusPill key="st" label={l.status} tone={toneForStatus(l.status)} />,
       <StatusPill key="m" label={l.moderation_status} tone={toneForStatus(l.moderation_status)} />,
       <div key="a" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

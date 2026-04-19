@@ -54,7 +54,7 @@ export default function CampaignsPage() {
   useEffect(() => { load(tab) }, [tab, load])
 
   const fmt = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
+    iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
 
   const tableRows = rows.map(r => ({
     id: r.id,

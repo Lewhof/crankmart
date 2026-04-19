@@ -53,7 +53,7 @@ async function checkAnalytics(): Promise<CheckResult> {
     return {
       name: 'Analytics pipeline',
       status: 'ok',
-      detail: `${hits.toLocaleString('en-ZA')} pageviews in the last 24 h.`,
+      detail: `${hits.toLocaleString()} pageviews in the last 24 h.`,
     }
   } catch {
     return { name: 'Analytics pipeline', status: 'degraded', detail: 'Recent count query failed.' }

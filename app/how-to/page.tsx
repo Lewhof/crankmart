@@ -1,9 +1,14 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { getCountry } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
 
-export const metadata: Metadata = {
-  title: 'How to Use CrankMart | South Africa\'s Cycling Marketplace',
-  description: 'Everything you need to know about buying, selling, and finding cycling gear on CrankMart. Step-by-step guides for listings, messages, events, and more.',
+export async function generateMetadata(): Promise<Metadata> {
+  const cfg = getCountryConfig(await getCountry())
+  return {
+    title: `How to Use CrankMart | ${cfg.name}'s Cycling Marketplace`,
+    description: 'Everything you need to know about buying, selling, and finding cycling gear on CrankMart. Step-by-step guides for listings, messages, events, and more.',
+  }
 }
 
 const sections = [
@@ -75,7 +80,7 @@ const sections = [
     steps: [
       {
         title: 'Find a Local Bike Shop',
-        body: 'The Directory lists cycling businesses across South Africa — bike shops, service centres, coaching services, tour operators, and more. Filter by location or category to find what\'s near you.',
+        body: 'The Directory lists cycling businesses across the country — bike shops, service centres, coaching services, tour operators, and more. Filter by location or category to find what\'s near you.',
       },
       {
         title: 'View Business Profiles',
@@ -95,7 +100,7 @@ const sections = [
     steps: [
       {
         title: 'Browse Upcoming Events',
-        body: 'The Events section lists races, sportives, group rides, charity events, and cycling festivals across South Africa. Filter by date or location to find events near you.',
+        body: 'The Events section lists races, sportives, group rides, charity events, and cycling festivals across the country. Filter by date or location to find events near you.',
       },
       {
         title: 'Submit an Event',
@@ -174,7 +179,7 @@ export default function HowToPage() {
           How to Use CrankMart
         </h1>
         <p style={{ fontSize: 16, color: '#9a9a9a', margin: '0 auto 32px', maxWidth: 520, lineHeight: 1.6 }}>
-          Everything you need to buy, sell, and discover cycling gear in South Africa.
+          Everything you need to buy, sell, and discover cycling gear in your country.
         </p>
 
         {/* Jump links */}

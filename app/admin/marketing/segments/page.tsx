@@ -30,7 +30,7 @@ export default function SegmentsPage() {
   useEffect(() => { load() }, [load])
 
   const fmt = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
+    iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
 
   const tableRows = rows.map(r => ({
     id: r.id,

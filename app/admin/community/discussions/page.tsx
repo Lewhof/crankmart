@@ -94,7 +94,7 @@ export default function CommunityDiscussionsPage() {
       </div>,
       <StatusPill key="s" label={c.status} tone={c.status === 'approved' ? 'success' : 'danger'} />,
       <div key="d" style={{ fontSize: 12, color: 'var(--admin-text-dim)' }}>
-        {new Date(c.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+        {new Date(c.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
       </div>,
       <div key="a" style={{ display: 'flex', gap: 6 }}>
         {c.status === 'approved' && (

@@ -146,7 +146,7 @@ export default function AdminNewsPage() {
       <StatusPill key="s" label={a.status} tone={toneForStatus(a.status)} />,
       <span key="v">{Number(a.views_count || 0).toLocaleString()}</span>,
       <span key="d" style={{ color: 'var(--admin-text-dim)', fontSize: 12 }}>
-        {new Date(a.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+        {new Date(a.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
       </span>,
       <div key="a" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {a.status === 'approved' && (

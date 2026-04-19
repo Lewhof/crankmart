@@ -1,16 +1,24 @@
 import type { Metadata } from 'next'
+import { getCountry } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
 
-export const metadata: Metadata = {
-  title: 'Frequently Asked Questions | CrankMart SA',
-  description:
-    "Answers to the most common questions about CrankMart — South Africa's cycling marketplace. Find bike shops, events, coaches, gear and more.",
-  openGraph: {
-    title: 'Frequently Asked Questions | CrankMart SA',
-    description: "Your questions about South Africa's cycling marketplace answered.",
-    url: 'https://crankmart.com/faq',
-    siteName: 'CrankMart',
-    type: 'website',
-  },
+// NOTE: FAQ answers below were drafted around SA cities (Cape Town, Joburg).
+// AU launch follow-up: rewrite SA-specific examples (or split into ZA/AU
+// answer sets keyed off `country`). Only metadata is country-aware here.
+export async function generateMetadata(): Promise<Metadata> {
+  const cfg = getCountryConfig(await getCountry())
+  const tag = cfg.code.toUpperCase()
+  return {
+    title: `Frequently Asked Questions | CrankMart ${tag}`,
+    description: `Answers to the most common questions about CrankMart — ${cfg.name}'s cycling marketplace. Find bike shops, events, coaches, gear and more.`,
+    openGraph: {
+      title: `Frequently Asked Questions | CrankMart ${tag}`,
+      description: `Your questions about ${cfg.name}'s cycling marketplace answered.`,
+      url: `https://crankmart.com/${cfg.code}/faq`,
+      siteName: 'CrankMart',
+      type: 'website',
+    },
+  }
 }
 
 const faqs = [

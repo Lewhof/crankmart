@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { countryFromPath } from '@/lib/regions-static'
 
 const COLS = [
   {
@@ -51,6 +53,12 @@ const WheelMark = ({ size = 22 }: { size?: number }) => (
 )
 
 export function Footer() {
+  const country = countryFromPath(usePathname())
+  // Per-country tagline + privacy-framework label (POPIA = SA, Privacy Act = AU)
+  const tagline = country === 'au'
+    ? "AU's dedicated cycling marketplace."
+    : "SA's first dedicated cycling marketplace."
+  const privacyFrameworkLabel = country === 'au' ? 'Privacy Act' : 'POPIA'
   return (
     <footer style={{ background: 'var(--color-night-ride)', marginTop: 'auto' }}>
       <style>{`
@@ -138,7 +146,7 @@ export function Footer() {
               </span>
             </div>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', lineHeight: 1.75, margin: 0, maxWidth: 220 }}>
-              SA&apos;s first dedicated cycling marketplace.
+              {tagline}
             </p>
           </div>
 
@@ -166,7 +174,7 @@ export function Footer() {
             {[
               { href: '/privacy', label: 'Privacy' },
               { href: '/terms',   label: 'Terms'   },
-              { href: '/privacy', label: 'POPIA'   },
+              { href: '/privacy', label: privacyFrameworkLabel },
             ].map(({ href, label }) => (
               <Link key={label} href={href} prefetch={false} className="cm-footer-legal-link">
                 {label}

@@ -2,14 +2,19 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { ArrowLeft, CheckCircle, Calendar } from 'lucide-react'
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
+import { getCountryConfig } from '@/lib/country-config'
 
 const EVENT_TYPES = ['Road Race','MTB Race','Gran Fondo','Stage Race','Gravel Race','XCO','Enduro','Downhill','Time Trial','Triathlon','Sportive / Fun Ride','Club Ride','Other']
-const PROVINCES = ['Western Cape','Gauteng','KwaZulu-Natal','Eastern Cape','Free State','Limpopo','Mpumalanga','North West','Northern Cape']
 const DISCIPLINES = ['Road','MTB','Gravel','XC','Enduro','Downhill','BMX','Triathlon','Multi-Discipline']
 const ENTRY_STATUSES = ['Open','Closed','Coming Soon','Free Entry','Invite Only']
 
 export default function SubmitEventPage() {
+  const country = countryFromPath(usePathname())
+  const cfg = getCountryConfig(country)
+  const PROVINCES = getProvincesStatic(country)
   const [form, setForm] = useState({
     title: '', description: '', eventType: '', city: '', province: '', venueName: '',
     eventDateStart: '', eventDateEnd: '', entryUrl: '', entryStatus: 'Open', entryFee: '',
@@ -160,7 +165,7 @@ export default function SubmitEventPage() {
               </div>
               <div className="fg">
                 <label className="fl">Entry Fee</label>
-                <input className="fi" placeholder="e.g., R450 or Free" value={form.entryFee} onChange={e => update('entryFee', e.target.value)} />
+                <input className="fi" placeholder={`e.g., ${cfg.currencySymbol}450 or Free`} value={form.entryFee} onChange={e => update('entryFee', e.target.value)} />
               </div>
             </div>
 

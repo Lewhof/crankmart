@@ -53,7 +53,7 @@ const TYPE_META: Record<string, { icon: string; color: string; category: string 
 function fmtRand(cents: number) { return `R${(cents / 100).toFixed(2)}` }
 function fmtDate(d: string | null) {
   if (!d) return '—'
-  return new Date(d).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 const CELL: React.CSSProperties = { padding: '10px 14px', textAlign: 'left' as const }

@@ -46,7 +46,7 @@ export default function SequencesPage() {
     load()
   }
 
-  const fmt = (iso: string) => new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
+  const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 
   const tableRows = rows.map(r => ({
     id: r.id,

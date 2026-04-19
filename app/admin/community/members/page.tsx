@@ -98,7 +98,7 @@ export default function CommunityMembersPage() {
         <div><strong>{m.listings_active}</strong> <span style={{ color: 'var(--admin-text-dim)' }}>listings</span></div>
       </div>,
       <div key="d" style={{ fontSize: 12, color: 'var(--admin-text-dim)' }}>
-        {new Date(m.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+        {new Date(m.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
       </div>,
       <div key="a" style={{ display: 'flex', gap: 6 }}>
         {m.banned_at ? (

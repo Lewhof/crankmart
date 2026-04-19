@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
         businessName: business.name,
         dashboardUrl: `${process.env.NEXTAUTH_URL ?? 'https://crankmart.com'}/account/my-listing`,
         listingUrl: `${process.env.NEXTAUTH_URL ?? 'https://crankmart.com'}/directory/${business.slug}`,
+        country: (business.country as 'za' | 'au' | undefined) ?? 'za',
       })
       await sendEmail({ to: email, subject: `Your CrankMart listing is verified — ${business.name}`, html })
     }

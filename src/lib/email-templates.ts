@@ -1,6 +1,9 @@
 // Pure email template functions — no server imports, safe for client components
 // Sending logic lives in email.ts (server only)
 
+import type { Country } from './country'
+import { getCountryConfig } from './country-config'
+
 const LOGO_HTML = '<img src="https://crankmart.com/apple-icon.png" alt="CrankMart" style="width:48px;height:48px;border-radius:8px" />'
 const HEADER = (subtitle?: string) => `
   <div style="background:#0D1B2A;padding:20px 32px;display:flex;align-items:center;gap:14px">
@@ -94,26 +97,30 @@ export function shopClaimTouch1Email({
   claimUrl,
   previewUrl,
   unsubscribeUrl,
+  country = 'za',
 }: {
   businessName: string
   city: string
   claimUrl: string
   previewUrl: string
   unsubscribeUrl: string
+  country?: Country
 }) {
+  const cfg = getCountryConfig(country)
+  const adj = country === 'au' ? 'AU' : 'SA'
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
   <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #ebebeb">
-    ${HEADER("SA's Cycling Directory")}
+    ${HEADER(`${adj}'s Cycling Directory`)}
     <div style="padding:32px">
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Is this your shop?</h2>
       <p style="margin:0 0 16px;color:#6b7280;font-size:14px;line-height:1.6">
-        We've listed <strong>${businessName}</strong> in ${city} on CrankMart, South Africa's dedicated cycling directory. We'd love for you to claim and manage this listing — it's free.
+        We've listed <strong>${businessName}</strong> in ${city} on CrankMart, ${cfg.name}'s dedicated cycling directory. We'd love for you to claim and manage this listing — it's free.
       </p>
       <p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.6">
-        Claiming your listing lets you update contact details, trading hours, services, and get in front of thousands of SA cyclists.
+        Claiming your listing lets you update contact details, trading hours, services, and get in front of thousands of ${adj} cyclists.
       </p>
       <a href="${claimUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:12px">
         Claim My Listing →
@@ -136,12 +143,15 @@ export function shopClaimTouch2Email({
   city,
   claimUrl,
   unsubscribeUrl,
+  country = 'za',
 }: {
   businessName: string
   city: string
   claimUrl: string
   unsubscribeUrl: string
+  country?: Country
 }) {
+  const adj = country === 'au' ? 'AU' : 'SA'
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
@@ -158,7 +168,7 @@ export function shopClaimTouch2Email({
         <ul style="margin:0;padding-left:18px;font-size:13px;color:#6b7280;line-height:1.8">
           <li>Update your contact info and trading hours</li>
           <li>Add your brands and services</li>
-          <li>Be found by SA cyclists searching nearby</li>
+          <li>Be found by ${adj} cyclists searching nearby</li>
         </ul>
       </div>
       <a href="${claimUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">
@@ -212,12 +222,15 @@ export function shopVerifiedEmail({
   businessName,
   dashboardUrl,
   listingUrl,
+  country = 'za',
 }: {
   ownerName: string
   businessName: string
   dashboardUrl: string
   listingUrl: string
+  country?: Country
 }) {
+  const adj = country === 'au' ? 'AU' : 'SA'
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
@@ -231,7 +244,7 @@ export function shopVerifiedEmail({
       </div>
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Welcome to CrankMart, ${ownerName}!</h2>
       <p style="margin:0 0 16px;color:#6b7280;font-size:14px;line-height:1.6">
-        <strong>${businessName}</strong> is now a verified listing on SA's cycling directory. SA cyclists can find you, view your details, and get in touch.
+        <strong>${businessName}</strong> is now a verified listing on ${adj}'s cycling directory. ${adj} cyclists can find you, view your details, and get in touch.
       </p>
       <a href="${dashboardUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:12px">
         Go to My Listing →
@@ -291,12 +304,15 @@ export function eventVerifiedEmail({
   eventTitle,
   eventUrl,
   editUrl,
+  country = 'za',
 }: {
   organiserName: string
   eventTitle: string
   eventUrl: string
   editUrl: string
+  country?: Country
 }) {
+  const adj = country === 'au' ? 'AU' : 'SA'
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
@@ -309,7 +325,7 @@ export function eventVerifiedEmail({
       </div>
       <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Hi ${organiserName} — you're live!</h2>
       <p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.6">
-        <strong>${eventTitle}</strong> has been verified and is now visible to SA cyclists on CrankMart.
+        <strong>${eventTitle}</strong> has been verified and is now visible to ${adj} cyclists on CrankMart.
       </p>
       <a href="${eventUrl}" style="display:block;text-align:center;background:#0D1B2A;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;margin-bottom:12px">
         View Event Page →

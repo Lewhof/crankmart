@@ -168,6 +168,7 @@ export async function GET(req: Request) {
       boostStats: boostStats.rows,
       moderationStats: moderationStats.rows,
       period: days,
+      country: seeAll ? null : safeCountry,
     })
   } catch (error: any) {
     console.error('Reports error:', error)

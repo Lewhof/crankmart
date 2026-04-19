@@ -46,7 +46,7 @@ export default function AdminWaitlistPage() {
   useEffect(() => { fetchData(page) }, [page, fetchData])
 
   const fmt = (iso: string) =>
-    new Date(iso).toLocaleString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    new Date(iso).toLocaleString(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 
   const rows: React.ComponentProps<typeof Table>['rows'] = (data?.rows ?? []).map(r => ({
     id: r.id,

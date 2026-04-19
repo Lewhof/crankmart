@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { PageHeader } from '@/components/admin/primitives'
+import { formatPrice } from '@/lib/currency'
+import type { Country } from '@/lib/country'
 
 interface ReportData {
   listingsByStatus: Array<{ status: string; count: string }>
@@ -17,6 +19,7 @@ interface ReportData {
   boostStats: Array<{ package_name: string; total: string; revenue: string }>
   moderationStats: Array<{ moderation_status: string; count: string }>
   period: number
+  country: Country | null
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -180,6 +183,10 @@ export default function ReportsPage() {
 
   if (!data) return null
 
+  // Reports filter by getAdminCountry server-side, so all monetary values
+  // are in that country's currency. `country` is null in superadmin all-view.
+  const reportCountry: Country = data.country ?? 'za'
+
   // Summary stats
   const totalListings = data.listingsByStatus.reduce((s, r) => s + Number(r.count), 0)
   const activeListings = Number(data.listingsByStatus.find(r => r.status === 'active')?.count || 0)
@@ -224,7 +231,7 @@ export default function ReportsPage() {
         <StatPill label="Sold" value={soldListingsTotal.toLocaleString()} color="#3B82F6" />
         <StatPill label={`New Users (${days}d)`} value={totalUsers.toLocaleString()} color="#8B5CF6" />
         <StatPill label={`Messages (${days}d)`} value={totalMessages.toLocaleString()} color="#F59E0B" />
-        <StatPill label={`Boost Revenue (${days}d)`} value={boostRevenue > 0 ? `R${boostRevenue.toLocaleString()}` : 'R0'} color="#EF4444" />
+        <StatPill label={`Boost Revenue (${days}d)`} value={formatPrice(reportCountry, boostRevenue)} color="#EF4444" />
       </div>
 
       {/* Row 1: Listings status + Moderation */}
@@ -335,7 +342,7 @@ export default function ReportsPage() {
                 <tr key={i} style={{ borderBottom: '1px solid var(--admin-border)' }}>
                   <td style={{ padding: '10px 12px', color: 'var(--admin-text-dim)', fontWeight: 600 }}>{i + 1}</td>
                   <td style={{ padding: '10px 12px', fontWeight: 600, color: 'var(--admin-text)', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</td>
-                  <td style={{ padding: '10px 12px', color: '#10B981', fontWeight: 700 }}>R{Number(r.price || 0).toLocaleString()}</td>
+                  <td style={{ padding: '10px 12px', color: '#10B981', fontWeight: 700 }}>{formatPrice(reportCountry, r.price || 0)}</td>
                   <td style={{ padding: '10px 12px', fontWeight: 700, color: 'var(--admin-text)' }}>{Number(r.views || 0).toLocaleString()}</td>
                   <td style={{ padding: '10px 12px' }}>
                     <span style={{ padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, background: `${STATUS_COLORS[r.status] || '#9CA3AF'}20`, color: STATUS_COLORS[r.status] || '#9CA3AF', textTransform: 'capitalize' }}>
@@ -360,7 +367,7 @@ export default function ReportsPage() {
               <div key={r.package_name} style={{ background: 'var(--admin-surface-2)', border: '1px solid #ebebeb', borderRadius: 8, padding: '14px 16px' }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--admin-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{r.package_name}</div>
                 <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--admin-text)' }}>{r.total} <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--admin-text-dim)' }}>sold</span></div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#10B981', marginTop: 4 }}>R{Number(r.revenue || 0).toLocaleString()} revenue</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#10B981', marginTop: 4 }}>{formatPrice(reportCountry, r.revenue || 0)} revenue</div>
               </div>
             ))}
           </div>

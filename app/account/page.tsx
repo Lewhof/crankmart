@@ -66,7 +66,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' })
+  return new Date(d).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 // Per-listing currency: fall back to ZA if a row pre-dates the country column.
 function fmtPriceFor(country: string | undefined | null, p: string): string {
@@ -490,7 +490,7 @@ function SavedTab() {
                     <div style={{ fontSize: 11, color: '#9a9a9a', display: 'flex', alignItems: 'center', gap: 3, margin: '3px 0' }}><MapPin size={10} /> {String(e.city ?? e.province ?? '')}</div>
                     {Boolean(e.start_date) && (
                       <div style={{ fontSize: 11, color: '#9a9a9a' }}>
-                        {new Date(String(e.start_date)).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {new Date(String(e.start_date)).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                       </div>
                     )}
                   </div>

@@ -74,6 +74,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           claimUrl,
           previewUrl,
           unsubscribeUrl,
+          country: (business.country as 'za' | 'au' | undefined) ?? 'za',
         })
         await sendEmail({
           to: business.email,
