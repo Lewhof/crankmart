@@ -7,6 +7,14 @@
  * Sets the `x-country` request header so server components / queries can
  * read it via `getCountry()` in `src/lib/country.ts`.
  *
+ * Sticky country preference: the `admin_country` cookie (set by the
+ * SuperadminCountryToggle / CountrySwitcher) acts as the user's preferred
+ * country. When a request has no URL country prefix the proxy redirects to
+ * the cookie's country instead of DEFAULT_COUNTRY — so any hardcoded
+ * unprefixed link (`/events`, `/browse`, etc.) lands on the user's chosen
+ * country. When the URL DOES have a prefix the proxy syncs the cookie to
+ * match, so direct URL navigation also updates the sticky preference.
+ *
  * Gates non-admins out of any country marked `coming-soon` in
  * COUNTRY_LIVE_STATUS (e.g. `za:live,au:coming-soon`). Country-scoped gate
  * means ZA can be publicly live while AU stays behind the admin gate.
@@ -61,16 +69,38 @@ function withCountryHeader(req: NextRequest, country: Country): Headers {
   return h
 }
 
+const COUNTRY_PREF_COOKIE = 'admin_country'
+const COUNTRY_PREF_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
+
+function readCountryPref(req: NextRequest): Country | null {
+  const v = req.cookies.get(COUNTRY_PREF_COOKIE)?.value
+  return isCountry(v ?? '') ? (v as Country) : null
+}
+
+function syncCountryPrefCookie(res: NextResponse, country: Country): void {
+  res.cookies.set(COUNTRY_PREF_COOKIE, country, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: COUNTRY_PREF_MAX_AGE,
+  })
+}
+
 function applyCountryHeader(req: NextRequest, forceCountry?: Country): NextResponse {
   const mode = getMode()
   const { pathname, search } = req.nextUrl
 
   if (pathname.startsWith('/api/')) {
-    // Respect an x-country header set by the caller (server components
-    // forwarding the country into internal /api fetches). Only fall back to
-    // the default when the caller didn't supply one.
+    // Resolution order: explicit caller header → sticky cookie → default.
+    // Vary: x-country + Cookie on /api responses keeps CDN cache slots split
+    // per (country header, cookie) pair so cross-country contamination can't
+    // leak through the edge cache.
     const incoming = req.headers.get('x-country')
-    const resolved = isCountry(incoming ?? '') ? (incoming as Country) : (forceCountry ?? DEFAULT_COUNTRY)
+    const cookie = readCountryPref(req)
+    const resolved: Country = isCountry(incoming ?? '')
+      ? (incoming as Country)
+      : (cookie ?? forceCountry ?? DEFAULT_COUNTRY)
     const headers = withCountryHeader(req, resolved)
     return NextResponse.next({ request: { headers } })
   }
@@ -83,15 +113,22 @@ function applyCountryHeader(req: NextRequest, forceCountry?: Country): NextRespo
   const first = pathname.split('/')[1] || ''
   if (isCountry(first)) {
     // Rewrite /za/x internally to /x so Next.js's file router finds the
-    // route — the app/ tree isn't nested under a [country] segment.
+    // route — the app/ tree isn't nested under a [country] segment. Also
+    // refresh the sticky cookie so unprefixed links land on the same country.
     const rewritten = req.nextUrl.clone()
     rewritten.pathname = pathname.slice(`/${first}`.length) || '/'
     const headers = withCountryHeader(req, first)
-    return NextResponse.rewrite(rewritten, { request: { headers } })
+    const res = NextResponse.rewrite(rewritten, { request: { headers } })
+    if (readCountryPref(req) !== first) syncCountryPrefCookie(res, first)
+    return res
   }
 
+  // No URL prefix → fall back to sticky cookie, then DEFAULT_COUNTRY.
+  // This is what makes `<Link href="/events">` from /au pages land on
+  // /au/events instead of bouncing back to /za/events.
+  const target = readCountryPref(req) ?? DEFAULT_COUNTRY
   const url = req.nextUrl.clone()
-  url.pathname = `/${DEFAULT_COUNTRY}${pathname === '/' ? '' : pathname}`
+  url.pathname = `/${target}${pathname === '/' ? '' : pathname}`
   url.search = search
   return NextResponse.redirect(url, 308)
 }
