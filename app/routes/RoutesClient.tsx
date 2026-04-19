@@ -337,13 +337,13 @@ export default function RoutesClient() {
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
             <Navigation size={16} style={{ color: '#93C5FD', flexShrink: 0 }} />
-            <span style={{ color: '#93C5FD', fontSize: 12, fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase' }}>SA Cycling Routes</span>
+            <span style={{ color: '#93C5FD', fontSize: 12, fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{country === 'au' ? 'AU' : 'SA'} Cycling Routes</span>
           </div>
           <h1 style={{ color: '#fff', fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 800, lineHeight: 1.2, margin: '0 0 10px' }}>
-            Discover South Africa's Best Rides
+            Discover {country === 'au' ? "Australia's" : "South Africa's"} Best Rides
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15, margin: '0 0 24px', lineHeight: 1.6 }}>
-            Road, MTB, gravel and urban routes across all 9 provinces. Find your next adventure.
+            Road, MTB, gravel and urban routes across all {PROVINCES.length} {country === 'au' ? 'states & territories' : 'provinces'}. Find your next adventure.
           </p>
           <div className='rt-search-wrap'>
             <input type='text' placeholder='Search routes, towns, provinces…' value={searchInput}

@@ -1,6 +1,14 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import { countryFromPath } from '@/lib/regions-static'
+import { getLocale } from '@/lib/currency'
+
+const COUNTRY_MAP_CENTER: Record<string, [number, number]> = {
+  za: [-29, 25],
+  au: [-25, 135],
+}
 
 const TYPE_COLORS: Record<string, string> = {
   race: '#EF4444', stage_race: '#0D1B2A', fun_ride: '#10B981',
@@ -37,6 +45,9 @@ interface LeafletLib {
 }
 
 export default function EventsMap({ events, userLat, userLng, nearbyKm = 50, nearMeActive = false }: Props) {
+  const country = countryFromPath(usePathname())
+  const locale = getLocale(country)
+  const mapCenter = COUNTRY_MAP_CENTER[country] ?? COUNTRY_MAP_CENTER.za
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<any>(null)
   const leafletRef = useRef<LeafletLib | null>(null)
@@ -52,7 +63,7 @@ export default function EventsMap({ events, userLat, userLng, nearbyKm = 50, nea
     ]).then(([leaflet]: [any, any]) => {
       L = leaflet.default ?? leaflet
       leafletRef.current = L
-      const map = L.map(mapRef.current!, { center: [-29, 25], zoom: 5, zoomControl: true })
+      const map = L.map(mapRef.current!, { center: mapCenter, zoom: country === 'au' ? 4 : 5, zoomControl: true })
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors', maxZoom: 18,
       }).addTo(map)
@@ -76,7 +87,7 @@ export default function EventsMap({ events, userLat, userLng, nearbyKm = 50, nea
         iconSize: [14, 14], iconAnchor: [7, 7],
       })
       const marker = L.marker([e.lat, e.lng], { icon })
-      const date = new Date(e.event_date_start).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
+      const date = new Date(e.event_date_start).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
       marker.bindPopup(`
         <div style="min-width:180px;font-family:Inter,sans-serif;">
           <div style="font-size:12px;font-weight:800;color:#1a1a1a;margin-bottom:4px;line-height:1.3;">${e.title}</div>

@@ -364,7 +364,7 @@ function BrowseContent() {
     setHasMore(true)
     const q = buildQuery(cat, cond, prov, min, max, attrMap, searchTerm, 0, sortMode, true)
     try {
-      const res = await fetch(`/api/listings?${q}`)
+      const res = await fetch(`/api/listings?${q}`, { headers: { 'x-country': country } })
       const body = await res.json()
       const items = Array.isArray(body) ? body : (body.items ?? [])
       const totalN = Array.isArray(body) ? items.length : Number(body.total ?? items.length)
@@ -381,7 +381,7 @@ function BrowseContent() {
     setLoadingMore(true)
     const q = buildQuery(category, condition, province, minPrice, maxPrice, attrs, search, allItems.length, sort, false)
     try {
-      const res = await fetch(`/api/listings?${q}`)
+      const res = await fetch(`/api/listings?${q}`, { headers: { 'x-country': country } })
       const body = await res.json()
       const data: ListingItem[] = Array.isArray(body) ? body : (body.items ?? [])
       const merged = [...allItems, ...data]

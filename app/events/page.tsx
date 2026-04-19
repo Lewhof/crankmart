@@ -3,9 +3,13 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import { usePathname } from 'next/navigation'
 import { MapPin, Calendar, ChevronRight, Search, ExternalLink, SlidersHorizontal, X, Map, LayoutGrid, LocateFixed, CalendarDays, Users } from 'lucide-react'
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
+import { getCountryConfig } from '@/lib/country-config'
+import { getLocale } from '@/lib/currency'
 
-// City → [lat, lng] lookup for SA cities
+// City → [lat, lng] lookup. SA cities exhaustive; AU cities cover seeded set.
 const CITY_COORDS: Record<string, [number, number]> = {
   // Western Cape
   'Cape Town': [-33.9249, 18.4241], 'Stellenbosch': [-33.9321, 18.8602], 'George': [-33.9646, 22.4614],
@@ -75,9 +79,21 @@ const CITY_COORDS: Record<string, [number, number]> = {
   'Augrabies': [-28.5968, 20.3377], 'Calvinia': [-31.4718, 19.7753], 'Hanover': [-31.0696, 24.4573],
   'Kenhardt': [-29.3627, 21.1476], 'Nigramoep': [-29.7131, 17.6872], 'O\'Kiep': [-29.6147, 17.8844],
   'Orania': [-29.8097, 24.4197],
+  // Australia — major cycling hubs (seeded set + likely additions)
+  // Australia — keys collide with SA city names ('Newcastle' exists in both KZN and NSW),
+  // so AU entries live under province-prefixed keys. getCityCoords prefers a province-prefixed
+  // hit when an AU state is supplied, then falls back to bare-key SA cities.
+  'NSW:Sydney': [-33.8688, 151.2093], 'VIC:Melbourne': [-37.8136, 144.9631], 'QLD:Brisbane': [-27.4698, 153.0251],
+  'WA:Perth': [-31.9505, 115.8605], 'SA:Adelaide': [-34.9285, 138.6007], 'TAS:Hobart': [-42.8821, 147.3272],
+  'ACT:Canberra': [-35.2809, 149.1300], 'NT:Darwin': [-12.4634, 130.8456], 'NSW:Newcastle': [-32.9283, 151.7817],
+  'NSW:Wollongong': [-34.4278, 150.8931], 'QLD:Gold Coast': [-28.0167, 153.4000], 'QLD:Sunshine Coast': [-26.6500, 153.0667],
+  'QLD:Cairns': [-16.9186, 145.7781], 'VIC:Geelong': [-38.1499, 144.3617], 'VIC:Ballarat': [-37.5622, 143.8503],
+  'VIC:Bendigo': [-36.7570, 144.2794], 'WA:Fremantle': [-32.0569, 115.7439], 'WA:Mandurah': [-32.5269, 115.7217],
+  'TAS:Launceston': [-41.4332, 147.1441], 'NT:Alice Springs': [-23.6980, 133.8807],
+  'NSW:Central Coast': [-33.4279, 151.3422],
 }
 
-// Province fallback centres — used when city not found
+// Province / state fallback centres — used when city not found
 const PROVINCE_COORDS: Record<string, [number, number]> = {
   'Western Cape': [-33.9249, 18.4241],
   'Gauteng': [-26.2041, 28.0473],
@@ -88,6 +104,14 @@ const PROVINCE_COORDS: Record<string, [number, number]> = {
   'Mpumalanga': [-25.4745, 30.9703],
   'North West': [-25.6675, 27.2423],
   'Northern Cape': [-28.7323, 24.7620],
+  'New South Wales':              [-33.8688, 151.2093],
+  'Victoria':                     [-37.8136, 144.9631],
+  'Queensland':                   [-27.4698, 153.0251],
+  'Western Australia':            [-31.9505, 115.8605],
+  'South Australia':              [-34.9285, 138.6007],
+  'Tasmania':                     [-42.8821, 147.3272],
+  'Northern Territory':           [-12.4634, 130.8456],
+  'Australian Capital Territory': [-35.2809, 149.1300],
 }
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -96,12 +120,25 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
 }
 
+// Map AU state names → 2/3-letter prefix used in CITY_COORDS keys.
+const AU_STATE_PREFIX: Record<string, string> = {
+  'New South Wales': 'NSW', 'Victoria': 'VIC', 'Queensland': 'QLD',
+  'Western Australia': 'WA', 'South Australia': 'SA', 'Tasmania': 'TAS',
+  'Northern Territory': 'NT', 'Australian Capital Territory': 'ACT',
+}
+
 function getCityCoords(city: string, province?: string): [number, number] | null {
   if (!city) return province ? (PROVINCE_COORDS[province] ?? null) : null
-  // Exact match
+  // AU lookup first — when province is an AU state, prefer the prefixed key
+  // so 'Newcastle' in NSW resolves to AU coords, not SA's KZN Newcastle.
+  if (province && AU_STATE_PREFIX[province]) {
+    const auKey = `${AU_STATE_PREFIX[province]}:${city}`
+    if (CITY_COORDS[auKey]) return CITY_COORDS[auKey]
+  }
+  // SA exact match (and AU cities that happen to be unique)
   const direct = CITY_COORDS[city]
   if (direct) return direct
-  // Case-insensitive match
+  // Case-insensitive match across all keys
   const key = Object.keys(CITY_COORDS).find(k => k.toLowerCase() === city.toLowerCase())
   if (key) return CITY_COORDS[key]
   // City field sometimes contains province name — treat as province fallback
@@ -141,7 +178,7 @@ const TYPES = [
   { value: 'training_camp', label: 'Training Camp' },
   { value: 'festival', label: 'Festival' },
 ]
-const PROVINCES = ['','Western Cape','Gauteng','KwaZulu-Natal','Eastern Cape','Limpopo','Mpumalanga','Northern Cape','North West','Free State']
+// PROVINCES is computed inside the component from countryFromPath()
 const TYPE_COLORS: Record<string, string> = {
   race: '#EF4444', stage_race: '#0D1B2A', fun_ride: '#10B981',
   social_ride: '#3B82F6', tour: '#F59E0B', training_camp: '#8B5CF6',
@@ -152,9 +189,6 @@ const TYPE_LABELS: Record<string, string> = {
   social_ride: 'Social Ride', tour: 'Tour', training_camp: 'Training Camp', festival: 'Festival'
 }
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
-}
 function getMonth(d: string) { return new Date(d).getMonth() }
 function gradientFor(type: string) {
   const g: Record<string, string> = {
@@ -170,6 +204,10 @@ function gradientFor(type: string) {
 }
 
 export default function EventsPage() {
+  const country = countryFromPath(usePathname())
+  const cfg = getCountryConfig(country)
+  const locale = getLocale(country)
+  const PROVINCES = ['', ...getProvincesStatic(country)]
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -221,29 +259,29 @@ export default function EventsPage() {
     if (province) params.set('province', province)
     if (month !== null) params.set('month', String(month + 1))
     if (search) params.set('search', search)
-    fetch(`/api/events?${params}`)
+    fetch(`/api/events?${params}`, { headers: { 'x-country': country } })
       .then(r => r.json())
       .then(d => setEvents(Array.isArray(d) ? d : []))
       .finally(() => setLoading(false))
-  }, [type, province, month, search])
+  }, [type, province, month, search, country])
 
   useEffect(() => {
     if (activeTab !== 'organisers' || orgLoaded) return
     setOrgLoading(true)
-    fetch('/api/directory?type=event_organiser&limit=200')
+    fetch('/api/directory?type=event_organiser&limit=200', { headers: { 'x-country': country } })
       .then(r => r.json())
       .then(d => { setOrganisers(Array.isArray(d.data) ? d.data : []); setOrgLoaded(true) })
       .finally(() => setOrgLoading(false))
-  }, [activeTab, orgLoaded])
+  }, [activeTab, orgLoaded, country])
 
   // Lazy-load past events (last 60 days) when user opens the section
   useEffect(() => {
     if (!pastOpen || pastLoaded) return
-    fetch('/api/events?past=1&limit=50')
+    fetch('/api/events?past=1&limit=50', { headers: { 'x-country': country } })
       .then(r => r.json())
       .then(d => { setPastEvents(Array.isArray(d) ? d : []); setPastLoaded(true) })
       .catch(() => setPastLoaded(true))
-  }, [pastOpen, pastLoaded])
+  }, [pastOpen, pastLoaded, country])
 
   const currentMonth = new Date().getMonth()
   const monthsWithEvents = new Set(events.map(e => getMonth(e.event_date_start)))
@@ -349,10 +387,10 @@ export default function EventsPage() {
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
             <Calendar size={16} style={{ color: '#93C5FD', flexShrink: 0 }} />
-            <span style={{ color: '#93C5FD', fontSize: 12, fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase' }}>SA Cycling Events</span>
+            <span style={{ color: '#93C5FD', fontSize: 12, fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{country === 'au' ? 'AU' : 'SA'} Cycling Events</span>
           </div>
           <h1>Upcoming Cycling Events</h1>
-          <p>Races, tours, sportives and fun rides across South Africa</p>
+          <p>Races, tours, sportives and fun rides across {cfg.name}</p>
           <div className="search-wrap">
             <input type="text" placeholder="Search events, cities..." value={search} onChange={e => setSearch(e.target.value)} />
             <Search size={18} className="search-icon" />
@@ -495,7 +533,7 @@ export default function EventsPage() {
           </div>
           <div className="events-wrap">
             <div className="events-grid">
-              {mapPins.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} />)}
+              {mapPins.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} locale={locale} />)}
             </div>
           </div>
         </div>
@@ -629,7 +667,7 @@ export default function EventsPage() {
                 </div>
               ) : (
                 <div className="events-grid">
-                  {filteredEvents.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} />)}
+                  {filteredEvents.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} locale={locale} />)}
                 </div>
               )}
 
@@ -655,7 +693,7 @@ export default function EventsPage() {
                         <p style={{ fontSize: 13, color: '#9a9a9a', textAlign: 'center', padding: 24 }}>No past events in the last 60 days.</p>
                       ) : (
                         <div className="events-grid" style={{ opacity: 0.75 }}>
-                          {pastEvents.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} />)}
+                          {pastEvents.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} locale={locale} />)}
                         </div>
                       )}
                     </div>
@@ -678,7 +716,7 @@ export default function EventsPage() {
   )
 }
 
-function EventCard({ event, gradientFor }: { event: Event; gradientFor: (t: string) => string }) {
+function EventCard({ event, gradientFor, locale }: { event: Event; gradientFor: (t: string) => string; locale: string }) {
   const color = TYPE_COLORS[event.event_type] || TYPE_COLORS.default
   const label = TYPE_LABELS[event.event_type] || event.event_type
 
@@ -692,7 +730,7 @@ function EventCard({ event, gradientFor }: { event: Event; gradientFor: (t: stri
         <div className="ev-body">
           <div className="ev-title">{event.title}</div>
           <div className="ev-meta">
-            <span><Calendar size={10} />{new Date(event.event_date_start).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+            <span><Calendar size={10} />{new Date(event.event_date_start).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
             <span><MapPin size={10} />{event.city}, {event.province}</span>
           </div>
           <div className="ev-chips">

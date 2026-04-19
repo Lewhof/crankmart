@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { countryFromPath, getProvincesStatic } from "@/lib/regions-static";
+import { getCountryConfig } from "@/lib/country-config";
 
 const DirectoryMap = dynamic(() => import("./MapComponent"), {
   ssr: false,
@@ -89,6 +90,8 @@ const getInitials = (name: string) => {
 
 export default function DirectoryPage() {
   const country = countryFromPath(usePathname());
+  const cfg = getCountryConfig(country);
+  const adj = country === 'au' ? 'AU' : 'SA';
   const PROVINCES = getProvincesStatic(country);
   const cityTable = CITIES_BY_PROVINCE[country] ?? {};
   const ALL_CITIES = [...new Set(Object.values(cityTable).flat())].sort();
@@ -185,15 +188,15 @@ export default function DirectoryPage() {
       : selectedProvince
       ? `Cycling Businesses in ${selectedProvince}`
       : selectedType
-      ? `${BUSINESS_TYPES.find(t => t.value === selectedType)?.label || 'Businesses'} in South Africa`
-      : 'Cycling Business Directory — South Africa'
+      ? `${BUSINESS_TYPES.find(t => t.value === selectedType)?.label || 'Businesses'} in ${cfg.name}`
+      : `Cycling Business Directory — ${cfg.name}`
 
     const itemListSchema = {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
       '@id': `https://crankmart.com/directory#itemlist`,
       name: pageTitle,
-      description: `Browse cycling businesses across South Africa on CrankMart`,
+      description: `Browse cycling businesses across ${cfg.name} on CrankMart`,
       numberOfItems: businesses.length,
       itemListElement: businesses.map((business, index) => ({
         '@type': 'ListItem',
@@ -297,13 +300,13 @@ export default function DirectoryPage() {
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8, marginBottom:12 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93C5FD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-            <span style={{ color:"#93C5FD", fontSize:12, fontWeight:600, letterSpacing:"0.07em", textTransform:"uppercase" }}>SA Cycling Businesses</span>
+            <span style={{ color:"#93C5FD", fontSize:12, fontWeight:600, letterSpacing:"0.07em", textTransform:"uppercase" }}>{adj} Cycling Businesses</span>
           </div>
           <h1 style={{ color:"#fff", fontSize:"clamp(24px,4vw,36px)", fontWeight:800, lineHeight:1.2, margin:"0 0 10px" }}>
-            Find SA Cycling Businesses
+            Find {adj} Cycling Businesses
           </h1>
           <p style={{ color:"rgba(255,255,255,0.7)", fontSize:15, margin:"0 0 24px", lineHeight:1.6 }}>
-            Discover bike shops, mechanics, brands, coaches, and more across South Africa
+            Discover bike shops, mechanics, brands, coaches, and more across {cfg.name}
           </p>
           <div className="dir-search-wrap">
             <input
