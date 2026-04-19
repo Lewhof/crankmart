@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Eye, ChevronRight, PenLine } from 'lucide-react'
+import { countryFromPath } from '@/lib/regions-static'
+import { getLocale } from '@/lib/currency'
 
 interface Article {
   id: string; title: string; slug: string; excerpt: string
@@ -20,7 +23,7 @@ const CATS = [
   { slug: 'general', label: 'General' },
 ]
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string, locale: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
   const days = Math.floor(diff / 86400000)
   if (days === 0) return 'Today'
@@ -28,10 +31,13 @@ function timeAgo(dateStr: string) {
   if (days < 7) return `${days} days ago`
   const weeks = Math.floor(days / 7)
   if (weeks < 5) return `${weeks} week${weeks > 1 ? 's' : ''} ago`
-  return new Date(dateStr).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export default function NewsPage() {
+  const country = countryFromPath(usePathname())
+  const locale = getLocale(country)
+  const countryAdj = country === 'au' ? 'AU' : 'SA'
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('all')
@@ -43,7 +49,7 @@ export default function NewsPage() {
     try {
       const q = new URLSearchParams({ limit: '9', offset: String(off) })
       if (cat !== 'all') q.set('category', cat)
-      const res = await fetch(`/api/news?${q}`)
+      const res = await fetch(`/api/news?${q}`, { headers: { 'x-country': country } })
       const data = await res.json()
       const list: Article[] = data.articles || []
       setArticles(prev => append ? [...prev, ...list] : list)
@@ -76,7 +82,7 @@ export default function NewsPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div>
               <h1 style={{ fontSize: 28, fontWeight: 900, color: '#1a1a1a', margin: '0 0 4px', letterSpacing: '-0.5px' }}>Cycling News</h1>
-              <p style={{ margin: 0, fontSize: 14, color: '#9a9a9a' }}>Latest SA cycling news, race reports and industry updates</p>
+              <p style={{ margin: 0, fontSize: 14, color: '#9a9a9a' }}>Latest {countryAdj} cycling news, race reports and industry updates</p>
             </div>
             <Link href="/news/submit"
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', background: 'var(--color-primary)', color: '#fff', borderRadius: 2, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
@@ -147,7 +153,7 @@ export default function NewsPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: 'rgba(255,255,255,.7)' }}>
                       <span>{featured.author_name}</span>
                       <span>·</span>
-                      <span>{timeAgo(featured.published_at)}</span>
+                      <span>{timeAgo(featured.published_at, locale)}</span>
                       <span>·</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Eye size={13} />{featured.views_count}</span>
                     </div>
@@ -177,7 +183,7 @@ export default function NewsPage() {
                       {article.excerpt}
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: '#9a9a9a' }}>
-                      <span>{article.author_name} · {timeAgo(article.published_at)}</span>
+                      <span>{article.author_name} · {timeAgo(article.published_at, locale)}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Eye size={12} />{article.views_count}</span>
                     </div>
                   </div>

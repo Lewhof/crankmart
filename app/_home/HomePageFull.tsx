@@ -5,6 +5,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Search, ChevronRight, Zap, MapPin, ArrowRight, Shield, Tag, Users, SlidersHorizontal, Calendar, Store, ExternalLink, Newspaper, Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import type { Country } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
+import { formatPrice, getLocale } from '@/lib/currency'
 
 interface Event {
   id: string; title: string; slug: string
@@ -53,6 +56,7 @@ const CATEGORIES = [
 ]
 
 interface HomePageFullProps {
+  country?: Country
   initial?: {
     featured?: FeaturedListing[]
     events?: Event[]
@@ -61,8 +65,11 @@ interface HomePageFullProps {
   }
 }
 
-export default function HomePageFull({ initial }: HomePageFullProps = {}) {
+export default function HomePageFull({ country = 'za', initial }: HomePageFullProps = {}) {
   const router = useRouter()
+  const cfg = getCountryConfig(country)
+  const locale = getLocale(country)
+  const countryAdj = country === 'za' ? 'SA' : 'AU'
   const [search, setSearch] = useState('')
   const [featured]     = useState<FeaturedListing[]>(initial?.featured     ?? [])
   const [events]       = useState<Event[]>(          initial?.events       ?? [])
@@ -72,9 +79,9 @@ export default function HomePageFull({ initial }: HomePageFullProps = {}) {
   const [catExpanded, setCatExpanded] = useState(false)
 
   const SLIDES = [
-    { img: '/images/01-hero-mtb-karoo.jpg',         headline: "South Africa's Cycling Marketplace", sub: 'Buy and sell bikes, gear and parts — free to list.' },
-    { img: '/images/02-hero-chapmans-peak.jpg',      headline: 'Find Your Next Ride',                sub: 'Thousands of listings from SA cyclists.' },
-    { img: '/images/06-hero-gravel-stellenbosch.jpg',headline: 'Sell in Minutes',                   sub: 'List your bike for free. Reach serious buyers.' },
+    { img: '/images/01-hero-mtb-karoo.jpg',         headline: `${cfg.name}'s Cycling Marketplace`,       sub: 'Buy and sell bikes, gear and parts — free to list.' },
+    { img: '/images/02-hero-chapmans-peak.jpg',      headline: 'Find Your Next Ride',                     sub: `Thousands of listings from ${countryAdj} cyclists.` },
+    { img: '/images/06-hero-gravel-stellenbosch.jpg',headline: 'Sell in Minutes',                         sub: 'List your bike for free. Reach serious buyers.' },
   ]
 
   // Auto-advance hero slides
@@ -92,7 +99,7 @@ export default function HomePageFull({ initial }: HomePageFullProps = {}) {
     else router.push('/browse')
   }
 
-  const fmt = (p: string) => `R ${parseFloat(p).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`
+  const fmt = (p: string) => formatPrice(country, p)
 
   return (
     <div style={{ background: '#fff', minHeight: '100vh' }}>
@@ -395,7 +402,7 @@ export default function HomePageFull({ initial }: HomePageFullProps = {}) {
         <div className="value-item">
           <div className="value-icon"><Users size={20} color="#0D1B2A" /></div>
           <div>
-            <p className="value-title">SA Cyclists Only</p>
+            <p className="value-title">{countryAdj} Cyclists Only</p>
             <p className="value-desc">Buy and sell locally, safely.</p>
           </div>
         </div>
@@ -418,7 +425,7 @@ export default function HomePageFull({ initial }: HomePageFullProps = {}) {
               </div>
               <div>
                 <h2 className="section-title" style={{ marginBottom: 2 }}>Latest Cycling News</h2>
-                <p style={{ margin: 0, fontSize: 12, color: '#9a9a9a' }}>Race reports, industry news & SA cycling updates</p>
+                <p style={{ margin: 0, fontSize: 12, color: '#9a9a9a' }}>Race reports, industry news & {countryAdj} cycling updates</p>
               </div>
             </div>
             <Link href="/news" className="section-link">All News <ChevronRight size={13} /></Link>
@@ -470,7 +477,7 @@ export default function HomePageFull({ initial }: HomePageFullProps = {}) {
                       {article.excerpt}
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11, color: '#9a9a9a' }}>
-                      <span>{article.author_name} · {new Date(article.published_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}</span>
+                      <span>{article.author_name} · {new Date(article.published_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Eye size={11} />{article.views_count}</span>
                     </div>
                   </div>
@@ -507,8 +514,8 @@ export default function HomePageFull({ initial }: HomePageFullProps = {}) {
             <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
               {events.map(ev => {
                 const dateStart = new Date(ev.event_date_start)
-                const day = dateStart.toLocaleDateString('en-ZA', { day: 'numeric' })
-                const mon = dateStart.toLocaleDateString('en-ZA', { month: 'short' }).toUpperCase()
+                const day = dateStart.toLocaleDateString(locale, { day: 'numeric' })
+                const mon = dateStart.toLocaleDateString(locale, { month: 'short' }).toUpperCase()
                 const statusColor = ev.entry_status === 'open' ? '#10B981' : ev.entry_status === 'closed' ? '#EF4444' : '#F59E0B'
                 return (
                   <Link key={ev.id} href={`/events/${ev.slug}`} style={{ display: 'flex', gap: 14, background: '#fff', borderRadius: 2, border: '1px solid #ebebeb', padding: '14px 16px', textDecoration: 'none', color: 'inherit', boxShadow: '0 1px 3px rgba(0,0,0,.05)', transition: 'box-shadow .15s', alignItems: 'center' }}>
@@ -547,7 +554,7 @@ export default function HomePageFull({ initial }: HomePageFullProps = {}) {
               </div>
               <div>
                 <h2 className="section-title" style={{ marginBottom: 2 }}>Featured Shops</h2>
-                <p style={{ margin: 0, fontSize: 12, color: '#9a9a9a' }}>SA's top bike shops and brands</p>
+                <p style={{ margin: 0, fontSize: 12, color: '#9a9a9a' }}>{countryAdj}'s top bike shops and brands</p>
               </div>
             </div>
             <Link href="/directory" className="section-link">All Shops <ChevronRight size={13} /></Link>
@@ -594,7 +601,7 @@ export default function HomePageFull({ initial }: HomePageFullProps = {}) {
         <div className="cta-text">
           <div className="cta-eyebrow">Free Forever</div>
           <h2>List Your Cycling Business.</h2>
-          <p>Reach thousands of SA cyclists. 2 minutes. No card needed.</p>
+          <p>Reach thousands of {countryAdj} cyclists. 2 minutes. No card needed.</p>
         </div>
         <div className="cta-actions">
           <Link href="/directory/register" className="cta-btn-primary">

@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import { MapPin, Package, Calendar, ChevronRight, Zap } from 'lucide-react'
+import { countryFromPath } from '@/lib/regions-static'
+import { formatPrice, getLocale } from '@/lib/currency'
 
 interface SellerProfile {
   id: string; name: string; province: string | null; city: string | null; createdAt: string
@@ -45,9 +47,10 @@ export default function SellerProfilePage() {
     }).finally(() => setLoading(false))
   }, [sellerId])
 
-  const fmt = (p: string) => `R ${parseFloat(p).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`
+  const country = countryFromPath(usePathname())
+  const fmt = (p: string) => formatPrice(country, p)
   const memberSince = seller?.createdAt
-    ? new Date(seller.createdAt).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
+    ? new Date(seller.createdAt).toLocaleDateString(getLocale(country), { month: 'long', year: 'numeric' })
     : ''
   const initials = seller?.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() ?? '?'
 

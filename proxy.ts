@@ -66,7 +66,12 @@ function applyCountryHeader(req: NextRequest, forceCountry?: Country): NextRespo
   const { pathname, search } = req.nextUrl
 
   if (pathname.startsWith('/api/')) {
-    const headers = withCountryHeader(req, forceCountry ?? DEFAULT_COUNTRY)
+    // Respect an x-country header set by the caller (server components
+    // forwarding the country into internal /api fetches). Only fall back to
+    // the default when the caller didn't supply one.
+    const incoming = req.headers.get('x-country')
+    const resolved = isCountry(incoming ?? '') ? (incoming as Country) : (forceCountry ?? DEFAULT_COUNTRY)
+    const headers = withCountryHeader(req, resolved)
     return NextResponse.next({ request: { headers } })
   }
 

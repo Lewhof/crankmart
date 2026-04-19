@@ -1,4 +1,7 @@
 import { ImageResponse } from 'next/og'
+import { getCountry } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
+import { formatPrice } from '@/lib/currency'
 
 export const runtime = 'edge'
 export const revalidate = 3600
@@ -11,20 +14,25 @@ const CONDITION_LABELS: Record<string, string> = {
 
 export default async function Image({ params }: { params: { slug: string } }) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
+  const country = await getCountry()
+  const cfg = getCountryConfig(country)
   let title = 'CrankMart listing'
   let price = ''
   let cond = ''
   let location = ''
 
   try {
-    const res = await fetch(`${baseUrl}/api/listings/${params.slug}`, { next: { revalidate: 3600 } })
+    const res = await fetch(`${baseUrl}/api/listings/${params.slug}`, {
+      headers: { 'x-country': country },
+      next: { revalidate: 3600 },
+    })
     if (res.ok) {
       const l = await res.json()
       const make  = l.bikeMake ? `${l.bikeMake} ` : ''
       const model = l.bikeModel ? l.bikeModel : ''
       const year  = l.bikeYear ? ` ${l.bikeYear}` : ''
       title = (make + model + year).trim() || l.title || title
-      price = l.price ? `R ${parseFloat(l.price).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}` : ''
+      price = l.price ? formatPrice(country, l.price) : ''
       cond = CONDITION_LABELS[l.condition] || ''
       location = [l.city, l.province].filter(Boolean).join(', ')
     }
@@ -87,7 +95,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
           fontSize: 20, color: 'rgba(255,255,255,.45)',
         }}>
           <div>crankmart.com</div>
-          <div>South Africa's Cycling Marketplace</div>
+          <div>{cfg.name}'s Cycling Marketplace</div>
         </div>
       </div>
     ),

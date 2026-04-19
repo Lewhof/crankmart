@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       alternates: { canonical: `https://crankmart.com/directory/${slug}` },
     }
   } catch {
-    return { title: 'CrankMart Business Directory', description: "Find cycling businesses across South Africa." }
+    return { title: 'CrankMart Business Directory', description: 'Find cycling businesses across the country.' }
   }
 }
 

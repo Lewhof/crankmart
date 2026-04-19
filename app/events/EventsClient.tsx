@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { MapPin, Calendar, ChevronRight, Search, ExternalLink, Users } from 'lucide-react'
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
+import { getLocale } from '@/lib/currency'
 
 interface Event {
   id: string; title: string; slug: string; description: string
@@ -30,7 +33,6 @@ const TYPES = [
   { value: 'training_camp', label: 'Training Camp' },
   { value: 'festival', label: 'Festival' },
 ]
-const PROVINCES = ['','Western Cape','Gauteng','KwaZulu-Natal','Eastern Cape','Limpopo','Mpumalanga','Northern Cape','North West','Free State']
 const TYPE_COLORS: Record<string, string> = {
   race: '#EF4444', stage_race: '#0D1B2A', fun_ride: '#10B981',
   social_ride: '#3B82F6', tour: '#F59E0B', training_camp: '#8B5CF6',
@@ -41,8 +43,8 @@ const TYPE_LABELS: Record<string, string> = {
   social_ride: 'Social Ride', tour: 'Tour', training_camp: 'Training Camp', festival: 'Festival'
 }
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
+function formatDate(d: string, locale: string) {
+  return new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 function getMonth(d: string) { return new Date(d).getMonth() }
 function gradientFor(type: string) {
@@ -59,6 +61,9 @@ function gradientFor(type: string) {
 }
 
 export default function EventsPage() {
+  const country = countryFromPath(usePathname())
+  const locale = getLocale(country)
+  const PROVINCES = ['', ...getProvincesStatic(country)]
   const [activeView, setActiveView] = useState<'events' | 'organisers'>('events')
   const [events, setEvents] = useState<Event[]>([])
   const [pastEvents, setPastEvents] = useState<Event[]>([])
@@ -82,29 +87,29 @@ export default function EventsPage() {
     if (province) params.set('province', province)
     if (month !== null) params.set('month', String(month + 1))
     if (search) params.set('search', search)
-    fetch(`/api/events?${params}`)
+    fetch(`/api/events?${params}`, { headers: { 'x-country': country } })
       .then(r => r.json())
       .then(d => setEvents(Array.isArray(d) ? d : []))
       .finally(() => setLoading(false))
-  }, [type, province, month, search])
+  }, [type, province, month, search, country])
 
   useEffect(() => {
-    fetch(`/api/events?past=1&limit=50`)
+    fetch(`/api/events?past=1&limit=50`, { headers: { 'x-country': country } })
       .then(r => r.json())
       .then(d => setPastEvents(Array.isArray(d) ? d : []))
       .catch(() => {})
-  }, [])
+  }, [country])
 
   useEffect(() => {
     if (activeView !== 'organisers' || organisers.length > 0) return
     setOrgLoading(true)
     const params = new URLSearchParams({ limit: '200', type: 'event_organiser' })
     if (orgProvince) params.set('province', orgProvince)
-    fetch(`/api/directory?${params}`)
+    fetch(`/api/directory?${params}`, { headers: { 'x-country': country } })
       .then(r => r.json())
       .then(d => setOrganisers(Array.isArray(d.data) ? d.data : []))
       .finally(() => setOrgLoading(false))
-  }, [activeView, orgProvince])
+  }, [activeView, orgProvince, country])
 
   const currentMonth = new Date().getMonth()
   const monthsWithEvents = new Set(events.map(e => getMonth(e.event_date_start)))
@@ -286,7 +291,7 @@ export default function EventsPage() {
               </div>
             ) : (
               <div className="events-grid">
-                {events.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} />)}
+                {events.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} locale={locale} />)}
               </div>
             )}
 
@@ -304,7 +309,7 @@ export default function EventsPage() {
                 </button>
                 {pastOpen && (
                   <div className="events-grid" style={{ marginTop: 16, opacity: 0.75 }}>
-                    {pastEvents.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} />)}
+                    {pastEvents.map(e => <EventCard key={e.id} event={e} gradientFor={gradientFor} locale={locale} />)}
                   </div>
                 )}
               </div>
@@ -364,7 +369,7 @@ export default function EventsPage() {
   )
 }
 
-function EventCard({ event, gradientFor }: { event: Event; gradientFor: (t: string) => string }) {
+function EventCard({ event, gradientFor, locale }: { event: Event; gradientFor: (t: string) => string; locale: string }) {
   const color = TYPE_COLORS[event.event_type] || TYPE_COLORS.default
   const label = TYPE_LABELS[event.event_type] || event.event_type
   return (
@@ -379,7 +384,7 @@ function EventCard({ event, gradientFor }: { event: Event; gradientFor: (t: stri
         <Link href={`/events/${event.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
           <div className="ev-title">{event.title}</div>
           <div className="ev-meta">
-            <span><Calendar size={10} />{new Date(event.event_date_start).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+            <span><Calendar size={10} />{new Date(event.event_date_start).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
             <span><MapPin size={10} />{event.city}, {event.province}</span>
           </div>
           <div className="ev-chips">

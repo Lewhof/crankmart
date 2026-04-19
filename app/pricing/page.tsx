@@ -1,9 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getCountry } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
 
-export const metadata: Metadata = {
-  title: 'CrankMart Pricing | SA Cycling Directory',
-  description: 'Affordable plans to list your bike shop, brand or event on South Africa\'s dedicated cycling directory.',
+export async function generateMetadata(): Promise<Metadata> {
+  const cfg = getCountryConfig(await getCountry())
+  return {
+    title: `CrankMart Pricing | ${cfg.name === 'South Africa' ? 'SA' : 'AU'} Cycling Directory`,
+    description: `Affordable plans to list your bike shop, brand or event on ${cfg.name}'s dedicated cycling directory.`,
+  }
 }
 
 const CHECK = (
@@ -240,7 +245,9 @@ function EventCard({ tier }: { tier: EventTier }) {
   )
 }
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const cfg = getCountryConfig(await getCountry())
+  const adj = cfg.name === 'South Africa' ? 'SA' : cfg.name === 'Australia' ? 'AU' : cfg.name
   return (
     <main style={{ background: '#f9fafb', minHeight: '100vh' }}>
       <style>{`
@@ -275,10 +282,10 @@ export default function PricingPage() {
             Pricing
           </div>
           <h1 style={{ fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 900, color: '#fff', margin: '0 0 16px', lineHeight: 1.1 }}>
-            Reach SA cyclists.<br />Grow your business.
+            Reach {adj} cyclists.<br />Grow your business.
           </h1>
           <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.7, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto' }}>
-            CrankMart is South Africa&apos;s dedicated cycling directory. Every rand spent here reaches people who are actively looking for bike shops, events, and services.
+            CrankMart is {cfg.name}&apos;s dedicated cycling directory. Every dollar spent here reaches people who are actively looking for bike shops, events, and services.
           </p>
         </div>
       </div>
@@ -293,7 +300,7 @@ export default function PricingPage() {
         }}>
           <div style={{ fontSize: 20 }}>💡</div>
           <p style={{ margin: 0, fontSize: 14, color: '#374151', lineHeight: 1.6 }}>
-            <strong>A single Google Ads click costs R12–R45.</strong> Featured on CrankMart reaches SA cyclists for <strong>R149/mo</strong> — unlimited impressions, targeted audience, zero cost-per-click.
+            <strong>A single Google Ads click costs R12–R45.</strong> Featured on CrankMart reaches {adj} cyclists for <strong>R149/mo</strong> — unlimited impressions, targeted audience, zero cost-per-click.
           </p>
         </div>
 

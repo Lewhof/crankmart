@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
+import { countryFromPath } from '@/lib/regions-static'
+import { formatPrice, getLocale } from '@/lib/currency'
 import {
   ArrowLeft, Heart, Share2, Eye, Bookmark,
   MapPin, MessageCircle, Shield, CheckCircle, X, Tag, Zap, Search, SlidersHorizontal, ChevronRight
@@ -59,6 +61,8 @@ const CATEGORY_FILTERS: Record<string, Array<{ key: string; label: string; optio
 
 export default function ListingDetailClient() {
   const params = useParams()
+  const country = countryFromPath(usePathname())
+  const locale = getLocale(country)
   const slug = params?.slug as string
 
   const { data: session } = useSession()
@@ -118,7 +122,7 @@ export default function ListingDetailClient() {
     setOfferSending(true)
     setOfferError('')
     try {
-      const body = `💰 OFFER: R${amount.toLocaleString('en-ZA')}${offerNote.trim() ? `\n\n${offerNote.trim()}` : ''}\n\n— Sent via CrankMart Make Offer`
+      const body = `💰 OFFER: ${formatPrice(country, amount)}${offerNote.trim() ? `\n\n${offerNote.trim()}` : ''}\n\n— Sent via CrankMart Make Offer`
       const res = await fetch('/api/messages/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -177,7 +181,7 @@ export default function ListingDetailClient() {
   const imgs = listing.images?.length ? listing.images : [{ id: '0', imageUrl: '' }]
   const isBike = listing.bikeMake || listing.bikeModel
   const memberSince = listing.user?.createdAt
-    ? new Date(listing.user.createdAt).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
+    ? new Date(listing.user.createdAt).toLocaleDateString(locale, { month: 'long', year: 'numeric' })
     : null
 
   return (
@@ -595,7 +599,7 @@ export default function ListingDetailClient() {
               <div className="content-card" style={{ marginBottom: 0 }}>
                 <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom: 6 }}>
                   <span style={{ fontSize:28, fontWeight:800, color:'#1a1a1a', lineHeight:1 }}>
-                    R {parseFloat(listing.price).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}
+                    {formatPrice(country, listing.price)}
                   </span>
                   {listing.negotiable && (
                     <span style={{ fontSize:11, fontWeight:700, color:'var(--color-primary)', background:'#E9ECF5', padding:'4px 10px', borderRadius:8 }}>
@@ -988,7 +992,7 @@ export default function ListingDetailClient() {
             <div style={{ display:'grid', gap:12 }}
               className="similar-grid">
               {similar.map(item => {
-                const fmt2 = (p: string) => `R ${parseFloat(p).toLocaleString('en-ZA', { maximumFractionDigits:0 })}`
+                const fmt2 = (p: string) => formatPrice(country, p)
                 return (
                   <a key={item.id} href={`/browse/${item.slug}`}
                     style={{ background:'#fff', borderRadius:2, border:'1px solid #ebebeb', overflow:'hidden', textDecoration:'none', color:'inherit', display:'flex', flexDirection:'column', boxShadow:'0 1px 3px rgba(0,0,0,.06)' }}>
@@ -1045,7 +1049,7 @@ export default function ListingDetailClient() {
                 </div>
                 <p style={{ fontSize:18, fontWeight:800, color:'#1a1a1a', margin:'0 0 8px' }}>Offer Sent!</p>
                 <p style={{ fontSize:14, color:'#6b7280', margin:'0 0 24px' }}>
-                  Your offer of <strong>R{parseFloat(offerAmount.replace(/[^0-9.]/g,'')).toLocaleString('en-ZA')}</strong> has been sent to the seller. Check your messages for their reply.
+                  Your offer of <strong>{formatPrice(country, offerAmount.replace(/[^0-9.]/g,''))}</strong> has been sent to the seller. Check your messages for their reply.
                 </p>
                 <div style={{ display:'flex', gap:10 }}>
                   <button onClick={() => setOfferOpen(false)}
@@ -1071,7 +1075,7 @@ export default function ListingDetailClient() {
                 </div>
 
                 <p style={{ fontSize:13, color:'#6b7280', margin:'0 0 20px' }}>
-                  Listed at <strong style={{ color:'#1a1a1a' }}>R{parseInt(listing.price).toLocaleString('en-ZA')}</strong> — enter your offer below. The seller will reply via messages.
+                  Listed at <strong style={{ color:'#1a1a1a' }}>{formatPrice(country, listing.price)}</strong> — enter your offer below. The seller will reply via messages.
                 </p>
 
                 <label style={{ display:'block', fontSize:13, fontWeight:700, color:'#1a1a1a', marginBottom:6 }}>Your Offer Amount</label>

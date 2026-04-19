@@ -1,4 +1,6 @@
 import { ImageResponse } from 'next/og'
+import { getCountry } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
 
 export const runtime = 'edge'
 export const revalidate = 3600
@@ -7,13 +9,18 @@ export const contentType = 'image/png'
 
 export default async function Image({ params }: { params: { slug: string } }) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
+  const country = await getCountry()
+  const cfg = getCountryConfig(country)
   let title = 'CrankMart event'
   let dateStr = ''
   let location = ''
   let discipline = ''
 
   try {
-    const res = await fetch(`${baseUrl}/api/events/${params.slug}`, { next: { revalidate: 3600 } })
+    const res = await fetch(`${baseUrl}/api/events/${params.slug}`, {
+      headers: { 'x-country': country },
+      next: { revalidate: 3600 },
+    })
     if (res.ok) {
       const e = await res.json()
       title = e.title || title
@@ -82,7 +89,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
           fontSize: 20, color: 'rgba(255,255,255,.45)',
         }}>
           <div>crankmart.com/events</div>
-          <div>South Africa's Cycling Events</div>
+          <div>{cfg.name}'s Cycling Events</div>
         </div>
       </div>
     ),

@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { countryFromPath, getProvincesStatic } from "@/lib/regions-static";
 
 const DirectoryMap = dynamic(() => import("./MapComponent"), {
   ssr: false,
@@ -52,31 +54,29 @@ const BUSINESS_TYPES = [
   { value: "tour_operator", label: "Tours & Rentals" },
 ];
 
-const PROVINCES = [
-  "Western Cape",
-  "Gauteng",
-  "KwaZulu-Natal",
-  "Eastern Cape",
-  "Free State",
-  "Limpopo",
-  "Mpumalanga",
-  "Northern Cape",
-  "North West",
-];
-
-const CITIES_BY_PROVINCE: Record<string, string[]> = {
-  "Western Cape": ["Cape Town", "Stellenbosch", "George", "Paarl", "Worcester"],
-  "Gauteng": ["Johannesburg", "Pretoria", "Midrand", "Sandton", "Centurion"],
-  "KwaZulu-Natal": ["Durban", "Pietermaritzburg", "Ballito", "Richards Bay"],
-  "Eastern Cape": ["Port Elizabeth", "East London", "Grahamstown"],
-  "Free State": ["Bloemfontein", "Welkom"],
-  "Limpopo": ["Polokwane", "Tzaneen"],
-  "Mpumalanga": ["Nelspruit", "Witbank"],
-  "Northern Cape": ["Kimberley", "Upington"],
-  "North West": ["Rustenburg", "Klerksdorp"],
+const CITIES_BY_PROVINCE: Record<string, Record<string, string[]>> = {
+  za: {
+    "Western Cape": ["Cape Town", "Stellenbosch", "George", "Paarl", "Worcester"],
+    "Gauteng": ["Johannesburg", "Pretoria", "Midrand", "Sandton", "Centurion"],
+    "KwaZulu-Natal": ["Durban", "Pietermaritzburg", "Ballito", "Richards Bay"],
+    "Eastern Cape": ["Port Elizabeth", "East London", "Grahamstown"],
+    "Free State": ["Bloemfontein", "Welkom"],
+    "Limpopo": ["Polokwane", "Tzaneen"],
+    "Mpumalanga": ["Nelspruit", "Witbank"],
+    "Northern Cape": ["Kimberley", "Upington"],
+    "North West": ["Rustenburg", "Klerksdorp"],
+  },
+  au: {
+    "New South Wales":              ["Sydney", "Newcastle", "Wollongong", "Central Coast"],
+    "Victoria":                     ["Melbourne", "Geelong", "Ballarat", "Bendigo"],
+    "Queensland":                   ["Brisbane", "Gold Coast", "Sunshine Coast", "Cairns"],
+    "Western Australia":            ["Perth", "Fremantle", "Mandurah"],
+    "South Australia":              ["Adelaide"],
+    "Tasmania":                     ["Hobart", "Launceston"],
+    "Northern Territory":           ["Darwin", "Alice Springs"],
+    "Australian Capital Territory": ["Canberra"],
+  },
 };
-
-const ALL_CITIES = [...new Set(Object.values(CITIES_BY_PROVINCE).flat())].sort();
 
 const getInitials = (name: string) => {
   return name
@@ -88,6 +88,10 @@ const getInitials = (name: string) => {
 };
 
 export default function DirectoryPage() {
+  const country = countryFromPath(usePathname());
+  const PROVINCES = getProvincesStatic(country);
+  const cityTable = CITIES_BY_PROVINCE[country] ?? {};
+  const ALL_CITIES = [...new Set(Object.values(cityTable).flat())].sort();
   const [businesses,      setBusinesses]      = useState<Business[]>([]);
   const [loading,         setLoading]         = useState(true);
   const [searchTerm,      setSearchTerm]      = useState("");
@@ -150,7 +154,7 @@ export default function DirectoryPage() {
       params.append("page", page.toString());
       params.append("limit", "200");
 
-      const response = await fetch(`/api/directory?${params.toString()}`);
+      const response = await fetch(`/api/directory?${params.toString()}`, { headers: { 'x-country': country } });
       const data: DirectoryResponse = await response.json();
 
       if (data.success) {
@@ -405,7 +409,7 @@ export default function DirectoryPage() {
             <div className="dir-flabel">City</div>
             <select value={selectedCity} onChange={e => { setSelectedCity(e.target.value); setPage(1); }} style={{ width:"100%", padding:"8px 10px", borderRadius:2, border:"1px solid #e4e4e7", fontSize:13, color: selectedCity ? "#1a1a1a" : "#9CA3AF", background:"#fff", cursor:"pointer" }}>
               <option value="">{selectedProvince ? "All Cities in Province" : "All Cities"}</option>
-              {(selectedProvince ? CITIES_BY_PROVINCE[selectedProvince] || [] : ALL_CITIES).map(c => <option key={c} value={c}>{c}</option>)}
+              {(selectedProvince ? cityTable[selectedProvince] || [] : ALL_CITIES).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
         </div>
@@ -486,7 +490,7 @@ export default function DirectoryPage() {
                 <div style={{ fontSize:11, fontWeight:700, color:'#9a9a9a', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:10 }}>City</div>
                 <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)} style={{ width:'100%', padding:'8px 10px', borderRadius:2, border:'1px solid #e4e4e7', fontSize:13, color:'#1a1a1a', background:'#fff', cursor:'pointer' }}>
                   <option value="">{selectedProvince ? 'All Cities' : 'All Cities'}</option>
-                  {(CITIES_BY_PROVINCE[selectedProvince] || ALL_CITIES).map(c => <option key={c} value={c}>{c}</option>)}
+                  {(cityTable[selectedProvince] || ALL_CITIES).map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
             </aside>

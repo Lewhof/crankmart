@@ -3,9 +3,11 @@
 import { useState, useEffect, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { MapPin, Heart, Zap } from 'lucide-react'
 import { SearchBar } from '@/components/search/SearchBar'
+import { countryFromPath } from '@/lib/regions-static'
+import { formatPrice } from '@/lib/currency'
 
 interface ListingItem {
   id: string; slug: string; title: string; price: string
@@ -34,6 +36,7 @@ const SUGGESTED_SEARCHES = [
 
 function SearchContent() {
   const router = useRouter()
+  const country = countryFromPath(usePathname())
   const params = useSearchParams()
   const query = params.get('q') || ''
 
@@ -72,7 +75,7 @@ function SearchContent() {
     }
   }
 
-  const fmt = (p: string) => `R ${parseFloat(p).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`
+  const fmt = (p: string) => formatPrice(country, p)
 
   return (
     <div style={{ background: '#f5f5f5', minHeight: '100vh' }}>

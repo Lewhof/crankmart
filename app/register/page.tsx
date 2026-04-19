@@ -1,14 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Mail, Lock, User, MapPin } from 'lucide-react'
-
-const PROVINCES = ['Eastern Cape','Free State','Gauteng','KwaZulu-Natal','Limpopo','Mpumalanga','Northern Cape','North West','Western Cape']
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
+import { getCountryConfig } from '@/lib/country-config'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const country = countryFromPath(usePathname())
+  const cfg = getCountryConfig(country)
+  const PROVINCES = getProvincesStatic(country)
   const [form, setForm] = useState({ name: '', email: '', password: '', province: '' })
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
@@ -71,7 +74,7 @@ export default function RegisterPage() {
       <div className="auth-card">
         <div className="auth-logo">🚲 CrankMart</div>
         <h1 className="auth-title">Create account</h1>
-        <p className="auth-sub">Join the South African cycling community</p>
+        <p className="auth-sub">Join the {cfg.name === 'South Africa' ? 'South African' : cfg.name === 'Australia' ? 'Australian' : cfg.name} cycling community</p>
 
         {error && <div className="error-box">{error}</div>}
 

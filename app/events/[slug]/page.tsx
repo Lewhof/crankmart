@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       alternates: buildAlternates(`/events/${slug}`),
     }
   } catch {
-    return { title: 'CrankMart Events', description: 'Find upcoming cycling events across South Africa.' }
+    return { title: 'CrankMart Events', description: 'Find upcoming cycling events across the country.' }
   }
 }
 

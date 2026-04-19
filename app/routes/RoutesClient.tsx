@@ -3,7 +3,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { MapPin, Navigation, TrendingUp, Clock, Mountain, ChevronRight, Search, Map, LayoutGrid, SlidersHorizontal, X, LocateFixed } from 'lucide-react'
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
 
 const MapComponent = dynamic(() => import('./MapComponent'), { ssr: false, loading: () => (
   <div style={{ width: '100%', height: '100%', background: '#E9ECF5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -26,11 +28,6 @@ const DIFFICULTIES = [
   { value: 'intermediate', label: 'Intermediate', color: '#D97706' },
   { value: 'advanced',     label: 'Advanced',     color: '#DC2626' },
   { value: 'expert',       label: 'Expert',       color: '#7C3AED' },
-]
-
-const PROVINCES = [
-  'Western Cape', 'Gauteng', 'KwaZulu-Natal', 'Eastern Cape',
-  'Limpopo', 'Mpumalanga', 'North West', 'Free State', 'Northern Cape',
 ]
 
 const DISTANCE_RANGES = [
@@ -85,6 +82,8 @@ function SkeletonCard() {
 }
 
 export default function RoutesClient() {
+  const country = countryFromPath(usePathname())
+  const PROVINCES = getProvincesStatic(country)
   const [routes, setRoutes]         = useState<Route[]>([])
   const [allMapRoutes, setAllMapRoutes] = useState<Route[]>([])
   const [total, setTotal]           = useState(0)
@@ -138,11 +137,11 @@ export default function RoutesClient() {
   useEffect(() => {
     const params = new URLSearchParams()
     if (province) params.set('province', province)
-    fetch(`/api/routes/cities?${params}`)
+    fetch(`/api/routes/cities?${params}`, { headers: { 'x-country': country } })
       .then(r => r.json())
       .then(d => setAvailCities(d.cities ?? []))
       .catch(() => setAvailCities([]))
-  }, [province])
+  }, [province, country])
 
   // Reset city when province changes
   useEffect(() => { setCity('') }, [province])
@@ -171,14 +170,14 @@ export default function RoutesClient() {
       const params = buildFilterParams()
       params.set('page', String(page))
       params.set('limit', '24')
-      const res = await fetch(`/api/routes?${params}`)
+      const res = await fetch(`/api/routes?${params}`, { headers: { 'x-country': country } })
       const data = await res.json()
       setRoutes(data.routes ?? [])
       setTotal(data.total ?? 0)
       setTotalPages(data.totalPages ?? 1)
     } catch { setRoutes([]) }
     finally { setLoading(false) }
-  }, [buildFilterParams, page])
+  }, [buildFilterParams, page, country])
 
   // Map fetch — all matching routes (no pagination, up to 200)
   const fetchMapRoutes = useCallback(async () => {
@@ -187,12 +186,12 @@ export default function RoutesClient() {
       const params = buildFilterParams()
       params.set('limit', '200')
       params.set('page', '1')
-      const res = await fetch(`/api/routes?${params}`)
+      const res = await fetch(`/api/routes?${params}`, { headers: { 'x-country': country } })
       const data = await res.json()
       setAllMapRoutes((data.routes ?? []).filter((r: Route) => r.lat && r.lng))
     } catch { setAllMapRoutes([]) }
     finally { setMapLoading(false) }
-  }, [buildFilterParams])
+  }, [buildFilterParams, country])
 
   useEffect(() => { fetchRoutes() }, [fetchRoutes])
   useEffect(() => { fetchMapRoutes() }, [fetchMapRoutes])

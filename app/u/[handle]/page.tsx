@@ -5,6 +5,8 @@ import { db } from '@/db'
 import { sql } from 'drizzle-orm'
 import { MapPin, Calendar, MessageCircle, Package } from 'lucide-react'
 import { UserCard } from '@/components/community/UserCard'
+import { getCountry } from '@/lib/country'
+import { formatPrice, getLocale } from '@/lib/currency'
 
 interface PageProps { params: Promise<{ handle: string }> }
 
@@ -102,7 +104,9 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const p = await fetchProfile(handle)
   if (!p) notFound()
 
-  const memberSince = new Date(p.user.created_at).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
+  const country = await getCountry()
+  const locale = getLocale(country)
+  const memberSince = new Date(p.user.created_at).toLocaleDateString(locale, { month: 'long', year: 'numeric' })
   const locationLabel = [p.user.profile_city, p.user.profile_province].filter(Boolean).join(', ') || null
 
   return (
@@ -179,7 +183,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 <div style={{ padding: 10 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title}</div>
                   <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--color-primary)', marginTop: 4 }}>
-                    R {parseInt(l.price).toLocaleString('en-ZA')}
+                    {formatPrice(country, l.price)}
                   </div>
                 </div>
               </Link>
@@ -196,7 +200,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {p.comments.map(c => {
-              const when = new Date(c.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
+              const when = new Date(c.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
               return (
                 <div key={c.id} style={{ background: '#fff', border: '1px solid #ebebeb', borderRadius: 8, padding: 12 }}>
                   <div style={{ fontSize: 11, color: '#9a9a9a', marginBottom: 4, textTransform: 'capitalize' }}>

@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { MapPin, Heart, SlidersHorizontal, Zap, ChevronRight, X, Check } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { SearchBar } from '@/components/search/SearchBar'
 import SaveButton from '@/components/listings/SaveButton'
+import { countryFromPath } from '@/lib/regions-static'
+import { formatPrice } from '@/lib/currency'
 
 interface ListingItem {
   id: string; slug: string; title: string; price: string
@@ -293,6 +295,7 @@ const CONDITIONS = [
 function BrowseContent() {
   const router = useRouter()
   const params = useSearchParams()
+  const country = countryFromPath(usePathname())
   const { data: session } = useSession()
 
   const [items, setItems] = useState<ListingItem[]>([])
@@ -469,7 +472,7 @@ function BrowseContent() {
     router.replace('/browse', { scroll: false })
   }
 
-  const fmt = (p: string) => `R ${parseFloat(p).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`
+  const fmt = (p: string) => formatPrice(country, p)
   const catLabel = QUICK_CATS.find(c => c.slug === category)?.label ?? 'Listings'
 
   return (
@@ -712,7 +715,7 @@ function BrowseContent() {
           )}
           {(minPrice || maxPrice) && (
             <button className="fbtn active" onClick={() => { setMinPrice(''); setMaxPrice('') }}>
-              {minPrice ? `R${parseInt(minPrice).toLocaleString()}` : '0'}–{maxPrice ? `R${parseInt(maxPrice).toLocaleString()}` : '∞'} <X size={11} />
+              {minPrice ? formatPrice(country, minPrice) : '0'}–{maxPrice ? formatPrice(country, maxPrice) : '∞'} <X size={11} />
             </button>
           )}
           {activeCount > 0 && (
@@ -744,7 +747,7 @@ function BrowseContent() {
         <div className="section-hdr">
           <div>
             <h3>{category === 'all' ? 'Latest Listings' : catLabel}</h3>
-            <small>Fresh deals from SA cyclists</small>
+            <small>Fresh deals from {country === 'au' ? 'AU' : 'SA'} cyclists</small>
           </div>
           {hasMore && items.length > 0 && (
             <button

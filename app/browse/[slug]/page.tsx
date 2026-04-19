@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import ListingDetailClient from './ListingDetail'
 import { buildAlternates } from '@/lib/hreflang'
+import { getCountry } from '@/lib/country'
+import { getCountryConfig } from '@/lib/country-config'
+import { formatPrice } from '@/lib/currency'
 
 interface Props {
   params: { slug: string }
@@ -8,10 +11,15 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const alternates = buildAlternates(`/browse/${params.slug}`)
+  const country = await getCountry()
+  const cfg = getCountryConfig(country)
 
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
-    const res = await fetch(`${baseUrl}/api/listings/${params.slug}`, { next: { revalidate: 300 } })
+    const res = await fetch(`${baseUrl}/api/listings/${params.slug}`, {
+      headers: { 'x-country': country },
+      next: { revalidate: 300 },
+    })
     if (!res.ok) throw new Error('Not found')
     const listing = await res.json()
 
@@ -24,9 +32,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       new: 'New', like_new: 'Like New', used: 'Used', poor: 'Poor'
     }
     const cond   = condMap[listing.condition] ?? listing.condition
-    const price  = parseFloat(listing.price).toLocaleString('en-ZA', { maximumFractionDigits: 0 })
+    const price  = formatPrice(country, listing.price)
     const where  = [listing.city, listing.province].filter(Boolean).join(', ')
-    const desc   = `${cond} ${listing.title} for R${price}${where ? ` in ${where}` : ''}. Listed on CrankMart SA.`
+    const desc   = `${cond} ${listing.title} for ${price}${where ? ` in ${where}` : ''}. Listed on CrankMart ${country.toUpperCase()}.`
 
     const image  = listing.images?.[0]?.imageUrl ?? listing.images?.[0]?.image_url ?? null
     const url    = alternates.canonical
@@ -53,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } catch {
     return {
       title: 'Listing — CrankMart',
-      description: 'Buy and sell bikes, gear, and cycling equipment in South Africa.',
+      description: `Buy and sell bikes, gear, and cycling equipment in ${cfg.name}.`,
       alternates,
     }
   }
