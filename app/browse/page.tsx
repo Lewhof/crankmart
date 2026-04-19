@@ -8,8 +8,8 @@ import { MapPin, Heart, SlidersHorizontal, Zap, ChevronRight, X, Check } from 'l
 import { useSession } from 'next-auth/react'
 import { SearchBar } from '@/components/search/SearchBar'
 import SaveButton from '@/components/listings/SaveButton'
-import { countryFromPath } from '@/lib/regions-static'
-import { formatPrice } from '@/lib/currency'
+import { countryFromPath, getProvincesStatic } from '@/lib/regions-static'
+import { formatPrice, getCurrency } from '@/lib/currency'
 
 interface ListingItem {
   id: string; slug: string; title: string; price: string
@@ -284,7 +284,7 @@ function pruneAttrs(attrMap: Record<string,string>, cat: string): Record<string,
   return Object.fromEntries(Object.entries(attrMap).filter(([k]) => allowed.has(k)))
 }
 
-const PROVINCES = ['Western Cape','Gauteng','KwaZulu-Natal','Eastern Cape','Free State','Limpopo','North West','Mpumalanga','Northern Cape']
+// PROVINCES is country-aware — computed inside the component from countryFromPath()
 const CONDITIONS = [
   { value: 'new', label: 'New', color: '#10B981' },
   { value: 'like_new', label: 'Like New', color: '#3B82F6' },
@@ -296,6 +296,9 @@ function BrowseContent() {
   const router = useRouter()
   const params = useSearchParams()
   const country = countryFromPath(usePathname())
+  const PROVINCES = getProvincesStatic(country)
+  const currency = getCurrency(country)
+  const regionLabel = country === 'au' ? 'State' : 'Province'
   const { data: session } = useSession()
 
   const [items, setItems] = useState<ListingItem[]>([])
@@ -1057,7 +1060,7 @@ function BrowseContent() {
 
           {/* Price */}
           <div className="fsec">
-            <div className="fsec-title">Price (ZAR)</div>
+            <div className="fsec-title">Price ({currency})</div>
             <div className="price-row">
               <input className="price-input" type="number" placeholder="Min" value={dMinPrice}
                 onChange={e => setDMinPrice(e.target.value)} />
@@ -1068,7 +1071,7 @@ function BrowseContent() {
 
           {/* Province */}
           <div className="fsec">
-            <div className="fsec-title">Province</div>
+            <div className="fsec-title">{regionLabel}</div>
             <div className="fchips">
               {PROVINCES.map(prov => (
                 <button key={prov} className={`fchip${dProvince === prov ? ' active' : ''}`}
