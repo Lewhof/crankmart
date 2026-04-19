@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { PageHeader } from '@/components/admin/primitives'
+import { LineChart } from '@/components/admin/charts/LineChart'
+import { BarList, type BarRow } from '@/components/admin/charts/BarList'
 
 interface Stats {
   pageViews: { total: number; prev: number; change: number | null }
@@ -30,54 +32,6 @@ function delta(change: number | null) {
     <span style={{ fontSize: 12, fontWeight: 700, color: up ? '#10B981' : '#EF4444', marginLeft: 6 }}>
       {up ? '▲' : '▼'} {Math.abs(change)}%
     </span>
-  )
-}
-
-function SparkLine({ data, color = 'var(--admin-text)', field = 'views' }: {
-  data: Array<Record<string, any>>
-  color?: string
-  field?: string
-}) {
-  if (!data.length) return <div style={{ padding: '20px 0', color: 'var(--admin-text-dim)', fontSize: 13 }}>No data</div>
-  const values = data.map(d => Number(d[field]))
-  const max = Math.max(...values, 1)
-  const w = 600, h = 100, px = 8, py = 10
-  const pts = values.map((v, i) => {
-    const x = px + (i / Math.max(values.length - 1, 1)) * (w - px * 2)
-    const y = h - py - (v / max) * (h - py * 2)
-    return `${x},${y}`
-  }).join(' ')
-  const areaClose = `${w - px},${h} ${px},${h}`
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 100 }}>
-      <defs>
-        <linearGradient id={`sg-${color.replace('#','')}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.18" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon fill={`url(#sg-${color.replace('#','')})`} points={`${pts} ${areaClose}`} />
-      <polyline fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" points={pts} />
-      {values.map((v, i) => {
-        const x = px + (i / Math.max(values.length - 1, 1)) * (w - px * 2)
-        const y = h - py - (v / max) * (h - py * 2)
-        return <circle key={i} cx={x} cy={y} r="3" fill={color} />
-      })}
-    </svg>
-  )
-}
-
-function HBar({ label, value, max, color = 'var(--admin-text)' }: { label: string; value: number; max: number; color?: string }) {
-  return (
-    <div style={{ marginBottom: 10 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
-        <span style={{ color: 'var(--admin-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>{label || '—'}</span>
-        <span style={{ fontWeight: 700, color: 'var(--admin-text)' }}>{value.toLocaleString()}</span>
-      </div>
-      <div style={{ height: 6, background: 'var(--admin-border)', borderRadius: 3, overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${Math.min((value / max) * 100, 100)}%`, background: color, borderRadius: 3, transition: 'width .4s' }} />
-      </div>
-    </div>
   )
 }
 
@@ -119,15 +73,34 @@ function countryFlag(code: string) {
 export default function AnalyticsPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [days, setDays] = useState(30)
   const [chartMode, setChartMode] = useState<'views' | 'visitors'>('views')
 
   useEffect(() => {
+    let cancelled = false
     setLoading(true)
-    fetch(`/api/admin/analytics/stats?days=${days}`)
-      .then(r => r.json())
-      .then(d => { setStats(d); setLoading(false) })
-      .catch(() => setLoading(false))
+    setError(null)
+    ;(async () => {
+      try {
+        const r = await fetch(`/api/admin/analytics/stats?days=${days}`, { cache: 'no-store' })
+        const body = await r.json().catch(() => ({ error: `Invalid response (${r.status})` }))
+        if (cancelled) return
+        if (!r.ok) {
+          setStats(null)
+          setError(body?.error || `API ${r.status}`)
+        } else {
+          setStats(body as Stats)
+        }
+      } catch (e) {
+        if (cancelled) return
+        setStats(null)
+        setError(e instanceof Error ? e.message : 'Network error')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
   }, [days])
 
   if (loading) return (
@@ -137,19 +110,66 @@ export default function AnalyticsPage() {
     </div>
   )
 
-  if (!stats) return <div style={{ padding: 20, color: 'var(--admin-text-dim)' }}>Failed to load analytics</div>
+  if (error || !stats) return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <PageHeader title="Analytics" subtitle="Traffic, visitor, and listing performance data" />
+      <div style={{ background: 'var(--admin-surface)', border: '1px solid #ebebeb', borderRadius: 8, padding: 24, maxWidth: 720 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#EF4444', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Analytics failed to load
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--admin-text)', marginBottom: 14, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          {error || 'No data returned.'}
+        </div>
+        <button
+          onClick={() => setDays(d => d)}
+          style={{
+            padding: '8px 16px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            border: '1.5px solid var(--admin-text)', background: 'var(--admin-text)', color: 'var(--admin-surface)',
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  )
 
-  const maxDevice  = Math.max(...stats.byDevice.map(d => Number(d.count)), 1)
-  const maxBrowser = Math.max(...stats.byBrowser.map(d => Number(d.count)), 1)
-  const maxPage    = Math.max(...stats.topPages.map(d => Number(d.views)), 1)
-  const maxCatViews = Math.max(...stats.categoryPerformance.map(c => Number(c.total_views)), 1)
+  const topPagesRows: BarRow[] = stats.topPages.map(p => ({
+    label: p.path,
+    value: Number(p.views),
+    color: '#0D1B2A',
+  }))
+
+  const deviceRows: BarRow[] = stats.byDevice.map(d => ({
+    label: d.device,
+    value: Number(d.count),
+    color: d.device === 'mobile' ? '#3B82F6' : d.device === 'tablet' ? '#8B5CF6' : 'var(--admin-text)',
+  }))
+
+  const browserRows: BarRow[] = stats.byBrowser.map(b => ({
+    label: b.browser,
+    value: Number(b.count),
+    color: '#F59E0B',
+  }))
+
+  const countryRows: BarRow[] = stats.byCountry.map(c => ({
+    label: c.country || c.country_code || 'Unknown',
+    value: Number(c.views),
+    sub: `${Number(c.visitors).toLocaleString()} visitors`,
+    leading: (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ fontSize: 18, lineHeight: 1 }}>{countryFlag(c.country_code)}</span>
+        <span style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>({c.country_code})</span>
+      </span>
+    ),
+    color: '#3B82F6',
+  }))
+
+  const maxCatViews = Math.max(...stats.categoryPerformance.map(c => Number(c.total_views) || 0), 1)
 
   // Sell funnel ordered
   const funnelOrder = ['/sell', '/sell/step-1', '/sell/step-2', '/sell/step-3', '/sell/step-4', '/sell/success']
   const funnelMap: Record<string, number> = {}
   stats.sellFunnel.forEach(r => { funnelMap[r.path] = Number(r.count) })
-  const funnelData = funnelOrder.map(p => ({ path: p, count: funnelMap[p] || 0 }))
-  const funnelMax = Math.max(...funnelData.map(f => f.count), 1)
   const funnelLabels: Record<string, string> = {
     '/sell': 'Sell landing',
     '/sell/step-1': 'Step 1 — Category',
@@ -158,6 +178,23 @@ export default function AnalyticsPage() {
     '/sell/step-4': 'Step 4 — Price',
     '/sell/success': 'Published ✓',
   }
+  const funnelRows: BarRow[] = funnelOrder.map((p, i) => {
+    const count = funnelMap[p] || 0
+    const prev = i > 0 ? (funnelMap[funnelOrder[i - 1]] || 0) : 0
+    const dropPct = prev > 0 ? Math.round((1 - count / prev) * 100) : null
+    return {
+      label: funnelLabels[p],
+      value: count,
+      sub: dropPct !== null && dropPct > 0 ? `−${dropPct}%` : undefined,
+      color: p === '/sell/success' ? '#10B981' : 'var(--admin-text)',
+    }
+  })
+  const funnelTotal = funnelRows.reduce((a, r) => a + r.value, 0)
+
+  const lineData = stats.dailyViews.map(d => ({
+    date: d.date,
+    value: Number(chartMode === 'views' ? d.views : d.unique_visitors),
+  }))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -203,37 +240,24 @@ export default function AnalyticsPage() {
             </button>
           ))}
         </div>
-        <SparkLine
-          data={stats.dailyViews}
-          field={chartMode === 'views' ? 'views' : 'unique_visitors'}
-          color={chartMode === 'views' ? 'var(--admin-text)' : '#3B82F6'}
+        <LineChart
+          data={lineData}
+          color={chartMode === 'views' ? '#0D1B2A' : '#3B82F6'}
+          yLabel={chartMode === 'views' ? 'views' : 'visitors'}
+          height={240}
         />
-        {stats.dailyViews.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 11, color: 'var(--admin-text-dim)' }}>
-            <span>{stats.dailyViews[0]?.date}</span>
-            <span>{stats.dailyViews[stats.dailyViews.length - 1]?.date}</span>
-          </div>
-        )}
       </Card>
 
       {/* Top pages + Device */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
         <Card title="Top Pages">
-          {stats.topPages.map((p, i) => (
-            <HBar key={i} label={p.path} value={Number(p.views)} max={maxPage} color="#0D1B2A" />
-          ))}
-          {stats.topPages.length === 0 && <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No data</div>}
+          <BarList rows={topPagesRows} />
         </Card>
         <Card title="Device Breakdown">
-          {stats.byDevice.map((d, i) => (
-            <HBar key={i} label={d.device} value={Number(d.count)} max={maxDevice}
-              color={d.device === 'mobile' ? '#3B82F6' : d.device === 'tablet' ? '#8B5CF6' : 'var(--admin-text)'} />
-          ))}
+          <BarList rows={deviceRows} />
           <div style={{ marginTop: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--admin-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Browser</div>
-            {stats.byBrowser.map((b, i) => (
-              <HBar key={i} label={b.browser} value={Number(b.count)} max={maxBrowser} color="#F59E0B" />
-            ))}
+            <BarList rows={browserRows} />
           </div>
         </Card>
       </div>
@@ -280,33 +304,7 @@ export default function AnalyticsPage() {
       {/* Location */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
         <Card title="Visitors by Country">
-          {stats.byCountry.length > 0 ? (() => {
-            const maxV = Math.max(...stats.byCountry.map(c => Number(c.views)), 1)
-            return (
-              <div>
-                {stats.byCountry.map((c, i) => (
-                  <div key={i} style={{ marginBottom: 10 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
-                      <span style={{ color: 'var(--admin-text)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 18, lineHeight: 1 }}>{countryFlag(c.country_code)}</span>
-                        <span>{c.country || c.country_code || 'Unknown'}</span>
-                        <span style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>({c.country_code})</span>
-                      </span>
-                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                        <span style={{ fontSize: 11, color: 'var(--admin-text-dim)' }}>{Number(c.visitors).toLocaleString()} visitors</span>
-                        <span style={{ fontWeight: 700, color: 'var(--admin-text)' }}>{Number(c.views).toLocaleString()}</span>
-                      </div>
-                    </div>
-                    <div style={{ height: 6, background: 'var(--admin-border)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.min((Number(c.views) / maxV) * 100, 100)}%`, background: '#3B82F6', borderRadius: 3, transition: 'width .4s' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
-          })() : (
-            <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No location data yet — accumulates as visitors arrive</div>
-          )}
+          <BarList rows={countryRows} empty="No location data yet — accumulates as visitors arrive" />
         </Card>
 
         <Card title="Top Cities">
@@ -343,33 +341,11 @@ export default function AnalyticsPage() {
       {/* Sell funnel + Referrers */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
         <Card title="Sell Listing Funnel">
-          {funnelData.map((f, i) => {
-            const dropPct = i > 0 && funnelData[i - 1].count > 0
-              ? Math.round((1 - f.count / funnelData[i - 1].count) * 100)
-              : null
-            return (
-              <div key={f.path} style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
-                  <span style={{ color: 'var(--admin-text)' }}>{funnelLabels[f.path]}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {dropPct !== null && dropPct > 0 && (
-                      <span style={{ fontSize: 11, color: '#EF4444', fontWeight: 600 }}>−{dropPct}%</span>
-                    )}
-                    <span style={{ fontWeight: 700, color: 'var(--admin-text)' }}>{f.count.toLocaleString()}</span>
-                  </div>
-                </div>
-                <div style={{ height: 8, background: 'var(--admin-border)', borderRadius: 4, overflow: 'hidden' }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${Math.min((f.count / funnelMax) * 100, 100)}%`,
-                    background: f.path === '/sell/success' ? '#10B981' : 'var(--admin-text)',
-                    borderRadius: 4, transition: 'width .4s',
-                  }} />
-                </div>
-              </div>
-            )
-          })}
-          {funnelMax === 0 && <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No sell flow traffic yet</div>}
+          {funnelTotal > 0 ? (
+            <BarList rows={funnelRows} />
+          ) : (
+            <div style={{ color: 'var(--admin-text-dim)', fontSize: 13 }}>No sell flow traffic yet</div>
+          )}
         </Card>
 
         <Card title="Top Referrers">
