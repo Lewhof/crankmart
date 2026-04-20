@@ -14,13 +14,17 @@
  * unprefixed link (`/events`, `/browse`, etc.) lands on the user's chosen
  * country.
  *
- * Cookie write rule: only initialise the cookie when ABSENT. Never
- * overwrite an existing cookie based on URL country, because that would
- * silently flip the sticky preference whenever Next.js auto-prefetches a
- * Link to a different country (e.g. the GeoSuggestBanner's "Switch to ZA"
- * Link is prefetched on render, which under the old logic reset cookie=au
- * back to za without the user ever clicking). The toggle's POST to
- * /api/admin/country remains the canonical way to CHANGE the cookie.
+ * Cookie write rule:
+ *   - Initialise the cookie when ABSENT (any visit).
+ *   - Sync to URL country when present AND request is a top-level browser
+ *     navigation (Sec-Fetch-Mode: navigate). Direct URL bar entry, hard
+ *     reload, opening in a new tab — these are explicit user intent.
+ *   - DO NOT sync on fetch()-based requests (Next.js Link prefetches,
+ *     RSC refetches, soft-nav). Those use Sec-Fetch-Mode: cors/no-cors
+ *     and would silently flip the sticky preference whenever any Link to
+ *     a different country enters the viewport (e.g. GeoSuggestBanner's
+ *     "Switch" Link). The toggle's POST to /api/admin/country remains
+ *     the canonical way to change the cookie via in-app interaction.
  *
  * Gates non-admins out of any country marked `coming-soon` in
  * COUNTRY_LIVE_STATUS (e.g. `za:live,au:coming-soon`). Country-scoped gate
@@ -125,10 +129,19 @@ function applyCountryHeader(req: NextRequest, forceCountry?: Country): NextRespo
     rewritten.pathname = pathname.slice(`/${first}`.length) || '/'
     const headers = withCountryHeader(req, first)
     const res = NextResponse.rewrite(rewritten, { request: { headers } })
-    // Initialise the cookie only when absent — never overwrite. See header
-    // comment: prefetched cross-country Links would silently flip the
-    // sticky preference under an unconditional sync.
-    if (readCountryPref(req) === null) syncCountryPrefCookie(res, first)
+
+    const existing = readCountryPref(req)
+    const fetchMode = req.headers.get('sec-fetch-mode')
+    const isTopLevelNavigation = fetchMode === 'navigate'
+
+    // Set cookie when (a) absent OR (b) explicit top-level navigation to a
+    // different country (typed URL, hard reload, new tab). Skip on soft-nav
+    // and prefetch (Sec-Fetch-Mode: cors/no-cors) so a `<Link href="/za">`
+    // entering the viewport can't silently overwrite the sticky preference.
+    const shouldSync =
+      existing === null ||
+      (isTopLevelNavigation && existing !== first)
+    if (shouldSync) syncCountryPrefCookie(res, first)
     return res
   }
 

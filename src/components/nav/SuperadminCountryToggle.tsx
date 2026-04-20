@@ -52,9 +52,14 @@ export function SuperadminCountryToggle() {
       const hasCountryPrefix = first === 'za' || first === 'au'
       const rest = hasCountryPrefix ? segments.slice(1) : segments
       const target = `/${c}${rest.length ? '/' + rest.join('/') : ''}`
-      // router.push triggers the RSC fetch + full re-render; refresh would
-      // double-fetch the same tree, doubling perceived latency on toggle.
+      // router.push fetches the new page tree, but Next.js's segment cache
+      // can keep the previous root layout's RSC (it depends on x-country
+      // for metadata, schemas, and country-aware copy). router.refresh
+      // forces the full tree to re-render so layout chrome and page body
+      // both reflect the new country immediately. Worth the extra fetch
+      // — toggling country is rare and the alternative is partial updates.
       router.push(target)
+      router.refresh()
     } finally {
       setBusy(false)
       setOpen(false)
