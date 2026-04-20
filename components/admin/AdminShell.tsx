@@ -8,6 +8,7 @@ import {
   Flag, Menu, X, Settings, Newspaper, BarChart2, Navigation, Palette,
   Zap, SearchCheck, ShieldCheck, ShieldAlert, Mail, CreditCard, Keyboard, Megaphone, ClipboardList, Send,
   Users as UsersIcon, MessageCircle, Flag as FlagIcon, Inbox,
+  Share2, Image as ImageIcon, Link2, Edit3,
 } from 'lucide-react'
 import { CommandPalette } from './CommandPalette'
 import { CountrySwitcher } from './CountrySwitcher'
@@ -45,7 +46,13 @@ const NAV: NavEntry[] = [
     { href: '/admin/community/members',     label: 'Members',        icon: UsersIcon },
   ] },
 
-  { label: 'Commerce', items: [
+  { label: 'Marketing & Social', items: [
+    { href: '/admin/social-media',              label: 'Social Media',    icon: Share2,    short: 'o' },
+    { href: '/admin/social-media/compose',      label: '· Composer',      icon: Edit3 },
+    { href: '/admin/social-media/calendar',     label: '· Calendar',      icon: Calendar },
+    { href: '/admin/social-media/assets',       label: '· Assets',        icon: ImageIcon },
+    { href: '/admin/social-media/profiles',     label: '· Profiles',      icon: Share2 },
+    { href: '/admin/social-media/short-links',  label: '· Short Links',   icon: Link2 },
     { href: '/admin/marketing',            label: 'Marketing',   icon: Megaphone,   short: 'm' },
     { href: '/admin/marketing/campaigns',  label: '· Campaigns', icon: Megaphone },
     { href: '/admin/marketing/segments',   label: '· Segments',  icon: Megaphone },

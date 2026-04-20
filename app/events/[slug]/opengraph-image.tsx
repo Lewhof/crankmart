@@ -7,7 +7,8 @@ export const revalidate = 3600
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-export default async function Image({ params }: { params: { slug: string } }) {
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
   const country = await getCountry()
   const cfg = getCountryConfig(country)
@@ -17,7 +18,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
   let discipline = ''
 
   try {
-    const res = await fetch(`${baseUrl}/api/events/${params.slug}`, {
+    const res = await fetch(`${baseUrl}/api/events/${slug}`, {
       headers: { 'x-country': country },
       next: { revalidate: 3600 },
     })

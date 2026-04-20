@@ -14,8 +14,12 @@ export async function POST(request: NextRequest) {
   }
 
   const store = await cookies()
+  // httpOnly: false — this is an operator UX preference, not a security
+  // boundary (admin access is enforced by checkAdminApi above). Admin
+  // client components (app/admin/routes/*) read it via document.cookie to
+  // render country-appropriate dropdowns. Must match proxy.ts attributes.
   store.set(ADMIN_COUNTRY_COOKIE, country, {
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',

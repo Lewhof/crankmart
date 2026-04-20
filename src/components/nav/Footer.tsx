@@ -3,6 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { countryFromPath } from '@/lib/regions-static'
+import { PLATFORM_META, type SocialPlatform } from '@/lib/social'
+
+type SocialLink = { platform: string; url: string }
 
 const COLS = [
   {
@@ -52,7 +55,7 @@ const WheelMark = ({ size = 22 }: { size?: number }) => (
   </svg>
 )
 
-export function Footer() {
+export function Footer({ socialProfiles = [] }: { socialProfiles?: SocialLink[] }) {
   const country = countryFromPath(usePathname())
   // Per-country tagline + privacy-framework label (POPIA = SA, Privacy Act = AU)
   const tagline = country === 'au'
@@ -164,6 +167,46 @@ export function Footer() {
             </div>
           ))}
         </div>
+
+        {/* Social icons — reads from social_profiles via root layout */}
+        {socialProfiles.length > 0 && (
+          <div style={{
+            display: 'flex',
+            gap: 14,
+            margin: '0 0 20px',
+            paddingBottom: 20,
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
+          }}>
+            {socialProfiles.map(({ platform, url }) => {
+              const meta = PLATFORM_META[platform as SocialPlatform]
+              if (!meta) return null
+              // Defence-in-depth: even though inserts validate https, re-gate here
+              // so a tampered DB row can never put javascript: / data: into href.
+              if (!url.startsWith('https://')) return null
+              return (
+                <a
+                  key={platform}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer me"
+                  aria-label={`CrankMart on ${platform}`}
+                  style={{
+                    color: 'rgba(255,255,255,0.35)',
+                    display: 'inline-flex',
+                    width: 32, height: 32,
+                    alignItems: 'center', justifyContent: 'center',
+                    borderRadius: 8,
+                    background: 'rgba(255,255,255,0.04)',
+                    transition: 'color .15s, background .15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.background = 'rgba(255,255,255,0.10)' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                  dangerouslySetInnerHTML={{ __html: meta.svg }}
+                />
+              )
+            })}
+          </div>
+        )}
 
         {/* Bottom bar */}
         <div className="cm-footer-bottom">

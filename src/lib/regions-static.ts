@@ -59,9 +59,13 @@ export function countryFromPath(pathname: string | null | undefined): Country {
 
 /**
  * Client-side admin-country resolver — reads the `admin_country` cookie set
- * by the CountrySwitcher component. Used inside admin forms where the route
- * path is `/admin/...` (not country-prefixed) but data-entry needs to bind
- * to the country currently in view.
+ * by the CountrySwitcher component + proxy. Used inside admin forms where
+ * the route path is `/admin/...` (not country-prefixed) but data-entry
+ * needs to bind to the country currently in view.
+ *
+ * The cookie is intentionally NOT httpOnly (it's a UX preference, not a
+ * security boundary — admin access is enforced server-side). Both the
+ * proxy and /api/admin/country POST write it with httpOnly: false.
  *
  * Only call from a "use client" module. Falls back to 'za' during SSR or
  * if the cookie isn't set.

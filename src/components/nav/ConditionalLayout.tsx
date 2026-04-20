@@ -9,9 +9,11 @@ import { Footer } from './Footer'
 export function ConditionalLayout({
   children,
   geoBanner,
+  socialProfiles,
 }: {
   children: React.ReactNode
   geoBanner?: React.ReactNode
+  socialProfiles?: Array<{ platform: string; url: string }>
 }) {
   const pathname = usePathname()
   const { data: session } = useSession()
@@ -32,7 +34,7 @@ export function ConditionalLayout({
       <main className="pb-20 md:pb-0">
         {children}
       </main>
-      <Footer />
+      <Footer socialProfiles={socialProfiles} />
       <BottomNav />
     </>
   )

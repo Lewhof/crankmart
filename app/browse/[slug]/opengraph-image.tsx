@@ -12,7 +12,8 @@ const CONDITION_LABELS: Record<string, string> = {
   new: 'New', like_new: 'Like New', used: 'Used', poor: 'Fair',
 }
 
-export default async function Image({ params }: { params: { slug: string } }) {
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
   const country = await getCountry()
   const cfg = getCountryConfig(country)
@@ -22,7 +23,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
   let location = ''
 
   try {
-    const res = await fetch(`${baseUrl}/api/listings/${params.slug}`, {
+    const res = await fetch(`${baseUrl}/api/listings/${slug}`, {
       headers: { 'x-country': country },
       next: { revalidate: 3600 },
     })

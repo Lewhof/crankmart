@@ -409,10 +409,25 @@ async function runHttpChecks(): Promise<CheckResult[]> {
     { id: 'sitemap_xml', label: 'sitemap.xml resolves (200 + valid)', category: 'technical_seo', url: `${BASE}/sitemap.xml`, validate: b => b.includes('<urlset') || b.includes('<sitemapindex') },
     { id: 'sitemap_listings', label: 'sitemap-listings.xml resolves', category: 'technical_seo', url: `${BASE}/sitemap-listings.xml`, validate: b => b.includes('<urlset') },
     { id: 'sitemap_blog', label: 'sitemap-blog.xml resolves', category: 'technical_seo', url: `${BASE}/sitemap-blog.xml`, validate: b => b.includes('<urlset') },
-    { id: 'social_instagram', label: 'Instagram profile (@crankmartsa)', category: 'marketing', url: 'https://www.instagram.com/crankmartsa' },
-    { id: 'social_facebook', label: 'Facebook page (@crankmartsa)', category: 'marketing', url: 'https://www.facebook.com/crankmartsa' },
-    { id: 'social_tiktok', label: 'TikTok profile (@crankmartsa)', category: 'marketing', url: 'https://www.tiktok.com/@crankmartsa' },
   ]
+
+  // Pull social profile checks from DB so admin edits in /admin/social-media/profiles
+  // flow through to the audit without code changes.
+  try {
+    const prof = await db.execute(sql`
+      SELECT platform, handle, url FROM social_profiles
+      WHERE is_active = TRUE
+    `)
+    const rows = (prof.rows ?? prof) as Array<{ platform: string; handle: string; url: string }>
+    for (const r of rows) {
+      checks.push({
+        id: `social_${r.platform}`,
+        label: `${r.platform[0].toUpperCase()}${r.platform.slice(1)} profile (@${r.handle})`,
+        category: 'marketing',
+        url: r.url,
+      })
+    }
+  } catch { /* social_profiles table missing — pre-migration; skip */ }
 
   await Promise.all(checks.map(async (c) => {
     const r = await fetchWithTimeout(c.url)

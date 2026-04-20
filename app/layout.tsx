@@ -8,7 +8,30 @@ import { SessionProvider } from 'next-auth/react'
 import { getThemeVars, buildThemeCss } from '@/lib/theme'
 import { getCountry } from '@/lib/country'
 import { getCountryConfig } from '@/lib/country-config'
+import { getActiveProfiles } from '@/lib/social'
 import './globals.css'
+
+// Fallback sameAs used only if social_profiles query fails. Keeps JSON-LD intact
+// during migrations or DB outages so Knowledge Graph doesn't drop CrankMart.
+const FALLBACK_SAMEAS = [
+  'https://www.instagram.com/crankmartsa',
+  'https://www.facebook.com/crankmartsa',
+  'https://www.tiktok.com/@crankmartsa',
+  'https://www.linkedin.com/company/crankmart-sa',
+  'https://www.youtube.com/@crankmartsa',
+  'https://twitter.com/crankmartsa',
+]
+
+// Escape sequences that would let a DB-sourced URL break out of <script type="application/ld+json">.
+// JSON.stringify alone does NOT escape </script> or <!-- — a malicious sameAs URL could inject.
+function safeLd(obj: unknown): string {
+  return JSON.stringify(obj)
+    .replace(/</g,  '\\u003c')
+    .replace(/>/g,  '\\u003e')
+    .replace(/&/g,  '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')
+}
 
 export const viewport = {
   width: 'device-width',
@@ -75,7 +98,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-function buildOrganizationSchema(country: 'za' | 'au') {
+function buildOrganizationSchema(country: 'za' | 'au', sameAs: string[]) {
   const cfg = getCountryConfig(country)
   return {
     '@context': 'https://schema.org',
@@ -99,14 +122,7 @@ function buildOrganizationSchema(country: 'za' | 'au') {
     knowsAbout: ['cycling', 'bike shops', 'MTB', 'road cycling', 'cycling events', 'cycling gear'],
     slogan: `${cfg.name}'s Cycling Marketplace`,
     email: 'info@crankmart.com',
-    sameAs: [
-      'https://www.instagram.com/crankmartsa',
-      'https://www.facebook.com/crankmartsa',
-      'https://www.tiktok.com/@crankmartsa',
-      'https://www.linkedin.com/company/crankmart-sa',
-      'https://www.youtube.com/@crankmartsa',
-      'https://twitter.com/crankmartsa',
-    ],
+    sameAs: sameAs.length > 0 ? sameAs : FALLBACK_SAMEAS,
   }
 }
 
@@ -140,6 +156,8 @@ export default async function RootLayout({
   const themeCss = buildThemeCss(theme)
   const country = await getCountry()
   const cfg = getCountryConfig(country)
+  const footerProfiles = await getActiveProfiles(country)
+  const sameAs = footerProfiles.map(p => p.url)
 
   return (
     <html lang={cfg.locale}>
@@ -147,18 +165,23 @@ export default async function RootLayout({
         <style dangerouslySetInnerHTML={{ __html: themeCss }} />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildOrganizationSchema(country)) }}
+          dangerouslySetInnerHTML={{ __html: safeLd(buildOrganizationSchema(country, sameAs)) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildWebsiteSchema(country)) }}
+          dangerouslySetInnerHTML={{ __html: safeLd(buildWebsiteSchema(country)) }}
         />
       </head>
       <body className="bg-background text-foreground">
         <SessionProvider>
           <GoogleAnalytics />
           <Analytics />
-          <ConditionalLayout geoBanner={<GeoSuggestBanner currentCountry={country} />}>
+          <ConditionalLayout
+            geoBanner={<GeoSuggestBanner currentCountry={country} />}
+            socialProfiles={footerProfiles.filter(p => p.displayInFooter).map(p => ({
+              platform: p.platform, url: p.url,
+            }))}
+          >
             {children}
           </ConditionalLayout>
           <CookieBanner />

@@ -89,8 +89,13 @@ function readCountryPref(req: NextRequest): Country | null {
 }
 
 function syncCountryPrefCookie(res: NextResponse, country: Country): void {
+  // httpOnly: false — this cookie is an operator UX preference, not a
+  // security boundary (admin access is checked server-side by checkAdminApi).
+  // Admin client components (e.g. app/admin/routes/new) need to read it to
+  // render country-appropriate dropdowns, which is impossible if it's
+  // httpOnly. Must match the attributes in /api/admin/country/route.ts.
   res.cookies.set(COUNTRY_PREF_COOKIE, country, {
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
@@ -152,7 +157,16 @@ function applyCountryHeader(req: NextRequest, forceCountry?: Country): NextRespo
   const url = req.nextUrl.clone()
   url.pathname = `/${target}${pathname === '/' ? '' : pathname}`
   url.search = search
-  return NextResponse.redirect(url, 308)
+  // The redirect target depends on the user's admin_country cookie, so
+  // any intermediate cache (Vercel edge, corporate proxy, browser 308
+  // persistent cache) MUST key on that cookie and must not share one
+  // user's redirect with another. Vary:Cookie + no-store closes both
+  // doors. Kept as 308 since the mapping is stable for a given cookie
+  // value, just not shareable across users.
+  const redirect = NextResponse.redirect(url, 308)
+  redirect.headers.set('Cache-Control', 'private, no-store, must-revalidate')
+  redirect.headers.set('Vary', 'Cookie')
+  return redirect
 }
 
 // Auth-flow pages that must stay reachable to non-admins so registration,

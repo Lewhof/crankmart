@@ -5,14 +5,15 @@ export const revalidate = 3600
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-export default async function Image({ params }: { params: { slug: string } }) {
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://crankmart.com'
   let title = 'CrankMart news'
   let category = ''
   let author = ''
 
   try {
-    const res = await fetch(`${baseUrl}/api/news/${params.slug}`, { next: { revalidate: 3600 } })
+    const res = await fetch(`${baseUrl}/api/news/${slug}`, { next: { revalidate: 3600 } })
     if (res.ok) {
       const a = await res.json()
       title = a.title || title

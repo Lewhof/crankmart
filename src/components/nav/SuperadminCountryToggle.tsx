@@ -40,11 +40,19 @@ export function SuperadminCountryToggle() {
     setBusy(true)
     try {
       // Sync the admin filter cookie so /admin pages scope to the new country.
-      await fetch('/api/admin/country', {
+      // Must succeed — if it doesn't, the cookie won't reflect the toggle and
+      // every unprefixed nav link will revert to the previous country. Don't
+      // silently swallow errors.
+      const res = await fetch('/api/admin/country', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ country: c }),
-      }).catch(() => {})
+      })
+      if (!res.ok) {
+        console.error('Country toggle POST failed:', res.status, await res.text().catch(() => ''))
+        setBusy(false)
+        return
+      }
 
       // Build the new URL by replacing (or prepending) the country segment.
       const segments = (pathname ?? '/').split('/').filter(Boolean)
@@ -52,18 +60,23 @@ export function SuperadminCountryToggle() {
       const hasCountryPrefix = first === 'za' || first === 'au'
       const rest = hasCountryPrefix ? segments.slice(1) : segments
       const target = `/${c}${rest.length ? '/' + rest.join('/') : ''}`
-      // router.push fetches the new page tree, but Next.js's segment cache
-      // can keep the previous root layout's RSC (it depends on x-country
-      // for metadata, schemas, and country-aware copy). router.refresh
-      // forces the full tree to re-render so layout chrome and page body
-      // both reflect the new country immediately. Worth the extra fetch
-      // — toggling country is rare and the alternative is partial updates.
-      router.push(target)
-      router.refresh()
-    } finally {
+
+      // HARD NAVIGATION instead of router.push. Next.js 16 deliberately
+      // caches the root layout's RSC across client-side navigations and
+      // does not re-render it — so the html lang, generateMetadata output,
+      // JSON-LD schemas, social profiles, and GeoBanner currentCountry
+      // prop would stay frozen on the old country. router.push + refresh
+      // doesn't help because refresh() refreshes the CURRENT (pre-push)
+      // route, not the pushed target. Country toggling is rare; the full
+      // page reload guarantees the entire tree rebuilds with the new
+      // x-country, new cookie value, and invalidated prefetch cache.
+      window.location.assign(target)
+    } catch (e) {
+      console.error('Country toggle failed:', e)
       setBusy(false)
-      setOpen(false)
     }
+    // Note: no finally → busy state stays until the hard nav completes,
+    // which is the correct UX (button disabled during reload).
   }
 
   return (
