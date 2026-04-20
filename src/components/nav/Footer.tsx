@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { countryFromPath } from '@/lib/regions-static'
-import { PLATFORM_META, type SocialPlatform } from '@/lib/social'
+import { PLATFORM_META, type SocialPlatform } from '@/lib/social-meta'
 
 type SocialLink = { platform: string; url: string }
 

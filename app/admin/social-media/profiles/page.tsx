@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, PageHeader, Button, StatusPill, Empty } from '@/components/admin/primitives'
 import { Plus, Trash2, Save } from 'lucide-react'
-import { PLATFORM_META } from '@/lib/social'
+import { PLATFORM_META } from '@/lib/social-meta'
 
 type Profile = {
   id: string

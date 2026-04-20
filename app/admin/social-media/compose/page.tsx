@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Card, PageHeader, Button, StatusPill } from '@/components/admin/primitives'
 import { Copy, Save, Send, ImagePlus, X } from 'lucide-react'
-import { PLATFORM_LIMITS, PLATFORM_META, type SocialPlatform } from '@/lib/social'
+import { PLATFORM_LIMITS, PLATFORM_META, type SocialPlatform } from '@/lib/social-meta'
 
 type Asset = { id: string; url: string; thumb_url: string | null; alt_text: string | null }
 type Post = {
