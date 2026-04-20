@@ -12,8 +12,15 @@
  * country. When a request has no URL country prefix the proxy redirects to
  * the cookie's country instead of DEFAULT_COUNTRY — so any hardcoded
  * unprefixed link (`/events`, `/browse`, etc.) lands on the user's chosen
- * country. When the URL DOES have a prefix the proxy syncs the cookie to
- * match, so direct URL navigation also updates the sticky preference.
+ * country.
+ *
+ * Cookie write rule: only initialise the cookie when ABSENT. Never
+ * overwrite an existing cookie based on URL country, because that would
+ * silently flip the sticky preference whenever Next.js auto-prefetches a
+ * Link to a different country (e.g. the GeoSuggestBanner's "Switch to ZA"
+ * Link is prefetched on render, which under the old logic reset cookie=au
+ * back to za without the user ever clicking). The toggle's POST to
+ * /api/admin/country remains the canonical way to CHANGE the cookie.
  *
  * Gates non-admins out of any country marked `coming-soon` in
  * COUNTRY_LIVE_STATUS (e.g. `za:live,au:coming-soon`). Country-scoped gate
@@ -113,13 +120,15 @@ function applyCountryHeader(req: NextRequest, forceCountry?: Country): NextRespo
   const first = pathname.split('/')[1] || ''
   if (isCountry(first)) {
     // Rewrite /za/x internally to /x so Next.js's file router finds the
-    // route — the app/ tree isn't nested under a [country] segment. Also
-    // refresh the sticky cookie so unprefixed links land on the same country.
+    // route — the app/ tree isn't nested under a [country] segment.
     const rewritten = req.nextUrl.clone()
     rewritten.pathname = pathname.slice(`/${first}`.length) || '/'
     const headers = withCountryHeader(req, first)
     const res = NextResponse.rewrite(rewritten, { request: { headers } })
-    if (readCountryPref(req) !== first) syncCountryPrefCookie(res, first)
+    // Initialise the cookie only when absent — never overwrite. See header
+    // comment: prefetched cross-country Links would silently flip the
+    // sticky preference under an unconditional sync.
+    if (readCountryPref(req) === null) syncCountryPrefCookie(res, first)
     return res
   }
 

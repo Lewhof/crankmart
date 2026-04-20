@@ -78,6 +78,7 @@ export function GeoSuggestBannerClient({
       </span>
       <Link
         href={href}
+        prefetch={false}
         style={{
           padding: '4px 12px',
           background: '#fff',
