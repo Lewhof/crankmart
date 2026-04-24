@@ -17,7 +17,11 @@
     "db:seed:all": "tsx src/db/seeds/index.ts --all",
     "db:seed:entity": "tsx src/db/seeds/index.ts",
     "db:apply-migration": "tsx src/db/apply-migration.ts",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "seed:test": "tsx --env-file=.env.test scripts/seed-test-users.ts",
+    "seed:test:dry": "tsx --env-file=.env.test scripts/seed-test-users.ts --dry",
+    "cleanup:test": "tsx --env-file=.env.test scripts/cleanup-test-data.ts",
+    "cleanup:test:dry": "tsx --env-file=.env.test scripts/cleanup-test-data.ts --dry"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",

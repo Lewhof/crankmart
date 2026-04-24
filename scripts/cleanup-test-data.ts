@@ -32,6 +32,19 @@ const TEST_EMAILS = [
 async function main() {
   const url = process.env.DATABASE_URL
   if (!url) throw new Error('DATABASE_URL not set')
+
+  // Hard guard: refuse to run against anything but a test branch. The TEST_ENV
+  // sentinel is only set in .env.test (see scripts/README.test-db.md). If
+  // someone accidentally loads .env.local / .env.production, this stops them
+  // before any DELETE statement runs.
+  if (process.env.TEST_ENV !== 'true') {
+    console.error('✗ Refusing to run: TEST_ENV != "true".')
+    console.error('  Cleanup only runs against the Neon test branch.')
+    console.error('  Use:  npx tsx --env-file=.env.test scripts/cleanup-test-data.ts')
+    console.error('  Or:   npm run cleanup:test')
+    process.exit(1)
+  }
+
   const dry = process.argv.includes('--dry')
   const sql = neon(url)
 

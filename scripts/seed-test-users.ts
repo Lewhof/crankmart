@@ -121,10 +121,23 @@ const STOLEN_TEST_SERIAL = 'TEST-STOLEN-001'
 async function main() {
   const url = process.env.DATABASE_URL
   if (!url) throw new Error('DATABASE_URL not set')
+
+  // Soft guard: seed is idempotent UPSERT, so running against prod would clutter
+  // rather than destroy. Still warn + require --force-prod to proceed — this
+  // keeps `npm run seed:test` safe by default while leaving an escape hatch.
+  const force = process.argv.includes('--force-prod')
+  if (process.env.TEST_ENV !== 'true' && !force) {
+    console.error('✗ Refusing to run: TEST_ENV != "true".')
+    console.error('  Seed is intended for the Neon test branch.')
+    console.error('  Use:  npm run seed:test')
+    console.error('  Override (not recommended): --force-prod')
+    process.exit(1)
+  }
+
   const dry = process.argv.includes('--dry')
   const sql = neon(url)
 
-  console.log(`Test-users seed — ${dry ? 'DRY RUN' : 'LIVE'}`)
+  console.log(`Test-users seed — ${dry ? 'DRY RUN' : 'LIVE'}${force ? ' (force-prod)' : ''}`)
 
   if (dry) {
     console.log(`Would seed: ${TEST_USERS.length} users, ${TEST_SHOPS.length} shops, ${TEST_EVENTS.length} events, ${TEST_LISTINGS.length} listings, 1 stolen serial`)
