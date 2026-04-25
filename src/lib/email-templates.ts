@@ -4,7 +4,20 @@
 import type { Country } from './country'
 import { getCountryConfig } from './country-config'
 
-const LOGO_HTML = '<img src="https://crankmart.com/apple-icon.png" alt="CrankMart" style="width:48px;height:48px;border-radius:8px" />'
+// Base URL used in email links + assets. Resolved from NEXT_PUBLIC_BASE_URL so
+// dev sends point at dev.crankmart.com instead of leaking users back to prod.
+// Validated against a strict scheme+host pattern — a bad value would inject
+// straight into href/src across every template, so we fall back to the prod
+// canonical on any malformed input and warn loudly.
+const BASE_URL_DEFAULT = 'https://crankmart.com'
+const BASE_URL_RAW = process.env.NEXT_PUBLIC_BASE_URL || BASE_URL_DEFAULT
+const BASE_URL = /^https?:\/\/[a-z0-9.-]+(?::\d+)?\/?$/i.test(BASE_URL_RAW) ? BASE_URL_RAW.replace(/\/$/, '') : BASE_URL_DEFAULT
+if (BASE_URL !== BASE_URL_RAW.replace(/\/$/, '')) {
+  console.warn(`[email-templates] NEXT_PUBLIC_BASE_URL "${BASE_URL_RAW}" failed validation; using default "${BASE_URL_DEFAULT}"`)
+}
+const BASE_HOST = BASE_URL.replace(/^https?:\/\//, '')
+
+const LOGO_HTML = `<img src="${BASE_URL}/apple-icon.png" alt="CrankMart" style="width:48px;height:48px;border-radius:8px" />`
 const HEADER = (subtitle?: string) => `
   <div style="background:#0D1B2A;padding:20px 32px;display:flex;align-items:center;gap:14px">
     ${LOGO_HTML}
@@ -53,7 +66,7 @@ export function newMessageEmail({
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
       You received this because someone messaged you on CrankMart.<br>
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a>
     </div>
   </div>
 </body>
@@ -84,7 +97,7 @@ export function listingPublishedEmail({
       <p style="font-size:13px;color:#9a9a9a;text-align:center">Share it with friends to get more views</p>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a>
     </div>
   </div>
 </body>
@@ -130,7 +143,7 @@ export function shopClaimTouch1Email({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -176,7 +189,7 @@ export function shopClaimTouch2Email({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -209,7 +222,7 @@ export function shopClaimTouch3Email({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -254,7 +267,7 @@ export function shopVerifiedEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a>
     </div>
   </div>
 </body>
@@ -291,7 +304,7 @@ export function eventOrganizerTouch1Email({
       <p style="font-size:13px;color:#9a9a9a;text-align:center;margin:0">Keep this email — it's the only way to edit your event.</p>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -335,7 +348,7 @@ export function eventVerifiedEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a>
     </div>
   </div>
 </body>
@@ -369,7 +382,7 @@ export function boostRenewalEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a>
     </div>
   </div>
 </body>
@@ -403,7 +416,7 @@ export function adListingInviteEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a> ·
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a> ·
       <a href="${unsubscribeUrl}" style="color:#9a9a9a;margin-left:8px">Unsubscribe</a>
     </div>
   </div>
@@ -442,7 +455,7 @@ export function listingExpiryReminderEmail({
       </a>
     </div>
     <div style="padding:20px 32px;border-top:1px solid #ebebeb;font-size:12px;color:#9a9a9a;text-align:center">
-      <a href="https://crankmart.com" style="color:#0D1B2A">crankmart.com</a>
+      <a href="${BASE_URL}" style="color:#0D1B2A">${BASE_HOST}</a>
     </div>
   </div>
 </body>

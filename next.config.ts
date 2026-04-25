@@ -43,14 +43,17 @@ const nextConfig: NextConfig = {
         pathname: '/uploads/**',
       },
       {
+        protocol: 'https',
+        hostname: 'dev.crankmart.com',
+        pathname: '/uploads/**',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
         port: '3099',
         pathname: '/uploads/**',
       },
     ],
-    // Allow relative /uploads/ paths served by nginx
-    domains: ['crankmart.com', 'localhost'],
   },
 }
 

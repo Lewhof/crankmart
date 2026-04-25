@@ -115,7 +115,47 @@ async function sendViaSmtp(o: SendOptions, senderEmail: string, senderName: stri
   return { ok: true, messageId: info.messageId }
 }
 
+/**
+ * Allowlist guard for non-prod environments. When `EMAIL_ALLOWLIST` is set
+ * (comma-separated; supports `*@domain.com` suffix wildcards), any send whose
+ * recipients aren't ALL on the list is dropped. Returns `ok: false` so callers
+ * (e.g. ticket reply route) treat the block as a delivery failure — important
+ * because callers persist `messageId` for RFC 5322 thread chaining and a
+ * silently-skipped send would write `null` and break In-Reply-To. Unset in
+ * prod, so this is a no-op there.
+ *
+ * Wildcard patterns must contain a `.` after the `@` (rejects bare `*@` which
+ * would otherwise match every email address). Patterns without `@` are
+ * rejected entirely (typo-safe; fails closed).
+ */
+function isAllowedRecipient(addr: string, allowlist: string[]): boolean {
+  const lower = addr.trim().toLowerCase()
+  if (!lower.includes('@')) return false
+  return allowlist.some(pattern => {
+    const p = pattern.toLowerCase()
+    if (p.startsWith('*@')) {
+      const domain = p.slice(2)
+      if (!domain.includes('.')) return false
+      return lower.endsWith('@' + domain)
+    }
+    if (!p.includes('@')) return false
+    return lower === p
+  })
+}
+
 export async function sendEmail(o: SendOptions): Promise<SendResult> {
+  const allowlistRaw = process.env.EMAIL_ALLOWLIST
+  if (allowlistRaw) {
+    const allowlist = allowlistRaw.split(',').map(s => s.trim()).filter(Boolean)
+    const recipients = Array.isArray(o.to) ? o.to : [o.to]
+    const blocked = recipients.filter(r => !isAllowedRecipient(r, allowlist))
+    if (blocked.length > 0) {
+      const safeSubject = o.subject.replace(/[\r\n]/g, ' ').slice(0, 80)
+      console.log(`[email allowlist] dropped send to ${blocked.join(', ')} (subject: "${safeSubject}")`)
+      return { ok: false, reason: 'allowlist_blocked' }
+    }
+  }
+
   const senderName = o.fromName ?? process.env.RESEND_FROM_NAME ?? 'CrankMart'
   const senderEmail = o.fromEmail ?? process.env.RESEND_FROM_EMAIL ?? 'info@crankmart.com'
 
