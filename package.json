@@ -21,7 +21,12 @@
     "seed:test": "tsx --env-file=.env.test scripts/seed-test-users.ts",
     "seed:test:dry": "tsx --env-file=.env.test scripts/seed-test-users.ts --dry",
     "cleanup:test": "tsx --env-file=.env.test scripts/cleanup-test-data.ts",
-    "cleanup:test:dry": "tsx --env-file=.env.test scripts/cleanup-test-data.ts --dry"
+    "cleanup:test:dry": "tsx --env-file=.env.test scripts/cleanup-test-data.ts --dry",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:list": "playwright test --list",
+    "test:e2e:install": "playwright install chromium"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.1",
@@ -77,6 +82,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^20",

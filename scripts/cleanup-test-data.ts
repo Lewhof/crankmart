@@ -27,6 +27,8 @@ const TEST_EMAILS = [
   'test.shop.au@crankmart.com',
   'test.event.sa@crankmart.com',
   'test.event.au@crankmart.com',
+  'test.admin@crankmart.com',
+  'test.unverified@crankmart.com',
 ]
 
 async function main() {

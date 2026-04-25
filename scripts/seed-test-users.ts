@@ -41,21 +41,25 @@ interface TestUser {
   key: string
   email: string
   name: string
-  role: 'buyer' | 'seller' | 'shop_owner' | 'organiser'
+  role: 'buyer' | 'seller' | 'shop_owner' | 'organiser' | 'admin'
   country: 'za' | 'au'
   province: string
   city: string
   handle: string
+  emailVerified?: boolean
 }
 
 // Keep these in sync with cleanup-test-data.ts TEST_EMAILS.
+// E2E personas — UI-drive login from playwright/.auth/<key>.json maps to these.
 const TEST_USERS: TestUser[] = [
-  { key: 'reg_sa',   email: 'test.sa@crankmart.com',       name: 'Test User SA',       role: 'seller',     country: 'za', province: 'Western Cape',     city: 'Cape Town',     handle: 'test_sa' },
-  { key: 'reg_au',   email: 'test.au@crankmart.com',       name: 'Test User AU',       role: 'seller',     country: 'au', province: 'New South Wales',  city: 'Sydney',        handle: 'test_au' },
-  { key: 'shop_sa',  email: 'test.shop.sa@crankmart.com',  name: 'Shop Owner SA',      role: 'shop_owner', country: 'za', province: 'Gauteng',          city: 'Johannesburg',  handle: 'test_shop_sa' },
-  { key: 'shop_au',  email: 'test.shop.au@crankmart.com',  name: 'Shop Owner AU',      role: 'shop_owner', country: 'au', province: 'Victoria',         city: 'Melbourne',     handle: 'test_shop_au' },
-  { key: 'event_sa', email: 'test.event.sa@crankmart.com', name: 'Event Organiser SA', role: 'organiser',  country: 'za', province: 'KwaZulu-Natal',    city: 'Durban',        handle: 'test_event_sa' },
-  { key: 'event_au', email: 'test.event.au@crankmart.com', name: 'Event Organiser AU', role: 'organiser',  country: 'au', province: 'Queensland',       city: 'Brisbane',      handle: 'test_event_au' },
+  { key: 'reg_sa',     email: 'test.sa@crankmart.com',          name: 'Test User SA',       role: 'seller',     country: 'za', province: 'Western Cape',     city: 'Cape Town',     handle: 'test_sa' },
+  { key: 'reg_au',     email: 'test.au@crankmart.com',          name: 'Test User AU',       role: 'seller',     country: 'au', province: 'New South Wales',  city: 'Sydney',        handle: 'test_au' },
+  { key: 'shop_sa',    email: 'test.shop.sa@crankmart.com',     name: 'Shop Owner SA',      role: 'shop_owner', country: 'za', province: 'Gauteng',          city: 'Johannesburg',  handle: 'test_shop_sa' },
+  { key: 'shop_au',    email: 'test.shop.au@crankmart.com',     name: 'Shop Owner AU',      role: 'shop_owner', country: 'au', province: 'Victoria',         city: 'Melbourne',     handle: 'test_shop_au' },
+  { key: 'event_sa',   email: 'test.event.sa@crankmart.com',    name: 'Event Organiser SA', role: 'organiser',  country: 'za', province: 'KwaZulu-Natal',    city: 'Durban',        handle: 'test_event_sa' },
+  { key: 'event_au',   email: 'test.event.au@crankmart.com',    name: 'Event Organiser AU', role: 'organiser',  country: 'au', province: 'Queensland',       city: 'Brisbane',      handle: 'test_event_au' },
+  { key: 'admin',      email: 'test.admin@crankmart.com',       name: 'Test Admin',         role: 'admin',      country: 'za', province: 'Gauteng',          city: 'Johannesburg',  handle: 'test_admin' },
+  { key: 'unverified', email: 'test.unverified@crankmart.com',  name: 'Test Unverified',    role: 'seller',     country: 'za', province: 'Western Cape',     city: 'Cape Town',     handle: 'test_unverified', emailVerified: false },
 ]
 
 interface TestShop {
@@ -150,6 +154,7 @@ async function main() {
   const userIdByKey: Record<string, string> = {}
   for (const u of TEST_USERS) {
     const existing = await sql`SELECT id FROM users WHERE email = ${u.email} LIMIT 1`
+    const verified = u.emailVerified ?? true
     if (existing[0]) {
       userIdByKey[u.key] = existing[0].id as string
       // Reset password + role + country in case prior run used different values
@@ -161,7 +166,7 @@ async function main() {
             province = ${u.province},
             city = ${u.city},
             handle = ${u.handle},
-            email_verified = true,
+            email_verified = ${verified},
             is_active = true,
             name = ${u.name}
         WHERE id = ${existing[0].id}::uuid
@@ -171,7 +176,7 @@ async function main() {
     const id = randomUUID()
     await sql`
       INSERT INTO users (id, email, name, password_hash, role, country, province, city, handle, email_verified, is_active)
-      VALUES (${id}, ${u.email}, ${u.name}, ${passwordHash}, ${u.role}::user_role, ${u.country}, ${u.province}, ${u.city}, ${u.handle}, true, true)
+      VALUES (${id}, ${u.email}, ${u.name}, ${passwordHash}, ${u.role}::user_role, ${u.country}, ${u.province}, ${u.city}, ${u.handle}, ${verified}, true)
     `
     userIdByKey[u.key] = id
   }
