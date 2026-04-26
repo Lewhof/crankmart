@@ -9,7 +9,7 @@ export class BrowsePage {
 
   constructor(readonly page: Page) {
     this.searchInput = page.getByPlaceholder(/search/i)
-    this.listingCards = page.locator('[data-testid="listing-card"], article, a[href^="/s/"]').first()
+    this.listingCards = page.locator('.lcard').first()
     this.priceFilter = page.getByLabel(/price/i)
     this.provinceFilter = page.getByLabel(/province|state/i)
     this.conditionFilter = page.getByLabel(/condition/i)
