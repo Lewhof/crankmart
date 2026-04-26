@@ -1,0 +1,107 @@
+name: E2E (dev)
+
+# Triggers:
+# 1. deployment_status — fires when Vercel finishes deploying. We filter to
+#    successful Production deploys on the dev branch (dev project's prod target).
+#    This is the canonical CI flow: every push to dev triggers a Vercel build,
+#    which on success triggers this workflow against the freshly-deployed code.
+# 2. workflow_dispatch — manual trigger from the Actions UI for ad-hoc runs.
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'E2E target URL (default: https://crankmart-dev.vercel.app)'
+        required: false
+        default: 'https://crankmart-dev.vercel.app'
+
+jobs:
+  e2e:
+    name: Wave 1 smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # For deployment_status events: only run on successful Vercel Production deploys
+    # for the dev branch (the dev project's "Production" target = dev branch).
+    # For workflow_dispatch: always run.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'deployment_status' &&
+       github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Production' &&
+       github.event.deployment.ref == 'refs/heads/dev')
+
+    env:
+      # For deployment_status, use the actual deploy URL Vercel reports.
+      # For workflow_dispatch, use the input or the stable alias.
+      E2E_BASE_URL: >-
+        ${{ github.event_name == 'workflow_dispatch'
+            && (inputs.base_url || 'https://crankmart-dev.vercel.app')
+            || github.event.deployment_status.environment_url
+            || 'https://crankmart-dev.vercel.app' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # For deployment_status events the default checkout ref is the workflow
+          # file's branch — pin to the deployed SHA so test code matches deployed code.
+          ref: ${{ github.event.deployment.sha || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system deps (cache hit path)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Verify deploy is reachable
+        run: |
+          echo "Probing $E2E_BASE_URL"
+          for i in {1..6}; do
+            STATUS=$(curl -sIL -o /dev/null -w "%{http_code}" "$E2E_BASE_URL/" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✓ Deploy live (attempt $i, HTTP $STATUS)"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $STATUS — waiting 10s..."
+            sleep 10
+          done
+          echo "✗ Deploy didn't return 200 within 60s"
+          exit 1
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_id }}
+          path: test-results/
+          retention-days: 7
