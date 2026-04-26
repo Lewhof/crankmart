@@ -2,6 +2,12 @@ import type { NextConfig } from "next"
 import { withSentryConfig } from '@sentry/nextjs'
 
 const nextConfig: NextConfig = {
+  // Pin Turbopack's workspace root to this app — without this, Next.js 16
+  // walks up and picks the parent crankmart/package-lock.json as root,
+  // which breaks tailwindcss resolution.
+  turbopack: {
+    root: import.meta.dirname,
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },

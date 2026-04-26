@@ -32,15 +32,16 @@ export async function GET(
     const business = result.rows[0] as any;
 
     // Get related businesses (same type, same province, excluding current, country-scoped)
+    // NB: column is `verified`, not `is_verified` — matches drizzle schema (businesses.verified)
     const relatedResult = await db.execute(
       sql`
-        SELECT id, name, slug, business_type, province, city, logo_url, description, is_verified, is_premium
+        SELECT id, name, slug, business_type, province, city, logo_url, description, verified, is_premium
         FROM businesses
         WHERE business_type = ${business.business_type}
           AND province = ${business.province}
           AND slug != ${slug}
           AND country = ${country}
-        ORDER BY is_premium DESC, is_verified DESC, name ASC
+        ORDER BY is_premium DESC, verified DESC, name ASC
         LIMIT 4
       `
     );
@@ -77,7 +78,7 @@ export async function GET(
         whatsapp: business.whatsapp,
         brands: business.brands_stocked || [],
         services: business.services || [],
-        verified: business.is_verified ?? business.verified ?? false,
+        verified: business.verified ?? false,
         featured: business.is_premium,
         opening_year: business.opening_year || null,
         hours_json: business.hours_json || null,
@@ -94,7 +95,7 @@ export async function GET(
         city: row.city,
         logo: row.logo_url,
         description: row.description,
-        verified: row.is_verified ?? row.verified ?? false,
+        verified: row.verified ?? false,
         featured: row.is_premium,
       })),
     });

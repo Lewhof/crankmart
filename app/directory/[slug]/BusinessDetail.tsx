@@ -203,6 +203,45 @@ export default function BusinessDetailPage() {
         </div>
       )}
 
+      {/* Hero fallback — logo on branded gradient when no banner exists */}
+      {!bannerImg && business.logo && (
+        <div
+          style={{
+            height: 280,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 18,
+            background: 'linear-gradient(135deg, #1a2744 0%, #0D1B2A 100%)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <img
+            src={business.logo}
+            alt={business.name}
+            onError={(e) => { e.currentTarget.style.display = 'none' }}
+            style={{
+              maxHeight: 170,
+              maxWidth: '60%',
+              objectFit: 'contain',
+            }}
+          />
+          <div
+            style={{
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {TYPE_LABELS[business.type] || business.type} · {business.city}
+          </div>
+        </div>
+      )}
+
       {/* Title band — dark bg, white text */}
       <div style={{ background:'var(--color-night-ride,#0D1B2A)', padding:'12px 0 16px', width:'100%' }}>
         <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 16px' }}>
