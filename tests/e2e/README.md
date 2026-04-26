@@ -105,16 +105,17 @@ Wave 2 regression tests will go in `tests/e2e/regression/`. Wave 3 admin-depth i
 
 Several Page Object selectors use educated-guess regex (e.g. `getByLabel(/email/i)`). When tests run for the first time against the live app, some selectors will need adjustment to match the actual rendered markup. Use Playwright's UI mode (`npm run test:e2e:ui`) to inspect and recover.
 
-## CI integration (Phase 3 — pending)
+## CI integration
 
-A GitHub Actions workflow at `.github/workflows/e2e-dev.yml` will:
-- Trigger on push to `dev` + PR to `main`
-- Wait for Vercel deploy READY
-- Install Chromium + run `npm run test:e2e`
-- Block merges to main on failure
-- Upload report as artifact
+[`.github/workflows/e2e-dev.yml`](../../.github/workflows/e2e-dev.yml) runs Wave 1 smoke automatically:
 
-Workflow file is **not yet committed** — added in Phase 3 of the automation roadmap.
+- **Trigger:** Vercel `deployment_status` event — fires only when the dev project's Production deploy reports success. Filtered to `Production – crankmart-dev` env.
+- **Pinned:** checks out the deployed SHA so test code matches deployed code.
+- **Cached:** Playwright browser binaries cached between runs (~3 min steady state).
+- **On failure:** `playwright-report/` (30d) and `test-results/` (7d) uploaded as Actions artifacts.
+- **Manual runs:** trigger via Actions UI → `E2E (dev)` → Run workflow. Optional `base_url` input lets you target a custom URL (default = stable alias).
+
+Phase 4 — PR-to-main preview gate — follows the same pattern with a different trigger filter (preview deploys + PR ref). Defer until dev-branch flow is proven stable across many runs.
 
 ## Roadmaps
 
