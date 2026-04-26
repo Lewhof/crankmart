@@ -33,8 +33,7 @@ jobs:
       (github.event_name == 'deployment_status' &&
        github.event.deployment_status.state == 'success' &&
        startsWith(github.event.deployment.environment, 'Production') &&
-       contains(github.event.deployment.environment, 'crankmart-dev') &&
-       (github.event.deployment.ref == 'dev' || github.event.deployment.ref == 'refs/heads/dev'))
+       contains(github.event.deployment.environment, 'crankmart-dev'))
 
     env:
       # For deployment_status, use the actual deploy URL Vercel reports.
