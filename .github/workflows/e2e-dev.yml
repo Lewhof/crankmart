@@ -22,14 +22,19 @@ jobs:
     timeout-minutes: 15
 
     # For deployment_status events: only run on successful Vercel Production deploys
-    # for the dev branch (the dev project's "Production" target = dev branch).
+    # for the dev branch on the crankmart-dev project. Vercel sets the environment
+    # string as "Production – <project>" (note: en-dash, not hyphen) — match by prefix
+    # to be robust against project rename + filter on project name to avoid running
+    # for the prod project's Preview deploys of the same branch (Vercel creates one
+    # of each because both projects watch the repo).
     # For workflow_dispatch: always run.
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'deployment_status' &&
        github.event.deployment_status.state == 'success' &&
-       github.event.deployment.environment == 'Production' &&
-       github.event.deployment.ref == 'refs/heads/dev')
+       startsWith(github.event.deployment.environment, 'Production') &&
+       contains(github.event.deployment.environment, 'crankmart-dev') &&
+       (github.event.deployment.ref == 'dev' || github.event.deployment.ref == 'refs/heads/dev'))
 
     env:
       # For deployment_status, use the actual deploy URL Vercel reports.
